@@ -1,6 +1,6 @@
 #pragma once
 #include "Position.h"
-class Entity{
+class Entity {
 public:
 	Entity::Entity();
 	Entity::~Entity();
@@ -21,4 +21,3 @@ private:
 	int hp, dmg, def;
 
 };
-

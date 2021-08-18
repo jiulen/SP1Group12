@@ -15,4 +15,3 @@ private:
 	int x, y;
 
 };
-
