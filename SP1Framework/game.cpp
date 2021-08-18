@@ -17,7 +17,8 @@ SGameChar   g_sChar;
 EGAMESTATES g_eGameState = S_SPLASHSCREEN; // initial state
 
 // Console object
-Console g_Console(80, 25, "SP1 Framework");
+Console g_Console(120, 50, "SP1 Framework");
+int gui_height = 10;
 
 //--------------------------------------------------------------
 // Purpose  : Initialisation function
@@ -26,8 +27,7 @@ Console g_Console(80, 25, "SP1 Framework");
 // Input    : void
 // Output   : void
 //--------------------------------------------------------------
-void init( void )
-{
+void init(void) {
     // Set precision for floating point output
     g_dElapsedTime = 0.0;    
 
@@ -52,11 +52,9 @@ void init( void )
 // Input    : Void
 // Output   : void
 //--------------------------------------------------------------
-void shutdown( void )
-{
+void shutdown(void) {
     // Reset to white text on black background
     colour(FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED);
-
     g_Console.clearBuffer();
 }
 
@@ -73,8 +71,7 @@ void shutdown( void )
 // Input    : Void
 // Output   : void
 //--------------------------------------------------------------
-void getInput( void )
-{
+void getInput(void){
     // resets all the keyboard events
     memset(g_skKeyEvent, 0, K_COUNT * sizeof(*g_skKeyEvent));
     // then call the console to detect input from user
@@ -94,10 +91,8 @@ void getInput( void )
 // Input    : const KEY_EVENT_RECORD& keyboardEvent - reference to a key event struct
 // Output   : void
 //--------------------------------------------------------------
-void keyboardHandler(const KEY_EVENT_RECORD& keyboardEvent)
-{    
-    switch (g_eGameState)
-    {
+void keyboardHandler(const KEY_EVENT_RECORD& keyboardEvent) {    
+    switch (g_eGameState) {
     case S_SPLASHSCREEN: // don't handle anything for the splash screen
         break;
     case S_GAME: gameplayKBHandler(keyboardEvent); // handle gameplay keyboard event 
@@ -121,14 +116,10 @@ void keyboardHandler(const KEY_EVENT_RECORD& keyboardEvent)
 // Input    : const MOUSE_EVENT_RECORD& mouseEvent - reference to a mouse event struct
 // Output   : void
 //--------------------------------------------------------------
-void mouseHandler(const MOUSE_EVENT_RECORD& mouseEvent)
-{    
-    switch (g_eGameState)
-    {
-    case S_SPLASHSCREEN: // don't handle anything for the splash screen
-        break;
-    case S_GAME: gameplayMouseHandler(mouseEvent); // handle gameplay mouse event
-        break;
+void mouseHandler(const MOUSE_EVENT_RECORD& mouseEvent) {    
+    switch (g_eGameState){
+    case S_SPLASHSCREEN: break;
+    case S_GAME: gameplayMouseHandler(mouseEvent); break;
     }
 }
 
@@ -141,12 +132,10 @@ void mouseHandler(const MOUSE_EVENT_RECORD& mouseEvent)
 // Input    : const KEY_EVENT_RECORD& keyboardEvent
 // Output   : void
 //--------------------------------------------------------------
-void gameplayKBHandler(const KEY_EVENT_RECORD& keyboardEvent)
-{
+void gameplayKBHandler(const KEY_EVENT_RECORD& keyboardEvent) {
     // here, we map the key to our enums
     EKEYS key = K_COUNT;
-    switch (keyboardEvent.wVirtualKeyCode)
-    {
+    switch (keyboardEvent.wVirtualKeyCode) {
     case 0x57: key = K_UP; break;
     case 0x53: key = K_DOWN; break;
     case 0x41: key = K_LEFT; break;
@@ -174,12 +163,8 @@ void gameplayKBHandler(const KEY_EVENT_RECORD& keyboardEvent)
 // Input    : const KEY_EVENT_RECORD& keyboardEvent
 // Output   : void
 //--------------------------------------------------------------
-void gameplayMouseHandler(const MOUSE_EVENT_RECORD& mouseEvent)
-{
-    if (mouseEvent.dwEventFlags & MOUSE_MOVED) // update the mouse position if there are no events
-    {
-        g_mouseEvent.mousePosition = mouseEvent.dwMousePosition;
-    }
+void gameplayMouseHandler(const MOUSE_EVENT_RECORD& mouseEvent) {
+    if (mouseEvent.dwEventFlags & MOUSE_MOVED) g_mouseEvent.mousePosition = mouseEvent.dwMousePosition;         // update the mouse position if there are no events
     g_mouseEvent.buttonState = mouseEvent.dwButtonState;
     g_mouseEvent.eventFlags = mouseEvent.dwEventFlags;
 }
@@ -198,30 +183,23 @@ void gameplayMouseHandler(const MOUSE_EVENT_RECORD& mouseEvent)
 // Input    : dt = deltatime
 // Output   : void
 //--------------------------------------------------------------
-void update(double dt)
-{
+void update(double dt) {
     // get the delta time
     g_dElapsedTime += dt;
     g_dDeltaTime = dt;
 
-    switch (g_eGameState)
-    {
-        case S_SPLASHSCREEN : splashScreenWait(); // game logic for the splash screen
-            break;
-        case S_GAME: updateGame(); // gameplay logic when we are in the game
-            break;
+    switch (g_eGameState) {
+        case S_SPLASHSCREEN: splashScreenWait(); break;
+        case S_GAME: updateGame(); break;     
     }
 }
 
 
-void splashScreenWait()    // waits for time to pass in splash screen
-{
-    if (g_dElapsedTime > 3.0) // wait for 3 seconds to switch to game mode, else do nothing
-        g_eGameState = S_GAME;
+void splashScreenWait() {                                          // waits for time to pass in splash screen
+    if (g_dElapsedTime > 3.0) g_eGameState = S_GAME;            // wait for 3 seconds to switch to game mode, else do nothing
 }
 
-void updateGame()       // gameplay logic
-{
+void updateGame() {     // gameplay logic
     processUserInput(); // checks if you should change states or do something else with the game, e.g. pause, exit
     moveCharacter();    // moves the character, collision detection, physics, etc
                         // sound can be played here too.
@@ -241,7 +219,7 @@ void moveCharacter()
         //Beep(1440, 30);
         g_sChar.m_cLocation.X--;        
     }
-    if (g_skKeyEvent[K_DOWN].keyDown && g_sChar.m_cLocation.Y < g_Console.getConsoleSize().Y - 1)
+    if (g_skKeyEvent[K_DOWN].keyDown && g_sChar.m_cLocation.Y < g_Console.getConsoleSize().Y - 1 - gui_height)
     {
         //Beep(1440, 30);
         g_sChar.m_cLocation.Y++;        
@@ -258,11 +236,8 @@ void moveCharacter()
 
    
 }
-void processUserInput()
-{
-    // quits the game if player hits the escape key
-    if (g_skKeyEvent[K_ESCAPE].keyReleased)
-        g_bQuitGame = true;    
+void processUserInput(void) {
+    if (g_skKeyEvent[K_ESCAPE].keyReleased) g_bQuitGame = true;         // quits the game if player hits the escape key
 }
 
 //--------------------------------------------------------------
@@ -273,35 +248,28 @@ void processUserInput()
 // Input    : void
 // Output   : void
 //--------------------------------------------------------------
-void render()
-{
+void render() {
     clearScreen();      // clears the current screen and draw from scratch 
-    switch (g_eGameState)
-    {
-    case S_SPLASHSCREEN: renderSplashScreen();
-        break;
-    case S_GAME: renderGame();
-        break;
+    switch (g_eGameState) {
+    case S_SPLASHSCREEN: renderSplashScreen(); break;
+    case S_GAME: renderGame(); break;
     }
     renderFramerate();      // renders debug information, frame rate, elapsed time, etc
     renderInputEvents();    // renders status of input events
     renderToScreen();       // dump the contents of the buffer to the screen, one frame worth of game
 }
 
-void clearScreen()
-{
+void clearScreen() {
     // Clears the buffer with this colour attribute
     g_Console.clearBuffer(0x1F);
 }
 
-void renderToScreen()
-{
+void renderToScreen() {
     // Writes the buffer to the console, hence you will see what you have written
     g_Console.flushBufferToConsole();
 }
 
-void renderSplashScreen()  // renders the splash screen
-{
+void renderSplashScreen() {      // renders the splash screen 
     COORD c = g_Console.getConsoleSize();
     c.Y /= 3;
     c.X = c.X / 2 - 9;
@@ -320,8 +288,7 @@ void renderGame()
     renderCharacter();  // renders the character into the buffer
 }
 
-void renderMap()
-{
+void renderMap() {
     // Set up sample colours, and output shadings
     const WORD colors[] = {
         0x1A, 0x2B, 0x3C, 0x4D, 0x5E, 0x6F,
@@ -338,19 +305,14 @@ void renderMap()
     }
 }
 
-void renderCharacter()
-{
+void renderCharacter() {
     // Draw the location of the character
     WORD charColor = 0x0C;
-    if (g_sChar.m_bActive)
-    {
-        charColor = 0x0A;
-    }
+    if (g_sChar.m_bActive) charColor = 0x0A;
     g_Console.writeToBuffer(g_sChar.m_cLocation, (char)1, charColor);
 }
 
-void renderFramerate()
-{
+void renderFramerate() {
     COORD c;
     // displays the framerate
     std::ostringstream ss;
@@ -369,17 +331,14 @@ void renderFramerate()
 }
 
 // this is an example of how you would use the input events
-void renderInputEvents()
-{
+void renderInputEvents() {
     // keyboard events
     COORD startPos = {50, 2};
     std::ostringstream ss;
     std::string key;
-    for (int i = 0; i < K_COUNT; ++i)
-    {
+    for (int i = 0; i < K_COUNT; ++i) {
         ss.str("");
-        switch (i)
-        {
+        switch (i) {
         case K_UP: key = "UP";
             break;
         case K_DOWN: key = "DOWN";
@@ -392,9 +351,9 @@ void renderInputEvents()
             break;
         default: continue;
         }
-        if (g_skKeyEvent[i].keyDown)
+        if (g_skKeyEvent[i].keyDown) 
             ss << key << " pressed";
-        else if (g_skKeyEvent[i].keyReleased)
+        else if (g_skKeyEvent[i].keyReleased) 
             ss << key << " released";
         else
             ss << key << " not pressed";
