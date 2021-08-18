@@ -30,6 +30,7 @@ enum EKEYS
     K_DOWN,
     K_LEFT,
     K_RIGHT,
+    K_ENTER,
     K_ESCAPE,
     K_SPACE,
     K_COUNT

@@ -23,14 +23,12 @@ void mainLoop(void);
 // main function - starting function
 // You should not be modifying this unless you know what you are doing
 int main(void) {
-    Entity* Eptr[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
-    Eptr[0] = new Player;
+    /*Entity* Eptr[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+    Eptr[0] = new Player;*/ //put in game.cpp later
 
-
-
-   //init();      // initialize your variables
-   //mainLoop();  // main loop
-   //shutdown();  // do clean up, if any. free memory.
+   init();      // initialize your variables
+   mainLoop();  // main loop
+   shutdown();  // do clean up, if any. free memory.
     
     return 0;
 }
