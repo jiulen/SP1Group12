@@ -8,6 +8,6 @@ public:
 
 
 private:
-
+	static int slime_kills;
 
 };

@@ -4,6 +4,9 @@
 #include "Framework\timer.h"
 #include "game.h"
 #include "Entity.h"
+#include "Player.h"
+#include "Slime.h"
+#include "Golem.h"
 
 CStopWatch g_Timer;                            // Timer function to keep track of time and the frame rate
 bool g_bQuitGame = false;                    // Set to true if you want to quit the game
@@ -19,9 +22,14 @@ void mainLoop(void);
 // main function - starting function
 // You should not be modifying this unless you know what you are doing
 int main(void) {
-    init();      // initialize your variables
-    mainLoop();  // main loop
-    shutdown();  // do clean up, if any. free memory.
+    Entity* Eptr[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+    Eptr[0] = new Player;
+
+
+
+   //init();      // initialize your variables
+   //mainLoop();  // main loop
+   //shutdown();  // do clean up, if any. free memory.
     
     return 0;
 }
