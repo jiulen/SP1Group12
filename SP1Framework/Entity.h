@@ -7,6 +7,7 @@ public:
 	Entity::~Entity();
 
 	virtual void Entity::move();
+	int Entity::Random_Integer();
 
 	int Entity::get_hp(void);
 	void set_hp(int);

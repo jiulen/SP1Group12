@@ -17,7 +17,7 @@ SGameChar   g_sChar;
 EGAMESTATES g_eGameState = S_SPLASHSCREEN; // initial state
 
 // Console object
-Console g_Console(120, 50, "SP1 Framework");
+Console g_Console(120, 50, "Temple Escape, Totally not Indiana Jones!!!");
 int GUI_height = 10;
 
 //--------------------------------------------------------------
@@ -27,16 +27,15 @@ int GUI_height = 10;
 // Input    : void
 // Output   : void
 //--------------------------------------------------------------
-void init( void )
-{
+void init(void) {
     // Set precision for floating point output
     g_dElapsedTime = 0.0;    
 
     // sets the initial state for the game
     g_eGameState = S_SPLASHSCREEN;
-
-    g_sChar.m_cLocation.X = g_Console.getConsoleSize().X / 2;
-    g_sChar.m_cLocation.Y = g_Console.getConsoleSize().Y / 2;
+    //change values to change where player spawns
+    g_sChar.m_cLocation.X = 1;      //g_Console.getConsoleSize().X / 2;
+    g_sChar.m_cLocation.Y = 1;      //g_Console.getConsoleSize().Y / 2;
     g_sChar.m_bActive = true;
     // sets the width, height and the font name to use in the console
     g_Console.setConsoleFont(0, 16, L"Consolas");
@@ -311,26 +310,39 @@ void renderSplashScreen() {             // renders the splash screen
 }
 
 void renderGame() {
-    //renderMap();        // renders the map to the buffer first
+    renderMap();        // renders the map to the buffer first
     renderCharacter();  // renders the character into the buffer
 }
 
-/*void renderMap() {
+void renderMap() {
     // Set up sample colours, and output shadings
-    const WORD colors[] = {
-        0x1A, 0x2B, 0x3C, 0x4D, 0x5E, 0x6F,
-        0xA1, 0xB2, 0xC3, 0xD4, 0xE5, 0xF6
+    const WORD fore[] = {
+        0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+        0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F
     };
 
     COORD c;
-    for (int i = 0; i < 12; ++i)
+    for (int i = 0; i < 16; ++i)
     {
-        c.X = 5 * i;
-        c.Y = i + 1;
-        colour(colors[i]);
-        g_Console.writeToBuffer(c, " °±²Û", colors[i]);
+        c.X = i + 2;
+        c.Y = 2;
+        colour(fore[i]);
+        g_Console.writeToBuffer(c, "A", fore[i]);
     }
-}*/
+
+    const WORD BG[] = {
+        0x00, 0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70,
+        0x80, 0x90, 0xA0, 0xB0, 0xC0, 0xD0, 0xE0, 0xF0
+    };
+
+    for (int i = 0; i < 16; ++i)
+    {
+        c.X = i + 2;
+        c.Y = 3;
+        colour(BG[i]);
+        g_Console.writeToBuffer(c, " ", BG[i]);
+    }
+}
 
 void renderCharacter() {
     // Draw the location of the character
@@ -346,8 +358,8 @@ void renderFramerate() {
     COORD c;
     // displays the framerate
     std::ostringstream ss;
-    ss << std::fixed << std::setprecision(3);
-    ss << 1.0 / g_dDeltaTime << "fps";
+    ss << std::fixed << std::setprecision(2);
+    ss << 1.0 / g_dDeltaTime << " fps";
     c.X = g_Console.getConsoleSize().X - 9;
     c.Y = 0;
     g_Console.writeToBuffer(c, ss.str());

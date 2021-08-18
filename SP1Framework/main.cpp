@@ -1,7 +1,7 @@
 // This is the main file to hold everthing together
 //dog
 //cat
-// bird
+//bird
 #include "Framework\timer.h"
 #include "game.h"
 #include "Entity.h"
@@ -25,12 +25,12 @@ void mainLoop(void);
 int main(void) {
     Entity* Eptr[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
     Eptr[0] = new Player;
+    srand(0);
 
 
-
-   //init();      // initialize your variables
-   //mainLoop();  // main loop
-   //shutdown();  // do clean up, if any. free memory.
+   init();      // initialize your variables
+   mainLoop();  // main loop
+   shutdown();  // do clean up, if any. free memory.
     
     return 0;
 }
