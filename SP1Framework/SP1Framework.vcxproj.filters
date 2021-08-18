@@ -19,6 +19,18 @@
     <Filter Include="Source Files\Framework">
       <UniqueIdentifier>{37c19c94-9502-4b2b-b3f1-70fa908b49af}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\ENTITIES">
+      <UniqueIdentifier>{8e10912d-4f29-4a2a-8735-c7eaa6ab30f6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\MAPS AND CUTSCENES">
+      <UniqueIdentifier>{641b1df2-bbc8-4f27-816d-1322c0859959}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\ENTITES">
+      <UniqueIdentifier>{3350608f-443d-4d65-96cc-04b63b54ca83}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\MAPS AND CUTSCENES">
+      <UniqueIdentifier>{b7277156-7fca-4082-bab3-05480c47a5de}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -34,19 +46,40 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Entity.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Position.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Player.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Slime.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\ENTITIES</Filter>
     </ClCompile>
     <ClCompile Include="Golem.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\ENTITIES</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>Source Files\ENTITIES</Filter>
+    </ClCompile>
+    <ClCompile Include="Slime.cpp">
+      <Filter>Source Files\ENTITIES</Filter>
+    </ClCompile>
+    <ClCompile Include="Map.cpp">
+      <Filter>Source Files\MAPS AND CUTSCENES</Filter>
+    </ClCompile>
+    <ClCompile Include="Room1.cpp">
+      <Filter>Source Files\MAPS AND CUTSCENES</Filter>
+    </ClCompile>
+    <ClCompile Include="Room2.cpp">
+      <Filter>Source Files\MAPS AND CUTSCENES</Filter>
+    </ClCompile>
+    <ClCompile Include="Room3.cpp">
+      <Filter>Source Files\MAPS AND CUTSCENES</Filter>
+    </ClCompile>
+    <ClCompile Include="Room4.cpp">
+      <Filter>Source Files\MAPS AND CUTSCENES</Filter>
+    </ClCompile>
+    <ClCompile Include="Room5.cpp">
+      <Filter>Source Files\MAPS AND CUTSCENES</Filter>
+    </ClCompile>
+    <ClCompile Include="Room6.cpp">
+      <Filter>Source Files\MAPS AND CUTSCENES</Filter>
+    </ClCompile>
+    <ClCompile Include="Position.cpp">
+      <Filter>Source Files\ENTITIES</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -60,19 +93,40 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Entity.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Position.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Player.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Slime.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\ENTITES</Filter>
     </ClInclude>
     <ClInclude Include="Golem.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\ENTITES</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>Header Files\ENTITES</Filter>
+    </ClInclude>
+    <ClInclude Include="Slime.h">
+      <Filter>Header Files\ENTITES</Filter>
+    </ClInclude>
+    <ClInclude Include="Map.h">
+      <Filter>Header Files\MAPS AND CUTSCENES</Filter>
+    </ClInclude>
+    <ClInclude Include="Room1.h">
+      <Filter>Header Files\MAPS AND CUTSCENES</Filter>
+    </ClInclude>
+    <ClInclude Include="Room2.h">
+      <Filter>Header Files\MAPS AND CUTSCENES</Filter>
+    </ClInclude>
+    <ClInclude Include="Room3.h">
+      <Filter>Header Files\MAPS AND CUTSCENES</Filter>
+    </ClInclude>
+    <ClInclude Include="Room6.h">
+      <Filter>Header Files\MAPS AND CUTSCENES</Filter>
+    </ClInclude>
+    <ClInclude Include="Room5.h">
+      <Filter>Header Files\MAPS AND CUTSCENES</Filter>
+    </ClInclude>
+    <ClInclude Include="Room4.h">
+      <Filter>Header Files\MAPS AND CUTSCENES</Filter>
+    </ClInclude>
+    <ClInclude Include="Position.h">
+      <Filter>Header Files\ENTITES</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
