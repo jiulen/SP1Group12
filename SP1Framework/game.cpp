@@ -357,14 +357,217 @@ void renderMap() {
             case 7: //exit
                 map_colour = 0x10;
                 break;
-            }
+            }d
             g_Console.writeToBuffer(x * 2, y, "  ", map_colour);
             lvl1.seekg(0);
         }
     }
     lvl1.close();
 }
-
+void renderMap()
+{
+    //if level_no == 2
+    std::ifstream lvl2("Map2.csv"); //opens map
+    std::string val; //value of square(0 - 7)
+    for (int y = 0; y < 40; y++)
+    {
+        for (int x = 0; x < 60; x++) //TODO: solve lag
+        {
+            for (int i = 0; i < y; i++)
+            {
+                std::getline(lvl2, val); //delimiter is newline '\n'
+            }
+            for (int i = 0; i < x + 1; i++) //get first character in line(+1)
+            {
+                std::getline(lvl2, val, ','); //delimiter is comma ','
+            }
+            WORD map_colour = 0x00;
+            switch (stoi(val))
+            {
+            case 0: //path
+                map_colour = 0x60;
+                break;
+            case 1: //wall
+                map_colour = 0x00;
+                break;
+            case 2: //dead body
+                map_colour = 0x50;
+                break;
+            case 3: //special dead body
+                map_colour = 0xD0;
+                break;
+            case 4: //chest
+                map_colour = 0xE0;
+                break;
+            case 5: //fake chest
+                map_colour = 0x80;
+                break;
+            case 6: //prisoner
+                map_colour = 0x30;
+                break;
+            case 7: //exit
+                map_colour = 0x10;
+                break;
+            }
+            g_Console.writeToBuffer(x * 2, y, "  ", map_colour);
+            lvl2.seekg(0);
+        }
+    }
+    lvl2.close();
+}
+void renderMap()
+{
+    //if level_no == 3
+    std::ifstream lvl3("Map3.csv"); //opens map
+    std::string val; //value of square(0 - 7)
+    for (int y = 0; y < 40; y++)
+    {
+        for (int x = 0; x < 60; x++) //TODO: solve lag
+        {
+            for (int i = 0; i < y; i++)
+            {
+                std::getline(lvl3, val); //delimiter is newline '\n'
+            }
+            for (int i = 0; i < x + 1; i++) //get first character in line(+1)
+            {
+                std::getline(lvl3, val, ','); //delimiter is comma ','
+            }
+            WORD map_colour = 0x00;
+            switch (stoi(val))
+            {
+            case 0: //path
+                map_colour = 0x60;
+                break;
+            case 1: //wall
+                map_colour = 0x00;
+                break;
+            case 2: //dead body
+                map_colour = 0x50;
+                break;
+            case 3: //special dead body
+                map_colour = 0xD0;
+                break;
+            case 4: //chest
+                map_colour = 0xE0;
+                break;
+            case 5: //fake chest
+                map_colour = 0x80;
+                break;
+            case 6: //prisoner
+                map_colour = 0x30;
+                break;
+            case 7: //exit
+                map_colour = 0x10;
+                break;
+            }
+            g_Console.writeToBuffer(x * 2, y, "  ", map_colour);
+            lvl3.seekg(0);
+        }
+    }
+    lvl3.close();
+}
+void renderMap()
+{
+    //if level_no == 4
+    std::ifstream lvl4("Map4.csv"); //opens map
+    std::string val; //value of square(0 - 7)
+    for (int y = 0; y < 40; y++)
+    {
+        for (int x = 0; x < 60; x++) //TODO: solve lag
+        {
+            for (int i = 0; i < y; i++)
+            {
+                std::getline(lvl4, val); //delimiter is newline '\n'
+            }
+            for (int i = 0; i < x + 1; i++) //get first character in line(+1)
+            {
+                std::getline(lvl4, val, ','); //delimiter is comma ','
+            }
+            WORD map_colour = 0x00;
+            switch (stoi(val))
+            {
+            case 0: //path
+                map_colour = 0x60;
+                break;
+            case 1: //wall
+                map_colour = 0x00;
+                break;
+            case 2: //dead body
+                map_colour = 0x50;
+                break;
+            case 3: //special dead body
+                map_colour = 0xD0;
+                break;
+            case 4: //chest
+                map_colour = 0xE0;
+                break;
+            case 5: //fake chest
+                map_colour = 0x80;
+                break;
+            case 6: //prisoner
+                map_colour = 0x30;
+                break;
+            case 7: //exit
+                map_colour = 0x10;
+                break;
+            }
+            g_Console.writeToBuffer(x * 2, y, "  ", map_colour);
+            lvl4.seekg(0);
+        }
+    }
+    lvl4.close();
+}
+void renderMap()
+{
+    //if level_no == 5
+    std::ifstream lvl5("Map5.csv"); //opens map
+    std::string val; //value of square(0 - 7)
+    for (int y = 0; y < 40; y++)
+    {
+        for (int x = 0; x < 60; x++) //TODO: solve lag
+        {
+            for (int i = 0; i < y; i++)
+            {
+                std::getline(lvl5, val); //delimiter is newline '\n'
+            }
+            for (int i = 0; i < x + 1; i++) //get first character in line(+1)
+            {
+                std::getline(lvl5, val, ','); //delimiter is comma ','
+            }
+            WORD map_colour = 0x00;
+            switch (stoi(val))
+            {
+            case 0: //path
+                map_colour = 0x60;
+                break;
+            case 1: //wall
+                map_colour = 0x00;
+                break;
+            case 2: //dead body
+                map_colour = 0x50;
+                break;
+            case 3: //special dead body
+                map_colour = 0xD0;
+                break;
+            case 4: //chest
+                map_colour = 0xE0;
+                break;
+            case 5: //fake chest
+                map_colour = 0x80;
+                break;
+            case 6: //prisoner
+                map_colour = 0x30;
+                break;
+            case 7: //exit
+                map_colour = 0x10;
+                break;
+            }
+            g_Console.writeToBuffer(x * 2, y, "  ", map_colour);
+            lvl5.seekg(0);
+        }
+    }
+    lvl5.close();
+}
 void renderCharacter() {
     // Draw the location of the character
     std::ostringstream playerChar;
