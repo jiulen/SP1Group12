@@ -1,9 +1,9 @@
 #include "Golem.h"
 
 Golem::Golem() {
-	set_hp(20);
-	set_dmg(5);
-	set_def(1);
+	hp = 20;
+	dmg = 5;
+	def = 1;
 }
 //has 20 health and 1 def, so with sword, deals 2 dmg, 10 hits
 

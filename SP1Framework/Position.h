@@ -1,17 +1,16 @@
 #pragma once
 class Position {
 public:
-	Position::Position();
-	Position::~Position();
-	Position::Position(int a, int b);
+	Position();
+	~Position();
+	Position(int a, int b);
 
-	int Position::get_x(void);
-	void Position::set_x(int a);
+	int get_x(void);
+	void set_x(int a);
 
-	int Position::get_y(void);
-	void Position::set_y(int a);
+	int get_y(void);
+	void set_y(int a);
 
 private:
 	int x, y;
-
 };
