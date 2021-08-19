@@ -5,7 +5,6 @@
 #include "Framework\timer.h"
 #include "game.h"
 #include "Entity.h"
-#include "Player.h"
 #include "Slime.h"
 #include "Golem.h"
 
@@ -24,7 +23,6 @@ void mainLoop(void);
 // You should not be modifying this unless you know what you are doing
 int main(void) {
     Entity* Eptr[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
-    Eptr[0] = new Player;
     srand(0);
 
 
