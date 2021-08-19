@@ -51,31 +51,10 @@
     <ClCompile Include="Golem.cpp">
       <Filter>Source Files\ENTITIES</Filter>
     </ClCompile>
-    <ClCompile Include="Player.cpp">
-      <Filter>Source Files\ENTITIES</Filter>
-    </ClCompile>
     <ClCompile Include="Slime.cpp">
       <Filter>Source Files\ENTITIES</Filter>
     </ClCompile>
     <ClCompile Include="Map.cpp">
-      <Filter>Source Files\MAPS AND CUTSCENES</Filter>
-    </ClCompile>
-    <ClCompile Include="Room1.cpp">
-      <Filter>Source Files\MAPS AND CUTSCENES</Filter>
-    </ClCompile>
-    <ClCompile Include="Room2.cpp">
-      <Filter>Source Files\MAPS AND CUTSCENES</Filter>
-    </ClCompile>
-    <ClCompile Include="Room3.cpp">
-      <Filter>Source Files\MAPS AND CUTSCENES</Filter>
-    </ClCompile>
-    <ClCompile Include="Room4.cpp">
-      <Filter>Source Files\MAPS AND CUTSCENES</Filter>
-    </ClCompile>
-    <ClCompile Include="Room5.cpp">
-      <Filter>Source Files\MAPS AND CUTSCENES</Filter>
-    </ClCompile>
-    <ClCompile Include="Room6.cpp">
       <Filter>Source Files\MAPS AND CUTSCENES</Filter>
     </ClCompile>
     <ClCompile Include="Position.cpp">
@@ -98,31 +77,10 @@
     <ClInclude Include="Golem.h">
       <Filter>Header Files\ENTITES</Filter>
     </ClInclude>
-    <ClInclude Include="Player.h">
-      <Filter>Header Files\ENTITES</Filter>
-    </ClInclude>
     <ClInclude Include="Slime.h">
       <Filter>Header Files\ENTITES</Filter>
     </ClInclude>
     <ClInclude Include="Map.h">
-      <Filter>Header Files\MAPS AND CUTSCENES</Filter>
-    </ClInclude>
-    <ClInclude Include="Room1.h">
-      <Filter>Header Files\MAPS AND CUTSCENES</Filter>
-    </ClInclude>
-    <ClInclude Include="Room2.h">
-      <Filter>Header Files\MAPS AND CUTSCENES</Filter>
-    </ClInclude>
-    <ClInclude Include="Room3.h">
-      <Filter>Header Files\MAPS AND CUTSCENES</Filter>
-    </ClInclude>
-    <ClInclude Include="Room6.h">
-      <Filter>Header Files\MAPS AND CUTSCENES</Filter>
-    </ClInclude>
-    <ClInclude Include="Room5.h">
-      <Filter>Header Files\MAPS AND CUTSCENES</Filter>
-    </ClInclude>
-    <ClInclude Include="Room4.h">
       <Filter>Header Files\MAPS AND CUTSCENES</Filter>
     </ClInclude>
     <ClInclude Include="Position.h">

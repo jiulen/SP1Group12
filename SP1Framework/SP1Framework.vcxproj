@@ -85,14 +85,7 @@
     <ClCompile Include="Golem.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Map.cpp" />
-    <ClCompile Include="Player.cpp" />
     <ClCompile Include="Position.cpp" />
-    <ClCompile Include="Room1.cpp" />
-    <ClCompile Include="Room2.cpp" />
-    <ClCompile Include="Room3.cpp" />
-    <ClCompile Include="Room4.cpp" />
-    <ClCompile Include="Room5.cpp" />
-    <ClCompile Include="Room6.cpp" />
     <ClCompile Include="Slime.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -102,14 +95,7 @@
     <ClInclude Include="game.h" />
     <ClInclude Include="Golem.h" />
     <ClInclude Include="Map.h" />
-    <ClInclude Include="Player.h" />
     <ClInclude Include="Position.h" />
-    <ClInclude Include="Room1.h" />
-    <ClInclude Include="Room2.h" />
-    <ClInclude Include="Room3.h" />
-    <ClInclude Include="Room4.h" />
-    <ClInclude Include="Room5.h" />
-    <ClInclude Include="Room6.h" />
     <ClInclude Include="Slime.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

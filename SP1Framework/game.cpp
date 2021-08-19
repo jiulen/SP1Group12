@@ -204,7 +204,6 @@ void update(double dt)
     // get the delta time
     g_dElapsedTime += dt;
     g_dDeltaTime = dt;
-
     switch (g_eGameState)
     {
         case S_SPLASHSCREEN: splashScreenWait(); // game logic for the splash screen
@@ -231,25 +230,20 @@ void updateGame()       // gameplay logic
 void moveCharacter()
 {    
     // Updating the location of the character based on the key release
-    // providing a beep sound whenver we shift the character
     if (g_skKeyEvent[K_UP].keyDown && g_sChar.m_cLocation.Y > 0)
     {
-        //Beep(1440, 30);
         g_sChar.m_cLocation.Y--;       
     }
     if (g_skKeyEvent[K_LEFT].keyDown && g_sChar.m_cLocation.X > 0)
     {
-        //Beep(1440, 30);
         g_sChar.m_cLocation.X--;        
     }
     if (g_skKeyEvent[K_DOWN].keyDown && g_sChar.m_cLocation.Y < g_Console.getConsoleSize().Y - 1 - GUI_height)
     {
-        //Beep(1440, 30);
         g_sChar.m_cLocation.Y++;        
     }
     if (g_skKeyEvent[K_RIGHT].keyDown && g_sChar.m_cLocation.X < g_Console.getConsoleSize().X - 1)
     {
-        //Beep(1440, 30);
         g_sChar.m_cLocation.X++;        
     }
     if (g_skKeyEvent[K_SPACE].keyDown)
@@ -311,18 +305,18 @@ void renderSplashScreen() {             // renders the splash screen
 }
 
 void renderGame() {
-    renderMap();        // renders the map to the buffer first
+    //renderMap();        // renders the map to the buffer first
     renderCharacter();  // renders the character into the buffer
 }
 
 void renderMap() {
-    // Set up sample colours, and output shadings
+    COORD c;
+    // Set up sample colours, and all colors are available for fore and background
     const WORD fore[] = {
         0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
         0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F
     };
 
-    COORD c;
     for (int i = 0; i < 16; ++i)
     {
         c.X = i + 2;
@@ -330,7 +324,7 @@ void renderMap() {
         colour(fore[i]);
         g_Console.writeToBuffer(c, "A", fore[i]);
     }
-
+    //all can be background
     const WORD BG[] = {
         0x00, 0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70,
         0x80, 0x90, 0xA0, 0xB0, 0xC0, 0xD0, 0xE0, 0xF0

@@ -49,6 +49,7 @@ struct SGameChar
 {
     COORD m_cLocation;
     bool  m_bActive;
+    int hp, dmg, def;
 };
 
 void init        ( void );      // initialize your variables, allocate memory, etc
