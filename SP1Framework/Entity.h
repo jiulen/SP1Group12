@@ -3,13 +3,13 @@
 
 class Entity {
 public:
-	Entity::Entity();
-	Entity::~Entity();
+	Entity();
+	~Entity();
 
-	virtual void Entity::move();
-	int Entity::Random_Integer();
+	virtual void move();
+	int Random_Integer(); //what this for?
 
-	int Entity::get_hp(void);
+	int get_hp(void);
 	void set_hp(int);
 
 	int get_dmg(void);
@@ -18,7 +18,7 @@ public:
 	int get_def(void);
 	void set_def(int);
 
-private:
+protected:
 	Position EntityPos;
 	int hp, dmg, def;
 

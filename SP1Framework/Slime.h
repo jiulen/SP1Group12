@@ -2,12 +2,9 @@
 #include "Entity.h"
 class Slime :public Entity {
 public:
-	Slime::Slime();
-	Slime::~Slime();
-	void Slime::move();
-
-
+	Slime();
+	~Slime();
+	void move();
 private:
 	static int slime_kills;
-
 };

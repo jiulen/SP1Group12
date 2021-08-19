@@ -3,11 +3,9 @@
 int Slime::slime_kills = 0;		//shows up as number of enemies killed at the end
 
 Slime::Slime() {
-	
-
-	set_hp(1);
-	set_dmg(2);
-	set_def(0);
+	hp = 1;
+	dmg = 2;
+	def = 0;
 }
 
 Slime::~Slime() {
