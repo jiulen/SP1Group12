@@ -4,6 +4,8 @@
 #include <iostream>
 #include <iomanip>
 #include <sstream>
+#include <fstream>
+#include <string>
 
 double  g_dElapsedTime;
 double  g_dDeltaTime;
@@ -13,6 +15,7 @@ SMouseEvent g_mouseEvent;
 // Game specific variables here
 SGameChar   g_sChar;
 EGAMESTATES g_eGameState = S_SPLASHSCREEN; // initial state
+int level_no = 0; //level number, increases when go next level
 
 // Console object
 Console g_Console(120, 50, "Temple Escape, Totally not Indiana Jones!!!");
@@ -307,38 +310,59 @@ void renderSplashScreen() {             // renders the splash screen
 }
 
 void renderGame() {
-    //renderMap();        // renders the map to the buffer first
+    renderMap();        // renders the map to the buffer first
     renderCharacter();  // renders the character into the buffer
 }
 
 void renderMap() {
-    COORD c;
-    // Set up sample colours, and all colors are available for fore and background
-    const WORD fore[] = {
-        0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
-        0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F
-    };
-
-    for (int i = 0; i < 16; ++i)
+    //if level_no == 1
+    std::ifstream lvl1("Map1.csv"); //opens map
+    std::string val; //value of square(0 - 7)
+    for (int y = 0; y < 40; y++)
     {
-        c.X = i + 2;
-        c.Y = 2;
-        colour(fore[i]);
-        g_Console.writeToBuffer(c, "A", fore[i]);
+        for (int x = 0; x < 60; x++) //TODO:find a way to reset getline starting position every loop
+        {
+            for (int i = 0; i < y; i++)
+            {
+                std::getline(lvl1, val); //delimiter is newline '\n'
+            }
+            for (int i = 0; i < x + 1; i++) //get first character in line(+1)
+            {
+                std::getline(lvl1, val, ','); //delimiter is comma ','
+            }
+            WORD map_colour = 0x00;
+            switch (stoi(val))
+            {
+            case 0: //path
+                map_colour = 0x60;
+                break;
+            case 1: //wall
+                map_colour = 0x00;
+                break;
+            case 2: //dead body
+                map_colour = 0x50;
+                break;
+            case 3: //special dead body
+                map_colour = 0xD0;
+                break;
+            case 4: //chest
+                map_colour = 0xE0;
+                break;
+            case 5: //fake chest
+                map_colour = 0x80;
+                break;
+            case 6: //prisoner
+                map_colour = 0x30;
+                break;
+            case 7: //exit
+                map_colour = 0x10;
+                break;
+            }
+            g_Console.writeToBuffer(x * 2, y, "  ", map_colour);
+            lvl1.seekg(0);
+        }
     }
-    //all can be background
-    const WORD BG[] = {
-        0x00, 0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70,
-        0x80, 0x90, 0xA0, 0xB0, 0xC0, 0xD0, 0xE0, 0xF0
-    };
-
-    for (int i = 0; i < 16; ++i)
-    {
-        c.X = i + 2;
-        c.Y = 3;
-        colour(BG[i]);
-        g_Console.writeToBuffer(c, " ", BG[i]);
-    }
+    lvl1.close();
 }
 
 void renderCharacter() {
