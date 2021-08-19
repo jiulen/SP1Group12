@@ -35,8 +35,8 @@ void init(void) {
     // sets the initial state for the game
     g_eGameState = S_SPLASHSCREEN;
     //change values to change where player spawns
-    g_sChar.m_cLocation.X = 1;
-    g_sChar.m_cLocation.Y = 1;
+    g_sChar.m_cLocation.X = 2;
+    g_sChar.m_cLocation.Y = 2;
     g_sChar.m_bActive = true;
     // sets the width, height and the font name to use in the console
     g_Console.setConsoleFont(0, 16, L"Consolas");
@@ -234,17 +234,17 @@ void moveCharacter()
     {
         g_sChar.m_cLocation.Y--;
     }
-    if (g_skKeyEvent[K_LEFT].keyDown && g_sChar.m_cLocation.X > 0)
+    if (g_skKeyEvent[K_LEFT].keyDown && g_sChar.m_cLocation.X > 1)
     {
-        g_sChar.m_cLocation.X--;        
+        g_sChar.m_cLocation.X-=2;        
     }
     if (g_skKeyEvent[K_DOWN].keyDown && g_sChar.m_cLocation.Y < g_Console.getConsoleSize().Y - 1 - GUI_height)
     {
         g_sChar.m_cLocation.Y++;        
     }
-    if (g_skKeyEvent[K_RIGHT].keyDown && g_sChar.m_cLocation.X < g_Console.getConsoleSize().X - 1)
+    if (g_skKeyEvent[K_RIGHT].keyDown && g_sChar.m_cLocation.X < g_Console.getConsoleSize().X - 2)
     {
-        g_sChar.m_cLocation.X++;        
+        g_sChar.m_cLocation.X+=2;        
     }
     if (g_skKeyEvent[K_INTERACTIVE].keyDown)
     {
@@ -367,12 +367,9 @@ void renderMap() {
 
 void renderCharacter() {
     // Draw the location of the character
-    WORD charColor = 0x0C;
-    if (g_sChar.m_bActive)
-    {
-        charColor = 0x0A;
-    }
-    g_Console.writeToBuffer(g_sChar.m_cLocation, (char)1, charColor);
+    std::ostringstream playerChar;
+    playerChar << static_cast<char>(1) << static_cast<char>(1);
+    g_Console.writeToBuffer(g_sChar.m_cLocation, playerChar.str(), 0x01);
 }
 
 void renderFramerate() {
