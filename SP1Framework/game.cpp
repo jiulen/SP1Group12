@@ -6,6 +6,7 @@
 #include <sstream>
 #include <fstream>
 #include <string>
+#include <vector>
 
 double  g_dElapsedTime;
 double  g_dDeltaTime;
@@ -15,11 +16,14 @@ SMouseEvent g_mouseEvent;
 // Game specific variables here
 SGameChar   g_sChar;
 EGAMESTATES g_eGameState = S_SPLASHSCREEN; // initial state
-int level_no = 0; //level number, increases when go next level
+int level_no = 1; //level number, increases when go next level
 
 // Console object
 Console g_Console(120, 50, "Temple Escape, Totally not Indiana Jones!!!");
 int GUI_height = 10;
+
+// Map arrays
+std::vector<std::vector<std::string>> map1Vector; // Map 1 array
 
 //--------------------------------------------------------------
 // Purpose  : Initialisation function
@@ -53,7 +57,7 @@ void init(void) {
 // Input    : Void
 // Output   : void
 //--------------------------------------------------------------
-void shutdown( void )
+void shutdown(void)
 {
     // Reset to white text on black background
     colour(FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED);
@@ -74,12 +78,12 @@ void shutdown( void )
 // Input    : Void
 // Output   : void
 //--------------------------------------------------------------
-void getInput( void )
+void getInput(void)
 {
     // resets all the keyboard events
     memset(g_skKeyEvent, 0, K_COUNT * sizeof(*g_skKeyEvent));
     // then call the console to detect input from user
-    g_Console.readConsoleInput();    
+    g_Console.readConsoleInput();
 }
 
 //--------------------------------------------------------------
@@ -96,7 +100,7 @@ void getInput( void )
 // Output   : void
 //--------------------------------------------------------------
 void keyboardHandler(const KEY_EVENT_RECORD& keyboardEvent)
-{    
+{
     switch (g_eGameState)
     {
     case S_SPLASHSCREEN: gameplayKBHandler(keyboardEvent);// don't handle anything for the splash screen
@@ -123,7 +127,7 @@ void keyboardHandler(const KEY_EVENT_RECORD& keyboardEvent)
 // Output   : void
 //--------------------------------------------------------------
 void mouseHandler(const MOUSE_EVENT_RECORD& mouseEvent)
-{    
+{
     switch (g_eGameState)
     {
     case S_SPLASHSCREEN: // don't handle anything for the splash screen
@@ -153,7 +157,7 @@ void gameplayKBHandler(const KEY_EVENT_RECORD& keyboardEvent)
     case 0x41: key = K_LEFT; break;
     case 0x44: key = K_RIGHT; break;
     case VK_RETURN: key = K_ENTER; break;
-    case VK_ESCAPE: key = K_ESCAPE; break; 
+    case VK_ESCAPE: key = K_ESCAPE; break;
     }
     // a key pressed event would be one with bKeyDown == true
     // a key released event would be one with bKeyDown == false
@@ -163,7 +167,7 @@ void gameplayKBHandler(const KEY_EVENT_RECORD& keyboardEvent)
     {
         g_skKeyEvent[key].keyDown = keyboardEvent.bKeyDown;
         g_skKeyEvent[key].keyReleased = !keyboardEvent.bKeyDown;
-    }    
+    }
 }
 
 //--------------------------------------------------------------
@@ -206,10 +210,10 @@ void update(double dt)
     g_dDeltaTime = dt;
     switch (g_eGameState)
     {
-        case S_SPLASHSCREEN: splashScreenWait(); // game logic for the splash screen
-            break;
-        case S_GAME: updateGame(); // gameplay logic when we are in the game
-            break;
+    case S_SPLASHSCREEN: splashScreenWait(); // game logic for the splash screen
+        break;
+    case S_GAME: updateGame(); // gameplay logic when we are in the game
+        break;
     }
 }
 
@@ -228,23 +232,25 @@ void updateGame()       // gameplay logic
 }
 
 void moveCharacter()
-{    
+{
     // Updating the location of the character based on the key release
-    if (g_skKeyEvent[K_UP].keyDown && g_sChar.m_cLocation.Y > 0)
+    // 
+    // [NOTE]: PLAYER CAN ONLY MOVE AFTER THE MAP 1 ARRAY IS DONE LOADING
+    if ((g_skKeyEvent[K_UP].keyDown) && (g_sChar.m_cLocation.Y > 0) && (map1Vector.size() == 2400) && (map1Vector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] != "1"))
     {
         g_sChar.m_cLocation.Y--;
     }
-    if (g_skKeyEvent[K_LEFT].keyDown && g_sChar.m_cLocation.X > 1)
+    if ((g_skKeyEvent[K_LEFT].keyDown) && (g_sChar.m_cLocation.X > 1) && (map1Vector.size() == 2400) && (map1Vector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] != "1"))
     {
-        g_sChar.m_cLocation.X-=2;        
+        g_sChar.m_cLocation.X -= 2;
     }
-    if (g_skKeyEvent[K_DOWN].keyDown && g_sChar.m_cLocation.Y < g_Console.getConsoleSize().Y - 1 - GUI_height)
+    if ((g_skKeyEvent[K_DOWN].keyDown) && (g_sChar.m_cLocation.Y < (g_Console.getConsoleSize().Y - 1 - GUI_height)) && (map1Vector.size() == 2400) && (map1Vector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] != "1"))
     {
-        g_sChar.m_cLocation.Y++;        
+        g_sChar.m_cLocation.Y++;
     }
-    if (g_skKeyEvent[K_RIGHT].keyDown && g_sChar.m_cLocation.X < g_Console.getConsoleSize().X - 2)
+    if ((g_skKeyEvent[K_RIGHT].keyDown) && (g_sChar.m_cLocation.X < (g_Console.getConsoleSize().X - 2)) && (map1Vector.size() == 2400) && (map1Vector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] != "1"))
     {
-        g_sChar.m_cLocation.X+=2;        
+        g_sChar.m_cLocation.X += 2;
     }
     if (g_skKeyEvent[K_INTERACTIVE].keyDown)
     {
@@ -255,12 +261,12 @@ void moveCharacter()
         //
     }
 
-   
+
 }
 void processUserInput() {
     // quits the game if player hits the escape key
     if (g_skKeyEvent[K_ESCAPE].keyReleased)
-        g_bQuitGame = true;    
+        g_bQuitGame = true;
 }
 
 //--------------------------------------------------------------
@@ -306,83 +312,33 @@ void renderSplashScreen() {             // renders the splash screen
     c.Y += 1;
     c.X = g_Console.getConsoleSize().X / 2 - 16;
     g_Console.writeToBuffer(c, "Press 'Esc' to quit", 0x0F);
-    
+
 }
 
 void renderGame() {
-    renderMap();        // renders the map to the buffer first
+    renderMap();     // renders the map to the buffer first
     renderCharacter();  // renders the character into the buffer
 }
 
-void renderMap() {
-    //if level_no == 1
+void Map1()
+{
+    unsigned x = 0, y = 0;
+
     std::ifstream lvl1("Map1.csv"); //opens map
-    std::string val; //value of square(0 - 7)
-    for (int y = 0; y < 40; y++)
+    std::string row;
+
+    while (std::getline(lvl1, row))
     {
-        for (int x = 0; x < 60; x++) //TODO: solve lag
+        std::stringstream rowStream(row);
+        std::string(cell);
+        std::vector<std::string> rowVector;
+
+        while (std::getline(rowStream, cell, ','))
         {
-            for (int i = 0; i < y; i++)
-            {
-                std::getline(lvl1, val); //delimiter is newline '\n'
-            }
-            for (int i = 0; i < x + 1; i++) //get first character in line(+1)
-            {
-                std::getline(lvl1, val, ','); //delimiter is comma ','
-            }
+            rowVector.push_back(cell);
+
             WORD map_colour = 0x00;
-            switch (stoi(val))
-            {
-            case 0: //path
-                map_colour = 0x60;
-                break;
-            case 1: //wall
-                map_colour = 0x00;
-                break;
-            case 2: //dead body
-                map_colour = 0x50;
-                break;
-            case 3: //special dead body
-                map_colour = 0xD0;
-                break;
-            case 4: //chest
-                map_colour = 0xE0;
-                break;
-            case 5: //fake chest
-                map_colour = 0x80;
-                break;
-            case 6: //prisoner
-                map_colour = 0x30;
-                break;
-            case 7: //exit
-                map_colour = 0x10;
-                break;
-            }d
-            g_Console.writeToBuffer(x * 2, y, "  ", map_colour);
-            lvl1.seekg(0);
-        }
-    }
-    lvl1.close();
-}
-void renderMap()
-{
-    //if level_no == 2
-    std::ifstream lvl2("Map2.csv"); //opens map
-    std::string val; //value of square(0 - 7)
-    for (int y = 0; y < 40; y++)
-    {
-        for (int x = 0; x < 60; x++) //TODO: solve lag
-        {
-            for (int i = 0; i < y; i++)
-            {
-                std::getline(lvl2, val); //delimiter is newline '\n'
-            }
-            for (int i = 0; i < x + 1; i++) //get first character in line(+1)
-            {
-                std::getline(lvl2, val, ','); //delimiter is comma ','
-            }
-            WORD map_colour = 0x00;
-            switch (stoi(val))
+            switch (stoi(cell))
             {
             case 0: //path
                 map_colour = 0x60;
@@ -409,165 +365,34 @@ void renderMap()
                 map_colour = 0x10;
                 break;
             }
+
             g_Console.writeToBuffer(x * 2, y, "  ", map_colour);
-            lvl2.seekg(0);
+            x++;
         }
+        y += .5;
+        if (map1Vector.size() < 2400) map1Vector.push_back(rowVector);
     }
-    lvl2.close();
 }
-void renderMap()
-{
-    //if level_no == 3
-    std::ifstream lvl3("Map3.csv"); //opens map
-    std::string val; //value of square(0 - 7)
-    for (int y = 0; y < 40; y++)
+
+void Map2() {}
+
+void Map3() {}
+
+void Map4() {}
+
+void Map5() {}
+
+void renderMap() {
+    switch (level_no)
     {
-        for (int x = 0; x < 60; x++) //TODO: solve lag
-        {
-            for (int i = 0; i < y; i++)
-            {
-                std::getline(lvl3, val); //delimiter is newline '\n'
-            }
-            for (int i = 0; i < x + 1; i++) //get first character in line(+1)
-            {
-                std::getline(lvl3, val, ','); //delimiter is comma ','
-            }
-            WORD map_colour = 0x00;
-            switch (stoi(val))
-            {
-            case 0: //path
-                map_colour = 0x60;
-                break;
-            case 1: //wall
-                map_colour = 0x00;
-                break;
-            case 2: //dead body
-                map_colour = 0x50;
-                break;
-            case 3: //special dead body
-                map_colour = 0xD0;
-                break;
-            case 4: //chest
-                map_colour = 0xE0;
-                break;
-            case 5: //fake chest
-                map_colour = 0x80;
-                break;
-            case 6: //prisoner
-                map_colour = 0x30;
-                break;
-            case 7: //exit
-                map_colour = 0x10;
-                break;
-            }
-            g_Console.writeToBuffer(x * 2, y, "  ", map_colour);
-            lvl3.seekg(0);
-        }
+    case 1: Map1(); break;
+    case 2: Map2(); break;
+    case 3: Map3(); break;
+    case 4: Map4(); break;
+    case 5: Map5(); break;
     }
-    lvl3.close();
 }
-void renderMap()
-{
-    //if level_no == 4
-    std::ifstream lvl4("Map4.csv"); //opens map
-    std::string val; //value of square(0 - 7)
-    for (int y = 0; y < 40; y++)
-    {
-        for (int x = 0; x < 60; x++) //TODO: solve lag
-        {
-            for (int i = 0; i < y; i++)
-            {
-                std::getline(lvl4, val); //delimiter is newline '\n'
-            }
-            for (int i = 0; i < x + 1; i++) //get first character in line(+1)
-            {
-                std::getline(lvl4, val, ','); //delimiter is comma ','
-            }
-            WORD map_colour = 0x00;
-            switch (stoi(val))
-            {
-            case 0: //path
-                map_colour = 0x60;
-                break;
-            case 1: //wall
-                map_colour = 0x00;
-                break;
-            case 2: //dead body
-                map_colour = 0x50;
-                break;
-            case 3: //special dead body
-                map_colour = 0xD0;
-                break;
-            case 4: //chest
-                map_colour = 0xE0;
-                break;
-            case 5: //fake chest
-                map_colour = 0x80;
-                break;
-            case 6: //prisoner
-                map_colour = 0x30;
-                break;
-            case 7: //exit
-                map_colour = 0x10;
-                break;
-            }
-            g_Console.writeToBuffer(x * 2, y, "  ", map_colour);
-            lvl4.seekg(0);
-        }
-    }
-    lvl4.close();
-}
-void renderMap()
-{
-    //if level_no == 5
-    std::ifstream lvl5("Map5.csv"); //opens map
-    std::string val; //value of square(0 - 7)
-    for (int y = 0; y < 40; y++)
-    {
-        for (int x = 0; x < 60; x++) //TODO: solve lag
-        {
-            for (int i = 0; i < y; i++)
-            {
-                std::getline(lvl5, val); //delimiter is newline '\n'
-            }
-            for (int i = 0; i < x + 1; i++) //get first character in line(+1)
-            {
-                std::getline(lvl5, val, ','); //delimiter is comma ','
-            }
-            WORD map_colour = 0x00;
-            switch (stoi(val))
-            {
-            case 0: //path
-                map_colour = 0x60;
-                break;
-            case 1: //wall
-                map_colour = 0x00;
-                break;
-            case 2: //dead body
-                map_colour = 0x50;
-                break;
-            case 3: //special dead body
-                map_colour = 0xD0;
-                break;
-            case 4: //chest
-                map_colour = 0xE0;
-                break;
-            case 5: //fake chest
-                map_colour = 0x80;
-                break;
-            case 6: //prisoner
-                map_colour = 0x30;
-                break;
-            case 7: //exit
-                map_colour = 0x10;
-                break;
-            }
-            g_Console.writeToBuffer(x * 2, y, "  ", map_colour);
-            lvl5.seekg(0);
-        }
-    }
-    lvl5.close();
-}
+
 void renderCharacter() {
     // Draw the location of the character
     std::ostringstream playerChar;
@@ -596,7 +421,7 @@ void renderFramerate() {
 // this is an example of how you would use the input events
 void renderInputEvents() {
     // keyboard events
-    COORD startPos = {50, 2};
+    COORD startPos = { 50, 2 };
     std::ostringstream ss;
     std::string key;
     for (int i = 0; i < K_COUNT; ++i) {
@@ -649,15 +474,15 @@ void renderInputEvents() {
     case DOUBLE_CLICK:
         ss.str("Double Clicked");
         g_Console.writeToBuffer(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y + 4, ss.str(), 0x59);
-        break;        
+        break;
     case MOUSE_WHEELED:
-        if (g_mouseEvent.buttonState & 0xFF000000) 
+        if (g_mouseEvent.buttonState & 0xFF000000)
            ss.str("Mouse wheeled down");
-        else 
+        else
            ss.str("Mouse wheeled up");
         g_Console.writeToBuffer(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y + 5, ss.str(), 0x59);
         break;
-    default:        
+    default:
         break;
     }*/
 }
