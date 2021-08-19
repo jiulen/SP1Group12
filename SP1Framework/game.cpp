@@ -284,7 +284,7 @@ void render() {
 
 void clearScreen() {
     // Clears the buffer with this colour attribute
-    g_Console.clearBuffer(0x1F);
+    g_Console.clearBuffer(0x0F);
 }
 
 void renderToScreen() {
@@ -296,16 +296,13 @@ void renderSplashScreen() {             // renders the splash screen
     COORD c = g_Console.getConsoleSize();
     c.Y /= 3;
     c.X = c.X / 2 - 16;
-    g_Console.writeToBuffer(c, "Press 'Enter' to start", 0x03);
+    g_Console.writeToBuffer(c, "Press 'Enter' to start", 0x0F);
     c.Y += 1;
     c.X = g_Console.getConsoleSize().X / 2 - 16;
-    g_Console.writeToBuffer(c, "Press 'W, A, S, D' to move around", 0x03);
+    g_Console.writeToBuffer(c, "Press 'W, A, S, D' to move around", 0x0F);
     c.Y += 1;
     c.X = g_Console.getConsoleSize().X / 2 - 16;
-    g_Console.writeToBuffer(c, "Press <Space> to change character colour", 0x09);
-    c.Y += 1;
-    c.X = g_Console.getConsoleSize().X / 2 - 16;
-    g_Console.writeToBuffer(c, "Press 'Esc' to quit", 0x09);
+    g_Console.writeToBuffer(c, "Press 'Esc' to quit", 0x0F);
     
 }
 
