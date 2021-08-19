@@ -87,4 +87,21 @@
       <Filter>Header Files\ENTITES</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Map1.csv">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Map2.csv">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Map3.csv">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Map4.csv">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Map5.csv">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
 </Project>
