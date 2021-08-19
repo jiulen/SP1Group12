@@ -357,7 +357,7 @@ void renderMap() {
             case 7: //exit
                 map_colour = 0x10;
                 break;
-            }d
+            }
             g_Console.writeToBuffer(x * 2, y, "  ", map_colour);
             lvl1.seekg(0);
         }
