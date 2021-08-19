@@ -320,7 +320,7 @@ void renderMap() {
     std::string val; //value of square(0 - 7)
     for (int y = 0; y < 40; y++)
     {
-        for (int x = 0; x < 60; x++) //TODO:find a way to reset getline starting position every loop
+        for (int x = 0; x < 60; x++) //TODO: solve lag
         {
             for (int i = 0; i < y; i++)
             {
