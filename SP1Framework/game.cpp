@@ -152,7 +152,6 @@ void gameplayKBHandler(const KEY_EVENT_RECORD& keyboardEvent)
     case 0x41: key = K_LEFT; break;
     case 0x44: key = K_RIGHT; break;
     case VK_RETURN: key = K_ENTER; break;
-    case VK_SPACE: key = K_SPACE; break;
     case VK_ESCAPE: key = K_ESCAPE; break; 
     }
     // a key pressed event would be one with bKeyDown == true
@@ -245,10 +244,6 @@ void moveCharacter()
     if (g_skKeyEvent[K_RIGHT].keyDown && g_sChar.m_cLocation.X < g_Console.getConsoleSize().X - 1)
     {
         g_sChar.m_cLocation.X++;        
-    }
-    if (g_skKeyEvent[K_SPACE].keyDown)
-    {
-        g_sChar.m_bActive = !g_sChar.m_bActive;        
     }
     if (g_skKeyEvent[K_INTERACTIVE].keyDown)
     {
@@ -391,8 +386,6 @@ void renderInputEvents() {
         case K_LEFT: key = "LEFT";
             break;
         case K_RIGHT: key = "RIGHT";
-            break;
-        case K_SPACE: key = "SPACE";
             break;
         default: continue;
         }

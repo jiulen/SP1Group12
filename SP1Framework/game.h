@@ -29,7 +29,6 @@ enum EKEYS
     K_UP, K_DOWN, K_LEFT, K_RIGHT,
     K_ENTER, K_ESCAPE,
     K_INTERACTIVE, K_INVENTORY,
-    K_SPACE,
     K_COUNT
 };
 
