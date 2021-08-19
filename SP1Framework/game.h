@@ -26,12 +26,9 @@ struct SMouseEvent
 // Enumeration to store the control keys that your game will have
 enum EKEYS
 {
-    K_UP,
-    K_DOWN,
-    K_LEFT,
-    K_RIGHT,
-    K_ENTER,
-    K_ESCAPE,
+    K_UP, K_DOWN, K_LEFT, K_RIGHT,
+    K_ENTER, K_ESCAPE,
+    K_INTERACTIVE, K_INVENTORY,
     K_SPACE,
     K_COUNT
 };
@@ -41,6 +38,8 @@ enum EGAMESTATES
 {
     S_SPLASHSCREEN,
     S_GAME,
+    S_INVENTORY,
+    S_MENU,
     S_COUNT
 };
 
@@ -52,11 +51,11 @@ struct SGameChar
     int hp, dmg, def;
 };
 
-void init        ( void );      // initialize your variables, allocate memory, etc
-void getInput    ( void );      // get input from player
-void update      ( double dt ); // update the game and the state of the game
-void render      ( void );      // renders the current state of the game to the console
-void shutdown    ( void );      // do clean up, free memory
+void init        (void);      // initialize your variables, allocate memory, etc
+void getInput    (void);      // get input from player
+void update      (double dt); // update the game and the state of the game
+void render      (void);      // renders the current state of the game to the console
+void shutdown    (void);      // do clean up, free memory
 
 void splashScreenWait();    // waits for time to pass in splash screen
 void updateGame();          // gameplay logic

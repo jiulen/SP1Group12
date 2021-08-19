@@ -232,7 +232,7 @@ void moveCharacter()
     // Updating the location of the character based on the key release
     if (g_skKeyEvent[K_UP].keyDown && g_sChar.m_cLocation.Y > 0)
     {
-        g_sChar.m_cLocation.Y--;       
+        g_sChar.m_cLocation.Y--;
     }
     if (g_skKeyEvent[K_LEFT].keyDown && g_sChar.m_cLocation.X > 0)
     {
@@ -249,6 +249,14 @@ void moveCharacter()
     if (g_skKeyEvent[K_SPACE].keyDown)
     {
         g_sChar.m_bActive = !g_sChar.m_bActive;        
+    }
+    if (g_skKeyEvent[K_INTERACTIVE].keyDown)
+    {
+        //
+    }
+    if (g_skKeyEvent[K_INVENTORY].keyDown)
+    {
+        //
     }
 
    
