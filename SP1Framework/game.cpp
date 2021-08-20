@@ -9,6 +9,9 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <stdio.h>      /*  NULL */
+#include <stdlib.h>     /* srand, rand */
+#include <time.h>  
 
 double  g_dElapsedTime;
 double  g_dDeltaTime;
@@ -38,6 +41,7 @@ std::vector<std::vector<std::string>> inventoryVector; // Inventory array
 // Output   : void
 //--------------------------------------------------------------
 void init(void) {
+    srand(time(NULL));
     // Set precision for floating point output
     g_dElapsedTime = 0.0;
 
@@ -225,8 +229,11 @@ void update(double dt)
 
 void splashScreenWait()    // waits for time to pass in splash screen
 {
-    if (g_skKeyEvent[K_ENTER].keyReleased) // wait for 3 seconds to switch to game mode, else do nothing
+    if (g_skKeyEvent[K_ENTER].keyReleased) { // wait for 3 seconds to switch to game mode, else do nothing
         g_eGameState = S_GAME;
+        slimes.set_posX(rand() % 60 * 2);
+        slimes.set_posY(rand() % 40);
+    }
 }
 
 void checkExitReached()
@@ -375,6 +382,7 @@ void renderSplashScreen() {             // renders the splash screen aka menu sc
 void renderGame() {
     renderMap();        // renders the map to the buffer first
     renderCharacter();  // renders the character into the buffer
+    renderSlime();
     if (E_KeyPressed == true) { renderInventory(); } // renders inventory into the buffer
 }
 
@@ -430,7 +438,12 @@ void renderCharacter() {
     playerChar << static_cast<char>(1) << static_cast<char>(1);
     g_Console.writeToBuffer(g_sChar.m_cLocation, playerChar.str(), 0x01);
 }
-
+void renderSlime() {
+    // draw location of slimes
+    std::ostringstream slimeChar;
+    slimeChar << static_cast<char>(5) << static_cast<char>(5);
+    g_Console.writeToBuffer(slimes.get_posX(), slimes.get_posY(), slimeChar.str(), 0xFD);
+}
 void renderInventory()
 {
     unsigned x = 0, y = 0;
