@@ -300,9 +300,9 @@ void renderToScreen() {
     g_Console.flushBufferToConsole();
 }
 
-void renderSplashScreen() {             // renders the splash screen 
+void renderSplashScreen() {             // renders the splash screen aka menu screen
     COORD c = g_Console.getConsoleSize();
-    c.Y /= 3;
+    c.Y = c.Y/2 + 12;
     c.X = c.X / 2 - 16;
     g_Console.writeToBuffer(c, "Press 'Enter' to start", 0x0F);
     c.Y += 1;
