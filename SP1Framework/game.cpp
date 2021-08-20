@@ -41,7 +41,9 @@ void init(void) {
     //change values to change where player spawns
     g_sChar.m_cLocation.X = 10;
     g_sChar.m_cLocation.Y = 37;
-    g_sChar.m_bActive = true;
+    g_sChar.hp = 10;
+    g_sChar.dmg = 1;
+    g_sChar.def = 0;
     // sets the width, height and the font name to use in the console
     g_Console.setConsoleFont(0, 16, L"Consolas");
 
@@ -314,7 +316,7 @@ void render() {
 
 void clearScreen() {
     // Clears the buffer with this colour attribute
-    g_Console.clearBuffer(0x0F);
+    g_Console.clearBuffer(0xF0);
 }
 
 void renderToScreen() {
@@ -326,13 +328,13 @@ void renderSplashScreen() {             // renders the splash screen aka menu sc
     COORD c = g_Console.getConsoleSize();
     c.Y = c.Y/2 + 12;
     c.X = c.X / 2 - 16;
-    g_Console.writeToBuffer(c, "Press 'Enter' to start", 0x0F);
+    g_Console.writeToBuffer(c, "Press 'Enter' to start", 0xF0);
     c.Y += 1;
     c.X = g_Console.getConsoleSize().X / 2 - 16;
-    g_Console.writeToBuffer(c, "Press 'W, A, S, D' to move around", 0x0F);
+    g_Console.writeToBuffer(c, "Press 'W, A, S, D' to move around", 0xF0);
     c.Y += 1;
     c.X = g_Console.getConsoleSize().X / 2 - 16;
-    g_Console.writeToBuffer(c, "Press 'Esc' to quit", 0x0F);
+    g_Console.writeToBuffer(c, "Press 'Esc' to quit", 0xF0);
 
 }
 
@@ -416,15 +418,27 @@ void renderFramerate() {
     ss << std::fixed << std::setprecision(2);
     ss << 1.0 / g_dDeltaTime << " fps";
     c.X = g_Console.getConsoleSize().X - 9;
-    c.Y = 41;
-    g_Console.writeToBuffer(c, ss.str());
+    c.Y = 40;
+    g_Console.writeToBuffer(c, ss.str(), 0xF0);
 
     // displays the elapsed time
     ss.str("");
     ss << g_dElapsedTime << "secs";
     c.X = 0;
-    c.Y = 41;
-    g_Console.writeToBuffer(c, ss.str(), 0x59);
+    c.Y = 40;
+    g_Console.writeToBuffer(c, ss.str(), 0xF0);
+
+    // displays the player's health
+    std::ostringstream hb;
+    char heart = (char)3;
+    hb << "HP: ";
+    for (int i = 0; i < g_sChar.hp; i++)
+    {
+        hb << heart << " ";
+    }
+    c.X = 10;
+    c.Y = 40;
+    g_Console.writeToBuffer(c, hb.str(), 0xF4); //black background, red text
 }
 
 // this is an example of how you would use the input events

@@ -46,7 +46,6 @@ enum EGAMESTATES
 struct SGameChar
 {
     COORD m_cLocation;
-    bool  m_bActive;
     int hp, dmg, def;
 };
 
