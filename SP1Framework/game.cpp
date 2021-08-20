@@ -23,7 +23,7 @@ Console g_Console(120, 50, "Temple Escape, Totally not Indiana Jones!!!");
 int GUI_height = 10;
 
 // Map arrays
-std::vector<std::vector<std::string>> map1Vector; // Map 1 array
+std::vector<std::vector<std::string>> mapVector; // Map array for all maps
 
 //--------------------------------------------------------------
 // Purpose  : Initialisation function
@@ -224,39 +224,50 @@ void splashScreenWait()    // waits for time to pass in splash screen
         g_eGameState = S_GAME;
 }
 
-void updateGame()       // gameplay logic
+void checkExitReached()
 {
-    processUserInput(); // checks if you should change states or do something else with the game, e.g. pause, exit
-    moveCharacter();    // moves the character, collision detection, physics, etc
-    // sound can be played here too.
+    if ((mapVector.size() == 2400) && ((mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "7") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "7") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "7") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "7")))
+    {
+        mapVector.clear();
+        if (level_no < 5) level_no++;
+        
+        switch (level_no)
+        {
+        case 2: g_sChar.m_cLocation.X = 6; g_sChar.m_cLocation.Y = 36; break;
+        case 3: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 2; break;
+        case 4: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 20; break;
+        case 5: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 20; break;
+        }
+    }
 }
 
-void moveCharacter()
+void updateGame()       // gameplay logic
+{
+    keyPressed();       // moves the character, collision detection, physics, etc // checks if you should change states or do something else with the game, e.g. pause, exit
+                        // sound can be played here too.
+    checkExitReached(); // checks if player reached the exit
+}
+
+void keyPressed()
 {
     // Updating the location of the character based on the key release
     // 
     // [NOTE]: PLAYER CAN ONLY MOVE AFTER THE MAP 1 ARRAY IS DONE LOADING
-    if ((g_skKeyEvent[K_UP].keyDown) && (g_sChar.m_cLocation.Y > 0) && (map1Vector.size() == 2400) && (map1Vector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "0"))
+    if ((g_skKeyEvent[K_UP].keyDown) && (g_sChar.m_cLocation.Y > 0) && (mapVector.size() == 2400) && (mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "0"))
     {
         g_sChar.m_cLocation.Y--;
     }
-    if ((g_skKeyEvent[K_LEFT].keyDown) && (g_sChar.m_cLocation.X > 1) && (map1Vector.size() == 2400) && (map1Vector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "0"))
+    if ((g_skKeyEvent[K_LEFT].keyDown) && (g_sChar.m_cLocation.X > 1) && (mapVector.size() == 2400) && (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "0"))
     {
         g_sChar.m_cLocation.X -= 2;
     }
-    if ((g_skKeyEvent[K_DOWN].keyDown) && (g_sChar.m_cLocation.Y < (g_Console.getConsoleSize().Y - 1 - GUI_height)) && (map1Vector.size() == 2400) && (map1Vector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "0"))
+    if ((g_skKeyEvent[K_DOWN].keyDown) && (g_sChar.m_cLocation.Y < (g_Console.getConsoleSize().Y - 1 - GUI_height)) && (mapVector.size() == 2400) && (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "0"))
     {
         g_sChar.m_cLocation.Y++;
     }
-    if ((g_skKeyEvent[K_RIGHT].keyDown) && (g_sChar.m_cLocation.X < (g_Console.getConsoleSize().X - 2)) && (map1Vector.size() == 2400) && (map1Vector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "0"))
+    if ((g_skKeyEvent[K_RIGHT].keyDown) && (g_sChar.m_cLocation.X < (g_Console.getConsoleSize().X - 2)) && (mapVector.size() == 2400) && (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "0"))
     {
         g_sChar.m_cLocation.X += 2;
-    }
-}
-void processUserInput() {
-    // quits the game if player hits the escape key
-    if (g_skKeyEvent[K_ESCAPE].keyReleased) {
-        g_bQuitGame = true;
     }
     if (g_skKeyEvent[K_INTERACTIVE].keyDown)
     {
@@ -265,6 +276,14 @@ void processUserInput() {
     if (g_skKeyEvent[K_INVENTORY].keyDown)
     {
         //
+    }
+   
+}
+
+void processUserInput()
+{
+    if (g_skKeyEvent[K_ESCAPE].keyReleased) { // quits the game if player hits the escape key
+        g_bQuitGame = true;
     }
 }
 
@@ -319,14 +338,21 @@ void renderGame() {
     renderCharacter();  // renders the character into the buffer
 }
 
-void Map1()
-{
+void renderMap() {
     unsigned x = 0, y = 0;
 
-    std::ifstream lvl1("Map1.csv"); //opens map
+    std::ifstream map;
+    switch (level_no)
+    {
+    case 1: map = std::ifstream("Map1.csv"); break; //opens map
+    case 2: map = std::ifstream("Map2.csv"); break; //opens map
+    case 3: map = std::ifstream("Map3.csv"); break; //opens map
+    case 4: map = std::ifstream("Map4.csv"); break; //opens map
+    case 5: map = std::ifstream("Map5.csv"); break; //opens map
+    }
     std::string row;
 
-    while (std::getline(lvl1, row))
+    while (std::getline(map, row))
     {
         std::stringstream rowStream(row);
         std::string(cell);
@@ -369,27 +395,7 @@ void Map1()
             x++;
         }
         y += .5;
-        if (map1Vector.size() < 2400) map1Vector.push_back(rowVector);
-    }
-    lvl1.close();
-}
-
-void Map2() {}
-
-void Map3() {}
-
-void Map4() {}
-
-void Map5() {}
-
-void renderMap() {
-    switch (level_no)
-    {
-    case 1: Map1(); break;
-    case 2: Map2(); break;
-    case 3: Map3(); break;
-    case 4: Map4(); break;
-    case 5: Map5(); break;
+        if (mapVector.size() < 2400) mapVector.push_back(rowVector);
     }
 }
 
