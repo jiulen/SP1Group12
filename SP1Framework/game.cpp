@@ -350,6 +350,29 @@ void renderToScreen() {
 
 void renderSplashScreen() {             // renders the splash screen aka menu screen
     COORD c = g_Console.getConsoleSize();
+    c.Y = 11; c.X = c.X / 2 - 25;
+    std::ostringstream title;
+    title << char(244) << "  " << char(205) << char(205) << char(203) << char(205) << char(205) << " " << char(201) << char(205) << char(205) << char(205) << char(205) << " " << char(201) << char(205) << char(205) << char(203) << char(205) << char(205) << char(187) << " " << char(201) << char(205) << char(205) << char(205) << char(187) << " " << char(210) << "     " << char(201) << char(205) << char(205) << char(205) << char(205) << "  " << char(244);
+    g_Console.writeToBuffer(c, title.str(), 0xF0); title.str(""); c.Y += 1;
+    title << char(245) << "    " << char(186) << "   " << char(186) << "     " << char(186) << "  " << char(208) << "  " << char(186) << " " << char(186) << "   " << char(186) << " " << char(186) << "     " << char(186) << "      " << char(245);
+    g_Console.writeToBuffer(c, title.str(), 0xF0); title.str(""); c.Y += 1;
+    title << char(244) << "    " << char(186) << "   " << char(204) << char(205) << char(205) << char(205) << char(205) << " " << char(186) << "     " << char(186) << " " << char(204) << char(205) << char(205) << char(205) << char(188) << " " << char(186) << "     " << char(204) << char(205) << char(205) << char(205) << char(205) << "  " << char(244);
+    g_Console.writeToBuffer(c, title.str(), 0xF0); title.str(""); c.Y += 1;
+    title << char(245) << "    " << char(186) << "   " << char(186) << "     " << char(186) << "     " << char(186) << " " << char(186) << "     " << char(186) << "     " << char(186) << "      " << char(245);
+    g_Console.writeToBuffer(c, title.str(), 0xF0); title.str(""); c.Y += 1;
+    title << char(244) << "    " << char(208) << "   " << char(200) << char(205) << char(205) << char(205) << char(205) << " " << char(208) << "     " << char(208) << " " << char(208) << "     " << char(200) << char(205) << char(205) << char(205) << char(181) << " " << char(200) << char(205) << char(205) << char(205) << char(205) << "  " << char(244);
+    g_Console.writeToBuffer(c, title.str(), 0xF0); title.str(""); c.Y += 1;
+    title << char(245) << "   " << char(201) << char(205) << char(205) << char(205) << char(205) << " " << char(201) << char(205) << char(205) << char(205) << char(181) << " " << char(201) << char(205) << char(205) << char(205) << char(181) << " " << char(201) << char(205) << char(205) << char(205) << char(187) << " " << char(201) << char(205) << char(205) << char(205) << char(187) << " " << char(201) << char(205) << char(205) << char(205) << char(205) << "   " << char(245);
+    g_Console.writeToBuffer(c, title.str(), 0xF0); title.str(""); c.Y += 1;
+    title << char(244) << "   " << char(186) << "     " << char(186) << "     " << char(186) << "     " << char(186) << "   " << char(186) << " " << char(186) << "   " << char(186) << " " << char(186) << "       " << char(244);
+    g_Console.writeToBuffer(c, title.str(), 0xF0); title.str(""); c.Y += 1;
+    title << char(245) << "   " << char(204) << char(205) << char(205) << char(205) << char(205) << " " << char(200) << char(205) << char(205) << char(205) << char(187) << " " << char(186) << "     " << char(204) << char(205) << char(205) << char(205) << char(185) << " " << char(204) << char(205) << char(205) << char(205) << char(188) << " " << char(204) << char(205) << char(205) << char(205) << char(205) << "   " << char(245);
+    g_Console.writeToBuffer(c, title.str(), 0xF0); title.str(""); c.Y += 1;
+    title << char(244) << "   " << char(186) << "         " << char(186) << " " << char(186) << "     " << char(186) << "   " << char(186) << " " << char(186) << "     " << char(186) << "       " << char(244);
+    g_Console.writeToBuffer(c, title.str(), 0xF0); title.str(""); c.Y += 1;
+    title << char(245) << "   " << char(200) << char(205) << char(205) << char(205) << char(205) << " " << char(198) << char(205) << char(205) << char(205) << char(188) << " " << char(200) << char(205) << char(205) << char(205) << char(188) << " " << char(208) << "   " << char(208) << " " << char(208) << "     " << char(200) << char(205) << char(205) << char(205) << char(205) << "   " << char(245);
+    g_Console.writeToBuffer(c, title.str(), 0xF0); title.str("");
+    c = g_Console.getConsoleSize();
     c.Y = c.Y/2 + 12;
     c.X = c.X / 2 - 16;
     g_Console.writeToBuffer(c, "Press 'Enter' to start", 0xF0);
