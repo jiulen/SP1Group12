@@ -39,8 +39,8 @@ void init(void) {
     // sets the initial state for the game
     g_eGameState = S_SPLASHSCREEN;
     //change values to change where player spawns
-    g_sChar.m_cLocation.X = 2;
-    g_sChar.m_cLocation.Y = 2;
+    g_sChar.m_cLocation.X = 10;
+    g_sChar.m_cLocation.Y = 37;
     g_sChar.m_bActive = true;
     // sets the width, height and the font name to use in the console
     g_Console.setConsoleFont(0, 16, L"Consolas");
@@ -228,7 +228,7 @@ void updateGame()       // gameplay logic
 {
     processUserInput(); // checks if you should change states or do something else with the game, e.g. pause, exit
     moveCharacter();    // moves the character, collision detection, physics, etc
-                        // sound can be played here too.
+    // sound can be played here too.
 }
 
 void moveCharacter()
@@ -252,6 +252,12 @@ void moveCharacter()
     {
         g_sChar.m_cLocation.X += 2;
     }
+}
+void processUserInput() {
+    // quits the game if player hits the escape key
+    if (g_skKeyEvent[K_ESCAPE].keyReleased) {
+        g_bQuitGame = true;
+    }
     if (g_skKeyEvent[K_INTERACTIVE].keyDown)
     {
         //
@@ -260,13 +266,6 @@ void moveCharacter()
     {
         //
     }
-
-
-}
-void processUserInput() {
-    // quits the game if player hits the escape key
-    if (g_skKeyEvent[K_ESCAPE].keyReleased)
-        g_bQuitGame = true;
 }
 
 //--------------------------------------------------------------
@@ -372,6 +371,7 @@ void Map1()
         y += .5;
         if (map1Vector.size() < 2400) map1Vector.push_back(rowVector);
     }
+    lvl1.close();
 }
 
 void Map2() {}
@@ -407,14 +407,14 @@ void renderFramerate() {
     ss << std::fixed << std::setprecision(2);
     ss << 1.0 / g_dDeltaTime << " fps";
     c.X = g_Console.getConsoleSize().X - 9;
-    c.Y = 0;
+    c.Y = 41;
     g_Console.writeToBuffer(c, ss.str());
 
     // displays the elapsed time
     ss.str("");
     ss << g_dElapsedTime << "secs";
     c.X = 0;
-    c.Y = 0;
+    c.Y = 41;
     g_Console.writeToBuffer(c, ss.str(), 0x59);
 }
 
