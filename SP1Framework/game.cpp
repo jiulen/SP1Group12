@@ -409,7 +409,6 @@ void renderMap() {
         while (std::getline(rowStream, cell, ','))
         {
             rowVector.push_back(cell);
-
             WORD map_colour = 0x00;
             switch (stoi(cell))
             {
@@ -422,7 +421,6 @@ void renderMap() {
             case 6: map_colour = 0x30; break; //prisoner
             case 7: map_colour = 0x10; break; //exit     
             }
-
             g_Console.writeToBuffer(x * 2, y, "  ", map_colour);
             x++;
             x %= 60;
@@ -447,20 +445,16 @@ void renderSlime() {
 void renderInventory()
 {
     unsigned x = 0, y = 0;
-
     std::ifstream inventory("Inventory.csv");
     std::string row;
-
     while (std::getline(inventory, row))
     {
         std::stringstream rowStream(row);
         std::string(cell);
         std::vector<std::string> rowVector;
-
         while (std::getline(rowStream, cell, ','))
         {
             rowVector.push_back(cell);
-
             WORD inventory_colour = 0x00;
             switch (stoi(cell))
             {
@@ -481,7 +475,6 @@ void renderInventory()
             case 14: inventory_colour = 0x30; break; // boot
             case 15: inventory_colour = 0xD0; break; // potion
             }
-
             g_Console.writeToBuffer(x * 2, y, "  ", inventory_colour);
             x++;
         }
@@ -492,23 +485,18 @@ void renderInventory()
 
 void renderFramerate() {
     COORD c;
-    // displays the framerate
     std::ostringstream ss;
     ss << std::fixed << std::setprecision(2);
-    ss << 1.0 / g_dDeltaTime << " fps";
+    ss << 1.0 / g_dDeltaTime << " fps";         // displays the framerate
     c.X = g_Console.getConsoleSize().X - 9;
     c.Y = 40;
     g_Console.writeToBuffer(c, ss.str(), 0xF0);
-
-    // displays the elapsed time
     ss.str("");
-    ss << g_dElapsedTime << "secs";
+    ss << g_dElapsedTime << "secs";             // displays the elapsed time
     c.X = 0;
     c.Y = 40;
     g_Console.writeToBuffer(c, ss.str(), 0xF0);
-
-    // displays the player's health
-    std::ostringstream hb;
+    std::ostringstream hb;              // displays the player's health
     hb << "HP: " << std::string(g_sChar.hp, (char)3); // (char)3 is heart symbol
     c.X = 10;
     c.Y = 40;
