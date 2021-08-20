@@ -20,7 +20,7 @@ void mainLoop(void);
 // You should not be modifying this unless you know what you are doing
 int main(void) {
     Entity* Eptr[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
-    srand(0);
+   
 
 
    init();      // initialize your variables
