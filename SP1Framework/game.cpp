@@ -116,7 +116,7 @@ void keyboardHandler(const KEY_EVENT_RECORD& keyboardEvent)
     {
     case S_SPLASHSCREEN: gameplayKBHandler(keyboardEvent); break; // don't handle anything for the splash screen
     case S_GAME: gameplayKBHandler(keyboardEvent); break; // handle gameplay keyboard event
-    case S_END: break;
+    case S_END: gameplayKBHandler(keyboardEvent); break;
     }
 }
 
@@ -226,13 +226,68 @@ void update(double dt)
     }
 }
 
-
 void splashScreenWait()    // waits for time to pass in splash screen
 {
     if (g_skKeyEvent[K_ENTER].keyReleased) { // wait for 3 seconds to switch to game mode, else do nothing
         g_eGameState = S_GAME;
         slimes.set_posX(rand() % 60 * 2);
         slimes.set_posY(rand() % 40);
+    }
+    processUserInput();
+}
+
+void updateGame()       // gameplay logic
+{
+    keyPressed();       // moves the character, collision detection, physics, etc
+    processUserInput(); // checks if you should change states or do something else with the game, e.g. pause, exit
+                        // sound can be played here too.
+    checkExitReached(); // checks if player reached the exit
+}
+
+void endScreenWait()
+{
+    processUserInput();
+}
+
+void keyPressed()
+{
+    // Updating the location of the character based on the key release
+    // 
+    // [NOTE]: PLAYER CAN ONLY MOVE AFTER THE MAP 1 ARRAY IS DONE LOADING
+    if (E_KeyPressed == false)
+    {
+        if ((g_skKeyEvent[K_UP].keyDown) && (g_sChar.m_cLocation.Y > 0) && (mapVector.size() == 2400) && (mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "0"))
+        {
+            g_sChar.m_cLocation.Y--;
+        }
+        if ((g_skKeyEvent[K_LEFT].keyDown) && (g_sChar.m_cLocation.X > 1) && (mapVector.size() == 2400) && (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "0"))
+        {
+            g_sChar.m_cLocation.X -= 2;
+        }
+        if ((g_skKeyEvent[K_DOWN].keyDown) && (g_sChar.m_cLocation.Y < (g_Console.getConsoleSize().Y - 1 - GUI_height)) && (mapVector.size() == 2400) && (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "0"))
+        {
+            g_sChar.m_cLocation.Y++;
+        }
+        if ((g_skKeyEvent[K_RIGHT].keyDown) && (g_sChar.m_cLocation.X < (g_Console.getConsoleSize().X - 2)) && (mapVector.size() == 2400) && (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "0"))
+        {
+            g_sChar.m_cLocation.X += 2;
+        }
+        if (g_skKeyEvent[K_INTERACTIVE].keyReleased) // we don't want player to spam
+        {
+
+        }
+    }
+    if (g_skKeyEvent[K_INVENTORY].keyReleased) // we don't want player to spam
+    {
+        if (E_KeyPressed == false) { E_KeyPressed = true; }
+        else { E_KeyPressed = false; }
+    }
+}
+
+void processUserInput()
+{
+    if (g_skKeyEvent[K_ESCAPE].keyReleased) { // quits the game if player hits the escape key
+        g_bQuitGame = true;
     }
 }
 
@@ -241,7 +296,7 @@ void checkExitReached()
     if ((mapVector.size() == 2400) && ((mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "7") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "7") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "7") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "7")))
     {
         if (level_no < 5) { mapVector.clear(); level_no++; }
-        
+
         switch (level_no)
         {
         case 2: g_sChar.m_cLocation.X = 6; g_sChar.m_cLocation.Y = 36; break;
@@ -254,60 +309,6 @@ void checkExitReached()
     {
         // Ending scene
         g_eGameState = S_END;
-    }
-}
-
-void endScreenWait()
-{
-    if (g_skKeyEvent[K_ESCAPE].keyReleased) { // wait for 'ESC' to exit, else do nothing
-        g_bQuitGame = true;
-    }
-}
-
-
-void updateGame()       // gameplay logic
-{
-    keyPressed();       // moves the character, collision detection, physics, etc // checks if you should change states or do something else with the game, e.g. pause, exit
-                        // sound can be played here too.
-    checkExitReached(); // checks if player reached the exit
-}
-
-void keyPressed()
-{
-    // Updating the location of the character based on the key release
-    // 
-    // [NOTE]: PLAYER CAN ONLY MOVE AFTER THE MAP 1 ARRAY IS DONE LOADING
-    if ((g_skKeyEvent[K_UP].keyDown) && (g_sChar.m_cLocation.Y > 0) && (mapVector.size() == 2400) && (mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "0"))
-    {
-        g_sChar.m_cLocation.Y--;
-    }
-    if ((g_skKeyEvent[K_LEFT].keyDown) && (g_sChar.m_cLocation.X > 1) && (mapVector.size() == 2400) && (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "0"))
-    {
-        g_sChar.m_cLocation.X -= 2;
-    }
-    if ((g_skKeyEvent[K_DOWN].keyDown) && (g_sChar.m_cLocation.Y < (g_Console.getConsoleSize().Y - 1 - GUI_height)) && (mapVector.size() == 2400) && (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "0"))
-    {
-        g_sChar.m_cLocation.Y++;
-    }
-    if ((g_skKeyEvent[K_RIGHT].keyDown) && (g_sChar.m_cLocation.X < (g_Console.getConsoleSize().X - 2)) && (mapVector.size() == 2400) && (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "0"))
-    {
-        g_sChar.m_cLocation.X += 2;
-    }
-    if (g_skKeyEvent[K_INVENTORY].keyReleased) // we don't want player to spam
-    {
-        if (E_KeyPressed == false) { E_KeyPressed = true; }
-        else { E_KeyPressed = false; }
-    }
-    if (g_skKeyEvent[K_INTERACTIVE].keyReleased) // we don't want player to spam
-    {
-        
-    }
-}
-
-void processUserInput()
-{
-    if (g_skKeyEvent[K_ESCAPE].keyReleased) { // quits the game if player hits the escape key
-        g_bQuitGame = true;
     }
 }
 
@@ -336,11 +337,6 @@ void render() {
 void clearScreen() {
     // Clears the buffer with this colour attribute
     g_Console.clearBuffer(0xF0);
-}
-
-void renderToScreen() {
-    // Writes the buffer to the console, hence you will see what you have written
-    g_Console.flushBufferToConsole();
 }
 
 void renderSplashScreen() {             // renders the splash screen aka menu screen
@@ -436,12 +432,14 @@ void renderCharacter() {
     playerChar << static_cast<char>(1) << static_cast<char>(1);
     g_Console.writeToBuffer(g_sChar.m_cLocation, playerChar.str(), 0x01);
 }
+
 void renderSlime() {
     // draw location of slimes
     std::ostringstream slimeChar;
     slimeChar << static_cast<char>(5) << static_cast<char>(5);
     g_Console.writeToBuffer(slimes.get_posX(), slimes.get_posY(), slimeChar.str(), 0xFD);
 }
+
 void renderInventory()
 {
     unsigned x = 0, y = 0;
@@ -475,12 +473,23 @@ void renderInventory()
             case 14: inventory_colour = 0x30; break; // boot
             case 15: inventory_colour = 0xD0; break; // potion
             }
-            g_Console.writeToBuffer(x * 2, y, "  ", inventory_colour);
+            g_Console.writeToBuffer((x + 9) * 2, y + 8, "  ", inventory_colour);
             x++;
+            x %= 42;
         }
-        y += .5;
+        y++;
         if (inventoryVector.size() < 1008) inventoryVector.push_back(rowVector);
     }
+}
+
+void renderEndScreen() {
+    COORD c;
+    c.X = 1;
+    c.Y = 1;
+    g_Console.writeToBuffer(c, "Created by Group 12: Winston, Jun Hou, Jiu Len and Darius", 0xF0);
+    c.Y += 1;
+    g_Console.writeToBuffer(c, "YOU WIN!!!", 0xF0);
+    //add more things later? -> dmg taken, dmg dealt, dmg healed, kills, time taken
 }
 
 void renderFramerate() {
@@ -503,14 +512,9 @@ void renderFramerate() {
     g_Console.writeToBuffer(c, hb.str(), 0xF4); //white background, red text
 }
 
-void renderEndScreen() {
-    COORD c;
-    c.X = 1;
-    c.Y = 1;
-    g_Console.writeToBuffer(c, "Created by Group 12: Winston, Jun Hou, Jiu Len and Darius", 0xF0);
-    c.Y += 1;
-    g_Console.writeToBuffer(c, "YOU WIN!!!", 0xF0);
-    //add more things later? -> dmg taken, dmg dealt, dmg healed, kills, time taken
+void renderToScreen() {
+    // Writes the buffer to the console, hence you will see what you have written
+    g_Console.flushBufferToConsole();
 }
 
 // this is an example of how you would use the input events
@@ -577,6 +581,3 @@ void renderInputEvents() {
         break;
     }*/
 }
-
-
-

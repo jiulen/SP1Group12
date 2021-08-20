@@ -57,8 +57,8 @@ void render      (void);      // renders the current state of the game to the co
 void shutdown    (void);      // do clean up, free memory
 
 void splashScreenWait();    // waits for time to pass in splash screen
-void endScreenWait();       // waits for 'ESC' key to be pressed in end screen
 void updateGame();          // gameplay logic
+void endScreenWait();       // wait for 5 seconds after end scene then quitting game
 void keyPressed();          // moves the character, collision detection, physics, etc
 void processUserInput();    // checks if you should change states or do something else with the game, e.g. pause, exit
 void checkExitReached();    // checks if player reached the exit
