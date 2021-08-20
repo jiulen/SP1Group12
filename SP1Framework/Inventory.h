@@ -4,11 +4,11 @@
 class Inventory
 {
 private:
-	InGameItem* items[8];
+	InGameItem* items[8] = { nullptr, nullptr, nullptr, nullptr,nullptr, nullptr,nullptr, nullptr };
 
 public:
 	Inventory();
 	~Inventory();
 	InGameItem* GetInGameItems();
-	void AddInGameItem();
+	void AddInGameItem(InGameItem&);
 };

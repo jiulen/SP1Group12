@@ -330,7 +330,6 @@ void render() {
     }
     renderFramerate();      // renders debug information, frame rate, elapsed time, etc
     //renderInputEvents();    // renders status of input events
-    g_Console.writeToBuffer(0, 48, std::to_string(E_KeyPressed), 0xF9);
     renderToScreen();       // dump the contents of the buffer to the screen, one frame worth of game
 }
 
@@ -339,9 +338,8 @@ void clearScreen() {
     g_Console.clearBuffer(0xF0);
 }
 
-void renderSplashScreen() {             // renders the splash screen aka menu screen
-    COORD c = g_Console.getConsoleSize();
-    c.Y = 11; c.X = c.X / 2 - 25;
+void menuScreen(COORD& c)
+{
     std::ostringstream title;
     title << char(244) << "  " << char(205) << char(205) << char(203) << char(205) << char(205) << " " << char(201) << char(205) << char(205) << char(205) << char(205) << " " << char(201) << char(205) << char(205) << char(203) << char(205) << char(205) << char(187) << " " << char(201) << char(205) << char(205) << char(205) << char(187) << " " << char(210) << "     " << char(201) << char(205) << char(205) << char(205) << char(205) << "  " << char(244);
     g_Console.writeToBuffer(c, title.str(), 0xF0); title.str(""); c.Y += 1;
@@ -363,6 +361,12 @@ void renderSplashScreen() {             // renders the splash screen aka menu sc
     g_Console.writeToBuffer(c, title.str(), 0xF0); title.str(""); c.Y += 1;
     title << char(245) << "   " << char(200) << char(205) << char(205) << char(205) << char(205) << " " << char(198) << char(205) << char(205) << char(205) << char(188) << " " << char(200) << char(205) << char(205) << char(205) << char(188) << " " << char(208) << "   " << char(208) << " " << char(208) << "     " << char(200) << char(205) << char(205) << char(205) << char(205) << "   " << char(245);
     g_Console.writeToBuffer(c, title.str(), 0xF0); title.str("");
+}
+
+void renderSplashScreen() {             // renders the splash screen aka menu screen
+    COORD c = g_Console.getConsoleSize();
+    c.Y = 11; c.X = c.X / 2 - 25;
+    menuScreen(c);
     c = g_Console.getConsoleSize();
     c.Y = c.Y / 2 + 12;
     c.X = c.X / 2 - 16;
@@ -379,34 +383,43 @@ void renderGame() {
     renderMap();        // renders the map to the buffer first
     renderCharacter();  // renders the character into the buffer
     renderSlime();
-    if (E_KeyPressed == true) { renderInventory(); } // renders inventory into the buffer
+    if (E_KeyPressed == true) { renderInventory(); updateInventory(); } // renders inventory into the buffer then update it after
 }
 
 void renderMap() {
-    unsigned x = 0, y = 0;
-
-    std::ifstream map;
-    switch (level_no)
+    if (mapVector.size() < 2400)
     {
-    case 1: map = std::ifstream("Map1.csv"); break; //opens map
-    case 2: map = std::ifstream("Map2.csv"); break; //opens map
-    case 3: map = std::ifstream("Map3.csv"); break; //opens map
-    case 4: map = std::ifstream("Map4.csv"); break; //opens map
-    case 5: map = std::ifstream("Map5.csv"); break; //opens map
-    }
-    std::string row;
-
-    while (std::getline(map, row))
-    {
-        std::stringstream rowStream(row);
-        std::string(cell);
-        std::vector<std::string> rowVector;
-
-        while (std::getline(rowStream, cell, ','))
+        std::ifstream map;
+        switch (level_no)
         {
-            rowVector.push_back(cell);
+        case 1: map = std::ifstream("Map1.csv"); break; //opens map
+        case 2: map = std::ifstream("Map2.csv"); break; //opens map
+        case 3: map = std::ifstream("Map3.csv"); break; //opens map
+        case 4: map = std::ifstream("Map4.csv"); break; //opens map
+        case 5: map = std::ifstream("Map5.csv"); break; //opens map
+        }
+        std::string row;
+
+        while (std::getline(map, row))
+        {
+            std::stringstream rowStream(row);
+            std::string(cell);
+            std::vector<std::string> rowVector;
+
+            while (std::getline(rowStream, cell, ',')) { rowVector.push_back(cell); }
+            
+            mapVector.push_back(rowVector);
+        }
+
+        map.close();
+    }
+
+    for (unsigned y = 0; y < 40; y++)
+    {
+        for (unsigned x = 0; x < 60; x++)
+        {
             WORD map_colour = 0x00;
-            switch (stoi(cell))
+            switch (stoi(mapVector[y][x]))
             {
             case 0: map_colour = 0x60; break; //path
             case 1: map_colour = 0x00; break; //wall            
@@ -418,11 +431,7 @@ void renderMap() {
             case 7: map_colour = 0x10; break; //exit     
             }
             g_Console.writeToBuffer(x * 2, y, "  ", map_colour);
-            x++;
-            x %= 60;
         }
-        y++;
-        if (mapVector.size() < 2400) mapVector.push_back(rowVector);
     }
 }
 
@@ -440,21 +449,69 @@ void renderSlime() {
     g_Console.writeToBuffer(slimes.get_posX(), slimes.get_posY(), slimeChar.str(), 0xFD);
 }
 
+void updateInventoryHealth()
+{
+    g_sChar.hp = 4; // for testing
+    for (unsigned r = 3; r < 8; r++)
+    {
+        for (unsigned c = 25; c < 31; c++)
+        {
+            switch (g_sChar.hp)
+            {
+            case 0: ( (c < 29) ? ( ((c == 26 || c == 27) && (r >= 4 && r <= 6)) ? (inventoryVector[r][c] = "1") : (inventoryVector[r][c] = "0") ) : (inventoryVector[r][c] = "1") ); break;
+            case 1: ( (c == 25) ? (inventoryVector[r][c] = "0") : (inventoryVector[r][c] = "1") ); break;
+            case 2: ( (c < 28) ? ( ((r == 4 && c != 27) || (r == 6 && c != 25)) ? (inventoryVector[r][c] = "1") : (inventoryVector[r][c] = "0") ) : (inventoryVector[r][c] = "1") ); break;
+            case 3: ( (c < 28) ? ( (((r == 4 || r == 6) && c != 27 )) ? (inventoryVector[r][c] = "1") : (inventoryVector[r][c] = "0") ) : (inventoryVector[r][c] = "1") ); break;
+            case 4: ( (c < 29) ? ( (((c == 25 && r <= 5) || (c == 27) || ((c == 26 || c == 28) && r == 5))) ? (inventoryVector[r][c] = "0") : (inventoryVector[r][c] = "1") ) : (inventoryVector[r][c] = "1") ); break;
+            case 5: break;
+            case 6: break;
+            case 7: break;
+            case 8: break;
+            case 9: break;
+            case 10: break;
+            }
+        }
+    }
+}
+
+void updateInventoryItems()
+{
+
+}
+
+void updateInventory()
+{
+    updateInventoryHealth();
+    updateInventoryItems();
+}
+
 void renderInventory()
 {
-    unsigned x = 0, y = 0;
-    std::ifstream inventory("Inventory.csv");
-    std::string row;
-    while (std::getline(inventory, row))
+    if (inventoryVector.size() < 1008)
     {
-        std::stringstream rowStream(row);
-        std::string(cell);
-        std::vector<std::string> rowVector;
-        while (std::getline(rowStream, cell, ','))
+        std::ifstream inventory("Inventory.csv");
+        std::string row;
+
+        while (std::getline(inventory, row))
         {
-            rowVector.push_back(cell);
+            std::stringstream rowStream(row);
+            std::string(cell);
+            std::vector<std::string> rowVector;
+
+            while (std::getline(rowStream, cell, ',')) { rowVector.push_back(cell); }
+
+            inventoryVector.push_back(rowVector);
+        }
+
+        inventory.close();
+    }
+
+    for (unsigned y = 0; y < 24; y++)
+    {
+        for (unsigned x = 0; x < 42; x++)
+        {
             WORD inventory_colour = 0x00;
-            switch (stoi(cell))
+            switch (stoi(inventoryVector[y][x]))
             {
             case 0: inventory_colour = 0x00; break;  // boarder
             case 1: inventory_colour = 0xF0; break;  // gui background
@@ -474,11 +531,7 @@ void renderInventory()
             case 15: inventory_colour = 0xD0; break; // potion
             }
             g_Console.writeToBuffer((x + 9) * 2, y + 8, "  ", inventory_colour);
-            x++;
-            x %= 42;
         }
-        y++;
-        if (inventoryVector.size() < 1008) inventoryVector.push_back(rowVector);
     }
 }
 
@@ -523,7 +576,7 @@ void renderInputEvents() {
     COORD startPos = { 50, 2 };
     std::ostringstream ss;
     std::string key;
-    for (int i = 0; i < K_COUNT; ++i) {
+    for (unsigned i = 0; i < K_COUNT; ++i) {
         ss.str("");
         switch (i) {
         case K_UP: key = "UP"; break;
