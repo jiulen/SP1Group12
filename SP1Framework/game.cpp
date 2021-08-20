@@ -116,7 +116,7 @@ void keyboardHandler(const KEY_EVENT_RECORD& keyboardEvent)
     {
     case S_SPLASHSCREEN: gameplayKBHandler(keyboardEvent); break; // don't handle anything for the splash screen
     case S_GAME: gameplayKBHandler(keyboardEvent); break; // handle gameplay keyboard event
-    case S_END: break;
+    case S_END: gameplayKBHandler(keyboardEvent); break;
     }
 }
 
@@ -226,7 +226,6 @@ void update(double dt)
     }
 }
 
-
 void splashScreenWait()    // waits for time to pass in splash screen
 {
     if (g_skKeyEvent[K_ENTER].keyReleased) { // wait for 3 seconds to switch to game mode, else do nothing
@@ -234,42 +233,20 @@ void splashScreenWait()    // waits for time to pass in splash screen
         slimes.set_posX(rand() % 60 * 2);
         slimes.set_posY(rand() % 40);
     }
+    processUserInput();
 }
 
-void checkExitReached()
+void updateGame()       // gameplay logic
 {
-    if ((mapVector.size() == 2400) && ((mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "7") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "7") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "7") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "7")))
-    {
-        if (level_no < 5) { mapVector.clear(); level_no++; }
-        
-        switch (level_no)
-        {
-        case 2: g_sChar.m_cLocation.X = 6; g_sChar.m_cLocation.Y = 36; break;
-        case 3: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 2; break;
-        case 4: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 20; break;
-        case 5: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 20; break;
-        }
-    }
-    if ((mapVector.size() == 2400) && ((mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "8") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "8") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "8") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "8")))
-    {
-        // Ending scene
-        g_eGameState = S_END;
-    }
+    keyPressed();       // moves the character, collision detection, physics, etc
+    processUserInput(); // checks if you should change states or do something else with the game, e.g. pause, exit
+                        // sound can be played here too.
+    checkExitReached(); // checks if player reached the exit
 }
 
 void endScreenWait()
 {
-    if (g_skKeyEvent[K_ESCAPE].keyReleased) { // wait for 'ESC' to exit, else do nothing
-        g_bQuitGame = true;
-    }
-}
-
-
-void updateGame()       // gameplay logic
-{
-    keyPressed();       // moves the character, collision detection, physics, etc // checks if you should change states or do something else with the game, e.g. pause, exit
-                        // sound can be played here too.
-    checkExitReached(); // checks if player reached the exit
+    processUserInput();
 }
 
 void keyPressed()
@@ -311,6 +288,27 @@ void processUserInput()
     }
 }
 
+void checkExitReached()
+{
+    if ((mapVector.size() == 2400) && ((mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "7") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "7") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "7") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "7")))
+    {
+        if (level_no < 5) { mapVector.clear(); level_no++; }
+
+        switch (level_no)
+        {
+        case 2: g_sChar.m_cLocation.X = 6; g_sChar.m_cLocation.Y = 36; break;
+        case 3: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 2; break;
+        case 4: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 20; break;
+        case 5: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 20; break;
+        }
+    }
+    if ((mapVector.size() == 2400) && ((mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "8") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "8") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "8") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "8")))
+    {
+        // Ending scene
+        g_eGameState = S_END;
+    }
+}
+
 //--------------------------------------------------------------
 // Purpose  : Render function is to update the console screen
 //            At this point, you should know exactly what to draw onto the screen.
@@ -336,11 +334,6 @@ void render() {
 void clearScreen() {
     // Clears the buffer with this colour attribute
     g_Console.clearBuffer(0xF0);
-}
-
-void renderToScreen() {
-    // Writes the buffer to the console, hence you will see what you have written
-    g_Console.flushBufferToConsole();
 }
 
 void renderSplashScreen() {             // renders the splash screen aka menu screen
@@ -436,12 +429,14 @@ void renderCharacter() {
     playerChar << static_cast<char>(1) << static_cast<char>(1);
     g_Console.writeToBuffer(g_sChar.m_cLocation, playerChar.str(), 0x01);
 }
+
 void renderSlime() {
     // draw location of slimes
     std::ostringstream slimeChar;
     slimeChar << static_cast<char>(5) << static_cast<char>(5);
     g_Console.writeToBuffer(slimes.get_posX(), slimes.get_posY(), slimeChar.str(), 0xFD);
 }
+
 void renderInventory()
 {
     unsigned x = 0, y = 0;
@@ -483,6 +478,16 @@ void renderInventory()
     }
 }
 
+void renderEndScreen() {
+    COORD c;
+    c.X = 1;
+    c.Y = 1;
+    g_Console.writeToBuffer(c, "Created by Group 12: Winston, Jun Hou, Jiu Len and Darius", 0xF0);
+    c.Y += 1;
+    g_Console.writeToBuffer(c, "YOU WIN!!!", 0xF0);
+    //add more things later? -> dmg taken, dmg dealt, dmg healed, kills, time taken
+}
+
 void renderFramerate() {
     COORD c;
     std::ostringstream ss;
@@ -503,14 +508,9 @@ void renderFramerate() {
     g_Console.writeToBuffer(c, hb.str(), 0xF4); //white background, red text
 }
 
-void renderEndScreen() {
-    COORD c;
-    c.X = 1;
-    c.Y = 1;
-    g_Console.writeToBuffer(c, "Created by Group 12: Winston, Jun Hou, Jiu Len and Darius", 0xF0);
-    c.Y += 1;
-    g_Console.writeToBuffer(c, "YOU WIN!!!", 0xF0);
-    //add more things later? -> dmg taken, dmg dealt, dmg healed, kills, time taken
+void renderToScreen() {
+    // Writes the buffer to the console, hence you will see what you have written
+    g_Console.flushBufferToConsole();
 }
 
 // this is an example of how you would use the input events
@@ -577,6 +577,3 @@ void renderInputEvents() {
         break;
     }*/
 }
-
-
-
