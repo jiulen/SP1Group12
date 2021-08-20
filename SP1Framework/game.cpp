@@ -254,30 +254,33 @@ void keyPressed()
     // Updating the location of the character based on the key release
     // 
     // [NOTE]: PLAYER CAN ONLY MOVE AFTER THE MAP 1 ARRAY IS DONE LOADING
-    if ((g_skKeyEvent[K_UP].keyDown) && (g_sChar.m_cLocation.Y > 0) && (mapVector.size() == 2400) && (mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "0"))
+    if (E_KeyPressed == false)
     {
-        g_sChar.m_cLocation.Y--;
-    }
-    if ((g_skKeyEvent[K_LEFT].keyDown) && (g_sChar.m_cLocation.X > 1) && (mapVector.size() == 2400) && (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "0"))
-    {
-        g_sChar.m_cLocation.X -= 2;
-    }
-    if ((g_skKeyEvent[K_DOWN].keyDown) && (g_sChar.m_cLocation.Y < (g_Console.getConsoleSize().Y - 1 - GUI_height)) && (mapVector.size() == 2400) && (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "0"))
-    {
-        g_sChar.m_cLocation.Y++;
-    }
-    if ((g_skKeyEvent[K_RIGHT].keyDown) && (g_sChar.m_cLocation.X < (g_Console.getConsoleSize().X - 2)) && (mapVector.size() == 2400) && (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "0"))
-    {
-        g_sChar.m_cLocation.X += 2;
+        if ((g_skKeyEvent[K_UP].keyDown) && (g_sChar.m_cLocation.Y > 0) && (mapVector.size() == 2400) && (mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "0"))
+        {
+            g_sChar.m_cLocation.Y--;
+        }
+        if ((g_skKeyEvent[K_LEFT].keyDown) && (g_sChar.m_cLocation.X > 1) && (mapVector.size() == 2400) && (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "0"))
+        {
+            g_sChar.m_cLocation.X -= 2;
+        }
+        if ((g_skKeyEvent[K_DOWN].keyDown) && (g_sChar.m_cLocation.Y < (g_Console.getConsoleSize().Y - 1 - GUI_height)) && (mapVector.size() == 2400) && (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "0"))
+        {
+            g_sChar.m_cLocation.Y++;
+        }
+        if ((g_skKeyEvent[K_RIGHT].keyDown) && (g_sChar.m_cLocation.X < (g_Console.getConsoleSize().X - 2)) && (mapVector.size() == 2400) && (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "0"))
+        {
+            g_sChar.m_cLocation.X += 2;
+        }
+        if (g_skKeyEvent[K_INTERACTIVE].keyReleased) // we don't want player to spam
+        {
+
+        }
     }
     if (g_skKeyEvent[K_INVENTORY].keyReleased) // we don't want player to spam
     {
         if (E_KeyPressed == false) { E_KeyPressed = true; }
         else { E_KeyPressed = false; }
-    }
-    if (g_skKeyEvent[K_INTERACTIVE].keyReleased) // we don't want player to spam
-    {
-        
     }
 }
 
@@ -470,10 +473,11 @@ void renderInventory()
             case 14: inventory_colour = 0x30; break; // boot
             case 15: inventory_colour = 0xD0; break; // potion
             }
-            g_Console.writeToBuffer(x * 2, y, "  ", inventory_colour);
+            g_Console.writeToBuffer((x + 9) * 2, y + 8, "  ", inventory_colour);
             x++;
+            x %= 42;
         }
-        y += .5;
+        y++;
         if (inventoryVector.size() < 1008) inventoryVector.push_back(rowVector);
     }
 }

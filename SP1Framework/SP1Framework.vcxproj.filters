@@ -133,7 +133,7 @@
     <None Include="Map5.csv">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="..\..\..\..\Documents\Inventory.csv">
+    <None Include="..\..\..\Inventory.csv">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

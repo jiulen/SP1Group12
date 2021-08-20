@@ -109,7 +109,7 @@
     <ClInclude Include="Sword.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\..\Documents\Inventory.csv" />
+    <None Include="..\..\..\Inventory.csv" />
     <None Include="Map1.csv" />
     <None Include="Map2.csv" />
     <None Include="Map3.csv" />
