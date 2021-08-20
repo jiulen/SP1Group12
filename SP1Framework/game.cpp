@@ -109,6 +109,10 @@ void keyboardHandler(const KEY_EVENT_RECORD& keyboardEvent)
         break;
     case S_GAME: gameplayKBHandler(keyboardEvent); // handle gameplay keyboard event 
         break;
+    case S_INVENTORY:
+        break;
+    case S_END: gameplayKBHandler(keyboardEvent);
+        break;
     }
 }
 
@@ -135,6 +139,10 @@ void mouseHandler(const MOUSE_EVENT_RECORD& mouseEvent)
     case S_SPLASHSCREEN: // don't handle anything for the splash screen
         break;
     case S_GAME: gameplayMouseHandler(mouseEvent); // handle gameplay mouse event
+        break;
+    case S_INVENTORY:
+        break;
+    case S_END:
         break;
     }
 }
@@ -216,6 +224,10 @@ void update(double dt)
         break;
     case S_GAME: updateGame(); // gameplay logic when we are in the game
         break;
+    case S_INVENTORY:
+        break;
+    case S_END: endScreenWait();
+        break;
     }
 }
 
@@ -240,10 +252,10 @@ void checkExitReached()
         case 5: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 20; break;
         }
     }
-    /*if ((mapVector.size() == 2400) && ((mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "8") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "8") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "8") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "8")))
+    if ((mapVector.size() == 2400) && ((mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "8") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "8") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "8") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "8")))
     {
-        // Ending scene
-    }*/
+        g_eGameState = S_END;
+    }
 }
 
 void updateGame()       // gameplay logic
@@ -251,6 +263,13 @@ void updateGame()       // gameplay logic
     keyPressed();       // moves the character, collision detection, physics, etc // checks if you should change states or do something else with the game, e.g. pause, exit
                         // sound can be played here too.
     checkExitReached(); // checks if player reached the exit
+}
+
+void endScreenWait()
+{
+    if (g_skKeyEvent[K_ESCAPE].keyReleased) { // wait for 'ESC' to exit, else do nothing
+        g_bQuitGame = true;
+    }
 }
 
 void keyPressed()
@@ -307,6 +326,10 @@ void render() {
     case S_SPLASHSCREEN: renderSplashScreen();
         break;
     case S_GAME: renderGame();
+        break;
+    case S_INVENTORY:
+        break;
+    case S_END: renderEndScreen();
         break;
     }
     renderFramerate();      // renders debug information, frame rate, elapsed time, etc
@@ -432,13 +455,22 @@ void renderFramerate() {
     std::ostringstream hb;
     char heart = (char)3;
     hb << "HP: ";
-    for (int i = 0; i < g_sChar.hp; i++)
-    {
+    for (int i = 0; i < g_sChar.hp; i++) {
         hb << heart << " ";
     }
     c.X = 10;
     c.Y = 40;
-    g_Console.writeToBuffer(c, hb.str(), 0xF4); //black background, red text
+    g_Console.writeToBuffer(c, hb.str(), 0xF4); //white background, red text
+}
+
+void renderEndScreen() {
+    COORD c;
+    c.X = 1;
+    c.Y = 1;
+    g_Console.writeToBuffer(c, "Created by: Winston, Jun Hou, Jiu Len and Darius", 0xF0);
+    c.Y += 1;
+    g_Console.writeToBuffer(c, "YOU WIN!!!", 0xF0);
+    //add more things later (no need hp)
 }
 
 // this is an example of how you would use the input events
