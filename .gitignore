@@ -19,3 +19,4 @@ ipch/
 *.db-shm
 *.db-wal
 *.db
+*.db
