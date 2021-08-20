@@ -250,6 +250,14 @@ void checkExitReached()
     }
 }
 
+void endScreenWait()
+{
+    if (g_skKeyEvent[K_ESCAPE].keyReleased) { // wait for 'ESC' to exit, else do nothing
+        g_bQuitGame = true;
+    }
+}
+
+
 void updateGame()       // gameplay logic
 {
     keyPressed();       // moves the character, collision detection, physics, etc // checks if you should change states or do something else with the game, e.g. pause, exit
