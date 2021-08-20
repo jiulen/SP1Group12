@@ -39,6 +39,7 @@ enum EGAMESTATES
     S_GAME,
     S_INVENTORY,
     S_MENU,
+    S_END,
     S_COUNT
 };
 
@@ -56,6 +57,7 @@ void render      (void);      // renders the current state of the game to the co
 void shutdown    (void);      // do clean up, free memory
 
 void splashScreenWait();    // waits for time to pass in splash screen
+void endScreenWait();       // waits for 'ESC' key to be pressed in end screen
 void updateGame();          // gameplay logic
 void keyPressed();          // moves the character, collision detection, physics, etc
 void processUserInput();    // checks if you should change states or do something else with the game, e.g. pause, exit
@@ -67,6 +69,7 @@ void renderMap();           // renders the map to the buffer first
 void renderCharacter();     // renders the character into the buffer
 void renderInventory();     // renders the inventory into the buffer
 void renderFramerate();     // renders debug information, frame rate, elapsed time, etc
+void renderEndScreen();
 void renderToScreen();      // dump the contents of the buffer to the screen, one frame worth of game
 void renderInputEvents();   // renders the status of input events
 

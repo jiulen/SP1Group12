@@ -1,5 +1,6 @@
 // This is the main file for the game logic and function
 #include "game.h"
+#include "Slime.h"
 #include "Framework\console.h"
 #include "Inventory.h"
 #include <iostream>
@@ -13,6 +14,7 @@ double  g_dElapsedTime;
 double  g_dDeltaTime;
 SKeyEvent g_skKeyEvent[K_COUNT];
 SMouseEvent g_mouseEvent;
+Slime slimes;
 
 // Game specific variables here
 SGameChar   g_sChar;
@@ -109,7 +111,8 @@ void keyboardHandler(const KEY_EVENT_RECORD& keyboardEvent)
     switch (g_eGameState)
     {
     case S_SPLASHSCREEN: gameplayKBHandler(keyboardEvent); break; // don't handle anything for the splash screen
-    case S_GAME: gameplayKBHandler(keyboardEvent); break; // handle gameplay keyboard event 
+    case S_GAME: gameplayKBHandler(keyboardEvent); break; // handle gameplay keyboard event
+    case S_END: break;
     }
 }
 
@@ -135,6 +138,7 @@ void mouseHandler(const MOUSE_EVENT_RECORD& mouseEvent)
     {
     case S_SPLASHSCREEN: break; // don't handle anything for the splash screen
     case S_GAME: gameplayMouseHandler(mouseEvent); break; // handle gameplay mouse event
+    case S_END: break;
     }
 }
 
@@ -214,6 +218,7 @@ void update(double dt)
     {
     case S_SPLASHSCREEN: splashScreenWait(); break; // game logic for the splash screen
     case S_GAME: updateGame(); break; // gameplay logic when we are in the game
+    case S_END: endScreenWait(); break;
     }
 }
 
@@ -238,10 +243,11 @@ void checkExitReached()
         case 5: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 20; break;
         }
     }
-    /*if ((mapVector.size() == 2400) && ((mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "8") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "8") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "8") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "8")))
+    if ((mapVector.size() == 2400) && ((mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "8") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "8") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "8") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "8")))
     {
         // Ending scene
-    }*/
+        g_eGameState = S_END;
+    }
 }
 
 void updateGame()       // gameplay logic
@@ -304,6 +310,7 @@ void render() {
     {
     case S_SPLASHSCREEN: renderSplashScreen(); break;
     case S_GAME: renderGame(); break;
+    case S_END: renderEndScreen(); break;
     }
     renderFramerate();      // renders debug information, frame rate, elapsed time, etc
     //renderInputEvents();    // renders status of input events
@@ -323,7 +330,30 @@ void renderToScreen() {
 
 void renderSplashScreen() {             // renders the splash screen aka menu screen
     COORD c = g_Console.getConsoleSize();
-    c.Y = c.Y/2 + 12;
+    c.Y = 11; c.X = c.X / 2 - 25;
+    std::ostringstream title;
+    title << char(244) << "  " << char(205) << char(205) << char(203) << char(205) << char(205) << " " << char(201) << char(205) << char(205) << char(205) << char(205) << " " << char(201) << char(205) << char(205) << char(203) << char(205) << char(205) << char(187) << " " << char(201) << char(205) << char(205) << char(205) << char(187) << " " << char(210) << "     " << char(201) << char(205) << char(205) << char(205) << char(205) << "  " << char(244);
+    g_Console.writeToBuffer(c, title.str(), 0xF0); title.str(""); c.Y += 1;
+    title << char(245) << "    " << char(186) << "   " << char(186) << "     " << char(186) << "  " << char(208) << "  " << char(186) << " " << char(186) << "   " << char(186) << " " << char(186) << "     " << char(186) << "      " << char(245);
+    g_Console.writeToBuffer(c, title.str(), 0xF0); title.str(""); c.Y += 1;
+    title << char(244) << "    " << char(186) << "   " << char(204) << char(205) << char(205) << char(205) << char(205) << " " << char(186) << "     " << char(186) << " " << char(204) << char(205) << char(205) << char(205) << char(188) << " " << char(186) << "     " << char(204) << char(205) << char(205) << char(205) << char(205) << "  " << char(244);
+    g_Console.writeToBuffer(c, title.str(), 0xF0); title.str(""); c.Y += 1;
+    title << char(245) << "    " << char(186) << "   " << char(186) << "     " << char(186) << "     " << char(186) << " " << char(186) << "     " << char(186) << "     " << char(186) << "      " << char(245);
+    g_Console.writeToBuffer(c, title.str(), 0xF0); title.str(""); c.Y += 1;
+    title << char(244) << "    " << char(208) << "   " << char(200) << char(205) << char(205) << char(205) << char(205) << " " << char(208) << "     " << char(208) << " " << char(208) << "     " << char(200) << char(205) << char(205) << char(205) << char(181) << " " << char(200) << char(205) << char(205) << char(205) << char(205) << "  " << char(244);
+    g_Console.writeToBuffer(c, title.str(), 0xF0); title.str(""); c.Y += 1;
+    title << char(245) << "   " << char(201) << char(205) << char(205) << char(205) << char(205) << " " << char(201) << char(205) << char(205) << char(205) << char(181) << " " << char(201) << char(205) << char(205) << char(205) << char(181) << " " << char(201) << char(205) << char(205) << char(205) << char(187) << " " << char(201) << char(205) << char(205) << char(205) << char(187) << " " << char(201) << char(205) << char(205) << char(205) << char(205) << "   " << char(245);
+    g_Console.writeToBuffer(c, title.str(), 0xF0); title.str(""); c.Y += 1;
+    title << char(244) << "   " << char(186) << "     " << char(186) << "     " << char(186) << "     " << char(186) << "   " << char(186) << " " << char(186) << "   " << char(186) << " " << char(186) << "       " << char(244);
+    g_Console.writeToBuffer(c, title.str(), 0xF0); title.str(""); c.Y += 1;
+    title << char(245) << "   " << char(204) << char(205) << char(205) << char(205) << char(205) << " " << char(200) << char(205) << char(205) << char(205) << char(187) << " " << char(186) << "     " << char(204) << char(205) << char(205) << char(205) << char(185) << " " << char(204) << char(205) << char(205) << char(205) << char(188) << " " << char(204) << char(205) << char(205) << char(205) << char(205) << "   " << char(245);
+    g_Console.writeToBuffer(c, title.str(), 0xF0); title.str(""); c.Y += 1;
+    title << char(244) << "   " << char(186) << "         " << char(186) << " " << char(186) << "     " << char(186) << "   " << char(186) << " " << char(186) << "     " << char(186) << "       " << char(244);
+    g_Console.writeToBuffer(c, title.str(), 0xF0); title.str(""); c.Y += 1;
+    title << char(245) << "   " << char(200) << char(205) << char(205) << char(205) << char(205) << " " << char(198) << char(205) << char(205) << char(205) << char(188) << " " << char(200) << char(205) << char(205) << char(205) << char(188) << " " << char(208) << "   " << char(208) << " " << char(208) << "     " << char(200) << char(205) << char(205) << char(205) << char(205) << "   " << char(245);
+    g_Console.writeToBuffer(c, title.str(), 0xF0); title.str("");
+    c = g_Console.getConsoleSize();
+    c.Y = c.Y / 2 + 12;
     c.X = c.X / 2 - 16;
     g_Console.writeToBuffer(c, "Press 'Enter' to start", 0xF0);
     c.Y += 1;
@@ -332,7 +362,6 @@ void renderSplashScreen() {             // renders the splash screen aka menu sc
     c.Y += 1;
     c.X = g_Console.getConsoleSize().X / 2 - 16;
     g_Console.writeToBuffer(c, "Press 'Esc' to quit", 0xF0);
-
 }
 
 void renderGame() {
@@ -380,8 +409,9 @@ void renderMap() {
 
             g_Console.writeToBuffer(x * 2, y, "  ", map_colour);
             x++;
+            x %= 60;
         }
-        y += .5;
+        y++;
         if (mapVector.size() < 2400) mapVector.push_back(rowVector);
     }
 }
@@ -462,6 +492,16 @@ void renderFramerate() {
     c.X = 10;
     c.Y = 40;
     g_Console.writeToBuffer(c, hb.str(), 0xF4); //white background, red text
+}
+
+void renderEndScreen() {
+    COORD c;
+    c.X = 1;
+    c.Y = 1;
+    g_Console.writeToBuffer(c, "Created by Group 12: Winston, Jun Hou, Jiu Len and Darius", 0xF0);
+    c.Y += 1;
+    g_Console.writeToBuffer(c, "YOU WIN!!!", 0xF0);
+    //add more things later? -> dmg taken, dmg dealt, dmg healed, kills, time taken
 }
 
 // this is an example of how you would use the input events

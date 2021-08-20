@@ -39,3 +39,15 @@ int Entity::get_def(void) {
 void Entity::set_def(int a) {
 	def = a;
 }
+void Entity::set_posX(int x) {
+	EntityPos.set_x(x);
+}
+int Entity::get_posX(void) {
+	return EntityPos.get_x();
+}
+void Entity::set_posY(int y) {
+	EntityPos.set_y(y);
+}
+int Entity::get_posY(void) {
+	return EntityPos.get_y();
+}

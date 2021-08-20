@@ -18,6 +18,12 @@ public:
 	int get_def(void);
 	void set_def(int);
 
+	int get_posX(void);
+	int get_posY(void);
+
+	void set_posX(int);
+	void set_posY(int);
+
 protected:
 	Position EntityPos;
 	int hp, dmg, def;
