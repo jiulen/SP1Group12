@@ -1,5 +1,6 @@
 // This is the main file for the game logic and function
 #include "game.h"
+#include "Slime.h"
 #include "Framework\console.h"
 #include <iostream>
 #include <iomanip>
@@ -12,7 +13,7 @@ double  g_dElapsedTime;
 double  g_dDeltaTime;
 SKeyEvent g_skKeyEvent[K_COUNT];
 SMouseEvent g_mouseEvent;
-
+Slime slimes;
 // Game specific variables here
 SGameChar   g_sChar;
 EGAMESTATES g_eGameState = S_SPLASHSCREEN; // initial state
@@ -364,6 +365,7 @@ void renderSplashScreen() {             // renders the splash screen aka menu sc
 void renderGame() {
     renderMap();     // renders the map to the buffer first
     renderCharacter();  // renders the character into the buffer
+
 }
 
 void renderMap() {
@@ -385,7 +387,7 @@ void renderMap() {
         std::stringstream rowStream(row);
         std::string(cell);
         std::vector<std::string> rowVector;
-
+        
         while (std::getline(rowStream, cell, ','))
         {
             rowVector.push_back(cell);
@@ -418,6 +420,7 @@ void renderMap() {
                 map_colour = 0x10;
                 break;
             }
+            
 
             g_Console.writeToBuffer(x * 2, y, "  ", map_colour);
             x++;
