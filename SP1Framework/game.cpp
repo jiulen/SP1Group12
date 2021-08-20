@@ -228,8 +228,7 @@ void checkExitReached()
 {
     if ((mapVector.size() == 2400) && ((mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "7") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "7") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "7") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "7")))
     {
-        mapVector.clear();
-        if (level_no < 5) level_no++;
+        if (level_no < 5) { mapVector.clear(); level_no++; }
         
         switch (level_no)
         {
@@ -239,6 +238,10 @@ void checkExitReached()
         case 5: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 20; break;
         }
     }
+    /*if ((mapVector.size() == 2400) && ((mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "8") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "8") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "8") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "8")))
+    {
+        // Ending scene
+    }*/
 }
 
 void updateGame()       // gameplay logic
