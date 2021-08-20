@@ -424,8 +424,9 @@ void renderMap() {
 
             g_Console.writeToBuffer(x * 2, y, "  ", map_colour);
             x++;
+            x %= 60;
         }
-        y += .5;
+        y++;
         if (mapVector.size() < 2400) mapVector.push_back(rowVector);
     }
 }
@@ -470,10 +471,10 @@ void renderEndScreen() {
     COORD c;
     c.X = 1;
     c.Y = 1;
-    g_Console.writeToBuffer(c, "Created by: Winston, Jun Hou, Jiu Len and Darius", 0xF0);
+    g_Console.writeToBuffer(c, "Created by Group 12: Winston, Jun Hou, Jiu Len and Darius", 0xF0);
     c.Y += 1;
     g_Console.writeToBuffer(c, "YOU WIN!!!", 0xF0);
-    //add more things later (no need hp)
+    //add more things later? -> dmg taken, dmg dealt, dmg healed, kills, time taken
 }
 
 // this is an example of how you would use the input events
