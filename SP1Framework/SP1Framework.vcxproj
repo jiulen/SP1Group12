@@ -84,7 +84,6 @@
     <ClCompile Include="game.cpp" />
     <ClCompile Include="Golem.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Map.cpp" />
     <ClCompile Include="Position.cpp" />
     <ClCompile Include="Slime.cpp" />
   </ItemGroup>
@@ -94,7 +93,6 @@
     <ClInclude Include="Framework\timer.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="Golem.h" />
-    <ClInclude Include="Map.h" />
     <ClInclude Include="Position.h" />
     <ClInclude Include="Slime.h" />
   </ItemGroup>

@@ -22,14 +22,8 @@
     <Filter Include="Source Files\ENTITIES">
       <UniqueIdentifier>{8e10912d-4f29-4a2a-8735-c7eaa6ab30f6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\MAPS AND CUTSCENES">
-      <UniqueIdentifier>{641b1df2-bbc8-4f27-816d-1322c0859959}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\ENTITES">
       <UniqueIdentifier>{3350608f-443d-4d65-96cc-04b63b54ca83}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\MAPS AND CUTSCENES">
-      <UniqueIdentifier>{b7277156-7fca-4082-bab3-05480c47a5de}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -54,9 +48,6 @@
     <ClCompile Include="Slime.cpp">
       <Filter>Source Files\ENTITIES</Filter>
     </ClCompile>
-    <ClCompile Include="Map.cpp">
-      <Filter>Source Files\MAPS AND CUTSCENES</Filter>
-    </ClCompile>
     <ClCompile Include="Position.cpp">
       <Filter>Source Files\ENTITIES</Filter>
     </ClCompile>
@@ -79,9 +70,6 @@
     </ClInclude>
     <ClInclude Include="Slime.h">
       <Filter>Header Files\ENTITES</Filter>
-    </ClInclude>
-    <ClInclude Include="Map.h">
-      <Filter>Header Files\MAPS AND CUTSCENES</Filter>
     </ClInclude>
     <ClInclude Include="Position.h">
       <Filter>Header Files\ENTITES</Filter>
