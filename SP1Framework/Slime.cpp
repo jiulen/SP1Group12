@@ -12,9 +12,12 @@ Slime::~Slime() {
 	slime_kills++;
 }
 
-void Slime::move() {				//1 2 3 4 for up down left right
+void Slime::move() {				//0 1 2 3 4 for up down left right
 	int randint = Random_Integer();
 	if (randint == 1) {
+
+	}
+	else if (randint == 1) {
 
 	}
 	else if (randint == 2) {
