@@ -236,19 +236,19 @@ void moveCharacter()
     // Updating the location of the character based on the key release
     // 
     // [NOTE]: PLAYER CAN ONLY MOVE AFTER THE MAP 1 ARRAY IS DONE LOADING
-    if ((g_skKeyEvent[K_UP].keyDown) && (g_sChar.m_cLocation.Y > 0) && (map1Vector.size() == 2400) && (map1Vector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] != "1"))
+    if ((g_skKeyEvent[K_UP].keyDown) && (g_sChar.m_cLocation.Y > 0) && (map1Vector.size() == 2400) && (map1Vector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "0"))
     {
         g_sChar.m_cLocation.Y--;
     }
-    if ((g_skKeyEvent[K_LEFT].keyDown) && (g_sChar.m_cLocation.X > 1) && (map1Vector.size() == 2400) && (map1Vector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] != "1"))
+    if ((g_skKeyEvent[K_LEFT].keyDown) && (g_sChar.m_cLocation.X > 1) && (map1Vector.size() == 2400) && (map1Vector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "0"))
     {
         g_sChar.m_cLocation.X -= 2;
     }
-    if ((g_skKeyEvent[K_DOWN].keyDown) && (g_sChar.m_cLocation.Y < (g_Console.getConsoleSize().Y - 1 - GUI_height)) && (map1Vector.size() == 2400) && (map1Vector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] != "1"))
+    if ((g_skKeyEvent[K_DOWN].keyDown) && (g_sChar.m_cLocation.Y < (g_Console.getConsoleSize().Y - 1 - GUI_height)) && (map1Vector.size() == 2400) && (map1Vector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "0"))
     {
         g_sChar.m_cLocation.Y++;
     }
-    if ((g_skKeyEvent[K_RIGHT].keyDown) && (g_sChar.m_cLocation.X < (g_Console.getConsoleSize().X - 2)) && (map1Vector.size() == 2400) && (map1Vector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] != "1"))
+    if ((g_skKeyEvent[K_RIGHT].keyDown) && (g_sChar.m_cLocation.X < (g_Console.getConsoleSize().X - 2)) && (map1Vector.size() == 2400) && (map1Vector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "0"))
     {
         g_sChar.m_cLocation.X += 2;
     }
