@@ -1,6 +1,7 @@
 // This is the main file for the game logic and function
 #include "game.h"
 #include "Framework\console.h"
+#include "Inventory.h"
 #include <iostream>
 #include <iomanip>
 #include <sstream>
@@ -17,13 +18,15 @@ SMouseEvent g_mouseEvent;
 SGameChar   g_sChar;
 EGAMESTATES g_eGameState = S_SPLASHSCREEN; // initial state
 int level_no = 1; //level number, increases when go next level
+bool E_KeyPressed = false;
 
 // Console object
 Console g_Console(120, 50, "Temple Escape, Totally not Indiana Jones!!!");
 int GUI_height = 10;
 
-// Map arrays
-std::vector<std::vector<std::string>> mapVector; // Map array for all maps
+// Arrays
+std::vector<std::vector<std::string>> mapVector;       // Map array for all maps
+std::vector<std::vector<std::string>> inventoryVector; // Inventory array
 
 //--------------------------------------------------------------
 // Purpose  : Initialisation function
@@ -105,10 +108,8 @@ void keyboardHandler(const KEY_EVENT_RECORD& keyboardEvent)
 {
     switch (g_eGameState)
     {
-    case S_SPLASHSCREEN: gameplayKBHandler(keyboardEvent);// don't handle anything for the splash screen
-        break;
-    case S_GAME: gameplayKBHandler(keyboardEvent); // handle gameplay keyboard event 
-        break;
+    case S_SPLASHSCREEN: gameplayKBHandler(keyboardEvent); break; // don't handle anything for the splash screen
+    case S_GAME: gameplayKBHandler(keyboardEvent); break; // handle gameplay keyboard event 
     }
 }
 
@@ -132,10 +133,8 @@ void mouseHandler(const MOUSE_EVENT_RECORD& mouseEvent)
 {
     switch (g_eGameState)
     {
-    case S_SPLASHSCREEN: // don't handle anything for the splash screen
-        break;
-    case S_GAME: gameplayMouseHandler(mouseEvent); // handle gameplay mouse event
-        break;
+    case S_SPLASHSCREEN: break; // don't handle anything for the splash screen
+    case S_GAME: gameplayMouseHandler(mouseEvent); break; // handle gameplay mouse event
     }
 }
 
@@ -158,6 +157,7 @@ void gameplayKBHandler(const KEY_EVENT_RECORD& keyboardEvent)
     case 0x53: key = K_DOWN; break;
     case 0x41: key = K_LEFT; break;
     case 0x44: key = K_RIGHT; break;
+    case 0x45: key = K_INVENTORY; break;
     case VK_RETURN: key = K_ENTER; break;
     case VK_ESCAPE: key = K_ESCAPE; break;
     }
@@ -212,10 +212,8 @@ void update(double dt)
     g_dDeltaTime = dt;
     switch (g_eGameState)
     {
-    case S_SPLASHSCREEN: splashScreenWait(); // game logic for the splash screen
-        break;
-    case S_GAME: updateGame(); // gameplay logic when we are in the game
-        break;
+    case S_SPLASHSCREEN: splashScreenWait(); break; // game logic for the splash screen
+    case S_GAME: updateGame(); break; // gameplay logic when we are in the game
     }
 }
 
@@ -274,15 +272,15 @@ void keyPressed()
     {
         g_sChar.m_cLocation.X += 2;
     }
-    if (g_skKeyEvent[K_INTERACTIVE].keyDown)
+    if (g_skKeyEvent[K_INVENTORY].keyReleased) // we don't want player to spam
     {
-        //
+        if (E_KeyPressed == false) { E_KeyPressed = true; }
+        else { E_KeyPressed = false; }
     }
-    if (g_skKeyEvent[K_INVENTORY].keyDown)
+    if (g_skKeyEvent[K_INTERACTIVE].keyReleased) // we don't want player to spam
     {
-        //
+        
     }
-   
 }
 
 void processUserInput()
@@ -304,13 +302,12 @@ void render() {
     clearScreen();      // clears the current screen and draw from scratch 
     switch (g_eGameState)
     {
-    case S_SPLASHSCREEN: renderSplashScreen();
-        break;
-    case S_GAME: renderGame();
-        break;
+    case S_SPLASHSCREEN: renderSplashScreen(); break;
+    case S_GAME: renderGame(); break;
     }
     renderFramerate();      // renders debug information, frame rate, elapsed time, etc
-    renderInputEvents();    // renders status of input events
+    //renderInputEvents();    // renders status of input events
+    g_Console.writeToBuffer(0, 48, std::to_string(E_KeyPressed), 0xF9);
     renderToScreen();       // dump the contents of the buffer to the screen, one frame worth of game
 }
 
@@ -339,8 +336,9 @@ void renderSplashScreen() {             // renders the splash screen aka menu sc
 }
 
 void renderGame() {
-    renderMap();     // renders the map to the buffer first
+    renderMap();        // renders the map to the buffer first
     renderCharacter();  // renders the character into the buffer
+    if (E_KeyPressed == true) { renderInventory(); } // renders inventory into the buffer
 }
 
 void renderMap() {
@@ -370,30 +368,14 @@ void renderMap() {
             WORD map_colour = 0x00;
             switch (stoi(cell))
             {
-            case 0: //path
-                map_colour = 0x60;
-                break;
-            case 1: //wall
-                map_colour = 0x00;
-                break;
-            case 2: //dead body
-                map_colour = 0x50;
-                break;
-            case 3: //special dead body
-                map_colour = 0xD0;
-                break;
-            case 4: //chest
-                map_colour = 0xE0;
-                break;
-            case 5: //fake chest
-                map_colour = 0x80;
-                break;
-            case 6: //prisoner
-                map_colour = 0x30;
-                break;
-            case 7: //exit
-                map_colour = 0x10;
-                break;
+            case 0: map_colour = 0x60; break; //path
+            case 1: map_colour = 0x00; break; //wall            
+            case 2: map_colour = 0x50; break; //dead body     
+            case 3: map_colour = 0xD0; break; //special dead body  
+            case 4: map_colour = 0xE0; break; //chest
+            case 5: map_colour = 0x80; break; //fake chest    
+            case 6: map_colour = 0x30; break; //prisoner
+            case 7: map_colour = 0x10; break; //exit     
             }
 
             g_Console.writeToBuffer(x * 2, y, "  ", map_colour);
@@ -409,6 +391,52 @@ void renderCharacter() {
     std::ostringstream playerChar;
     playerChar << static_cast<char>(1) << static_cast<char>(1);
     g_Console.writeToBuffer(g_sChar.m_cLocation, playerChar.str(), 0x01);
+}
+
+void renderInventory()
+{
+    unsigned x = 0, y = 0;
+
+    std::ifstream inventory("Inventory.csv");
+    std::string row;
+
+    while (std::getline(inventory, row))
+    {
+        std::stringstream rowStream(row);
+        std::string(cell);
+        std::vector<std::string> rowVector;
+
+        while (std::getline(rowStream, cell, ','))
+        {
+            rowVector.push_back(cell);
+
+            WORD inventory_colour = 0x00;
+            switch (stoi(cell))
+            {
+            case 0: inventory_colour = 0x00; break;  // boarder
+            case 1: inventory_colour = 0xF0; break;  // gui background
+            case 2: inventory_colour = 0x40; break;  // heart icon
+            case 3: inventory_colour = 0x60; break;  // char hair  
+            case 4: inventory_colour = 0x80; break;  // char face     
+            case 5: inventory_colour = 0xB0; break;  // char upper body
+            case 6: inventory_colour = 0x30; break;  // char lower body
+            case 7: inventory_colour = 0x70; break;  // char hand
+            case 8: inventory_colour = 0xA0; break;  // items background
+            case 9: inventory_colour = 0x80; break;  // default icon background
+            case 10: inventory_colour = 0x70; break; // default center icon
+            case 11: inventory_colour = 0x60; break; // sword handle
+            case 12: inventory_colour = 0x70; break; // sword part
+            case 13: inventory_colour = 0x20; break; // chestplate
+            case 14: inventory_colour = 0x30; break; // boot
+            case 15: inventory_colour = 0xD0; break; // potion
+            }
+
+            g_Console.writeToBuffer(x * 2, y, "  ", inventory_colour);
+            x++;
+        }
+        y += .5;
+        if (inventoryVector.size() < 1008) inventoryVector.push_back(rowVector);
+    }
 }
 
 void renderFramerate() {
@@ -430,15 +458,10 @@ void renderFramerate() {
 
     // displays the player's health
     std::ostringstream hb;
-    char heart = (char)3;
-    hb << "HP: ";
-    for (int i = 0; i < g_sChar.hp; i++)
-    {
-        hb << heart << " ";
-    }
+    hb << "HP: " << std::string(g_sChar.hp, (char)3); // (char)3 is heart symbol
     c.X = 10;
     c.Y = 40;
-    g_Console.writeToBuffer(c, hb.str(), 0xF4); //black background, red text
+    g_Console.writeToBuffer(c, hb.str(), 0xF4); //white background, red text
 }
 
 // this is an example of how you would use the input events
@@ -450,14 +473,10 @@ void renderInputEvents() {
     for (int i = 0; i < K_COUNT; ++i) {
         ss.str("");
         switch (i) {
-        case K_UP: key = "UP";
-            break;
-        case K_DOWN: key = "DOWN";
-            break;
-        case K_LEFT: key = "LEFT";
-            break;
-        case K_RIGHT: key = "RIGHT";
-            break;
+        case K_UP: key = "UP"; break;
+        case K_DOWN: key = "DOWN"; break;
+        case K_LEFT: key = "LEFT"; break;
+        case K_RIGHT: key = "RIGHT"; break;
         default: continue;
         }
         /*if (g_skKeyEvent[i].keyDown)

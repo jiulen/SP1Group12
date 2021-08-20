@@ -78,25 +78,38 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Boot.cpp" />
+    <ClCompile Include="Chestplate.cpp" />
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="Framework\console.cpp" />
     <ClCompile Include="Framework\timer.cpp" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="Golem.cpp" />
+    <ClCompile Include="InGameItem.cpp" />
+    <ClCompile Include="Inventory.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Position.cpp" />
+    <ClCompile Include="Potion.cpp" />
     <ClCompile Include="Slime.cpp" />
+    <ClCompile Include="Sword.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Boot.h" />
+    <ClInclude Include="Chestplate.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="Framework\console.h" />
     <ClInclude Include="Framework\timer.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="Golem.h" />
+    <ClInclude Include="InGameItem.h" />
+    <ClInclude Include="Inventory.h" />
     <ClInclude Include="Position.h" />
+    <ClInclude Include="Potion.h" />
     <ClInclude Include="Slime.h" />
+    <ClInclude Include="Sword.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\..\..\Documents\Inventory.csv" />
     <None Include="Map1.csv" />
     <None Include="Map2.csv" />
     <None Include="Map3.csv" />
