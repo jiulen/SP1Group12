@@ -13,7 +13,6 @@
 #include <stdlib.h>     /* srand, rand */
 #include <time.h>  
 
-double  g_dElapsedTime;
 double  g_dDeltaTime;
 double  g_dGameTime; //time spent on levels
 SKeyEvent g_skKeyEvent[K_COUNT];
@@ -44,7 +43,6 @@ std::vector<std::vector<std::string>> inventoryVector; // Inventory array
 void init(void) {
     srand(time(NULL));
     // Set precision for floating point output
-    g_dElapsedTime = 0.0;
     g_dGameTime = 0.0;
 
     // sets the initial state for the game
@@ -218,7 +216,6 @@ void gameplayMouseHandler(const MOUSE_EVENT_RECORD& mouseEvent)
 void update(double dt)
 {
     // get the delta time
-    g_dElapsedTime += dt;
     g_dDeltaTime = dt;
     switch (g_eGameState)
     {
