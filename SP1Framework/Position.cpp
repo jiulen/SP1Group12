@@ -6,20 +6,16 @@ Position::Position() {
 Position::~Position() {
 
 }
-Position::Position(int a, int b) {
-	x = a, y = b;
+void Position::setPosition(int xNew, int yNew) {
+	x = xNew;
+	y = yNew;
 }
 
 int Position::get_x(void) {
 	return x;
 }
-void Position::set_x(int a) {
-	x = a;
-}
+
 
 int Position::get_y(void) {
 	return y;
-}
-void Position::set_y(int a) {
-	y = a;
 }

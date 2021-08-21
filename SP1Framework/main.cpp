@@ -19,9 +19,8 @@ void mainLoop(void);
 // main function - starting function
 // You should not be modifying this unless you know what you are doing
 int main(void) {
-    Entity* Eptr[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
-   
-
+    Entity* entityptr[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+    entityptr[0] = new Slime;
 
    init();      // initialize your variables
    mainLoop();  // main loop

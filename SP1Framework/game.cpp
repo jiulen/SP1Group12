@@ -1,6 +1,7 @@
 // This is the main file for the game logic and function
 #include "game.h"
 #include "Slime.h"
+#include "Entity.h"
 #include "Framework\console.h"
 #include "Inventory.h"
 #include <iostream>
@@ -12,6 +13,8 @@
 #include <stdio.h>      /*  NULL */
 #include <stdlib.h>     /* srand, rand */
 #include <time.h>  
+
+int test1, test2; // ignore this test is for slime stuff
 
 double  g_dDeltaTime;
 double  g_dGameTime; //time spent on levels
@@ -32,8 +35,11 @@ int GUI_height = 10;
 // Arrays
 std::vector<std::vector<std::string>> mapVector;       // Map array for all maps
 std::vector<std::vector<std::string>> inventoryVector; // Inventory array
+Entity* entityptr[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 
-//--------------------------------------------------------------
+Entity* eptr[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+
+
 // Purpose  : Initialisation function
 //            Initialize variables, allocate memory, load data from file, etc. 
 //            This is called once before entering into your main loop
@@ -59,6 +65,11 @@ void init(void) {
     // remember to set your keyboard handler, so that your functions can be notified of input events
     g_Console.setKeyboardHandler(keyboardHandler);
     g_Console.setMouseHandler(mouseHandler);
+}
+void initEntities()
+{
+    Entity* eptr[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+    eptr[0] = new Slime;
 }
 
 //--------------------------------------------------------------
@@ -227,10 +238,12 @@ void update(double dt)
 
 void splashScreenWait()    // waits for time to pass in splash screen
 {
-    if (g_skKeyEvent[K_ENTER].keyReleased) { // wait for 3 seconds to switch to game mode, else do nothing
+    if (g_skKeyEvent[K_ENTER].keyReleased) { // wait for user to press enter to switch to game mode, else do nothing
         g_eGameState = S_GAME;
-        slimes.set_posX(rand() % 60 * 2);
-        slimes.set_posY(rand() % 40);
+        test1 = (rand() % 60 * 2);
+        test2 = (rand() % 40);
+        
+       
     }
     processUserInput();
 }
@@ -241,6 +254,7 @@ void updateGame()       // gameplay logic
     processUserInput(); // checks if you should change states or do something else with the game, e.g. pause, exit
                         // sound can be played here too.
     checkExitReached(); // checks if player reached the exit
+    
 }
 
 void endScreenWait()
@@ -447,7 +461,11 @@ void renderSlime() {
     // draw location of slimes
     std::ostringstream slimeChar;
     slimeChar << static_cast<char>(5) << static_cast<char>(5);
-    g_Console.writeToBuffer(slimes.get_posX(), slimes.get_posY(), slimeChar.str(), 0xFD);
+    //eptr[0]->EntityPos.setPosition(test1, test2);
+   /*/ if (level_no == 1) {
+         g_Console.writeToBuffer(eptr[0]->get_posX(), eptr[0]->get_posY(), slimeChar.str(), 0xFD);
+    }
+    */
 }
 
 void updateInventoryHealth()

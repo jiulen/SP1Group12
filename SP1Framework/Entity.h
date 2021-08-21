@@ -5,7 +5,7 @@ class Entity {
 public:
 	Entity();
 	~Entity();
-
+	Position EntityPos;
 	virtual void move();
 	int Random_Integer(); //what this for?
 
@@ -21,11 +21,10 @@ public:
 	int get_posX(void);
 	int get_posY(void);
 
-	void set_posX(int);
-	void set_posY(int);
+	
 
 protected:
-	Position EntityPos;
+	
 	int hp, dmg, def;
 
 };
