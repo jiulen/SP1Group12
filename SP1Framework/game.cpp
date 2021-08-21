@@ -325,10 +325,9 @@ void render() {
     switch (g_eGameState)
     {
     case S_SPLASHSCREEN: renderSplashScreen(); break;
-    case S_GAME: renderGame(); break;
+    case S_GAME: renderFramerate(); renderGame(); break;
     case S_END: renderEndScreen(); break;
     }
-    renderFramerate();      // renders debug information, frame rate, elapsed time, etc
     //renderInputEvents();    // renders status of input events
     renderToScreen();       // dump the contents of the buffer to the screen, one frame worth of game
 }
