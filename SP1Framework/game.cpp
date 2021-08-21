@@ -15,6 +15,7 @@
 
 double  g_dElapsedTime;
 double  g_dDeltaTime;
+double  g_dGameTime; //time spent on levels
 SKeyEvent g_skKeyEvent[K_COUNT];
 SMouseEvent g_mouseEvent;
 Slime slimes;
@@ -26,7 +27,7 @@ int level_no = 1; //level number, increases when go next level
 bool E_KeyPressed = false;
 
 // Console object
-Console g_Console(120, 50, "Temple Escape, Totally not Indiana Jones!!!");
+Console g_Console(120, 50, "Temple Escape");
 int GUI_height = 10;
 
 // Arrays
@@ -44,6 +45,7 @@ void init(void) {
     srand(time(NULL));
     // Set precision for floating point output
     g_dElapsedTime = 0.0;
+    g_dGameTime = 0.0;
 
     // sets the initial state for the game
     g_eGameState = S_SPLASHSCREEN;
@@ -221,7 +223,7 @@ void update(double dt)
     switch (g_eGameState)
     {
     case S_SPLASHSCREEN: splashScreenWait(); break; // game logic for the splash screen
-    case S_GAME: updateGame(); break; // gameplay logic when we are in the game
+    case S_GAME: if (E_KeyPressed == false) { g_dGameTime += dt; } updateGame(); break; // gameplay logic when we are in the game
     case S_END: endScreenWait(); break;
     }
 }
@@ -556,7 +558,7 @@ void renderFramerate() {
     c.Y = 40;
     g_Console.writeToBuffer(c, ss.str(), 0xF0);
     ss.str("");
-    ss << g_dElapsedTime << "secs";             // displays the elapsed time
+    ss << g_dGameTime << "secs";             // displays the elapsed time
     c.X = 0;
     c.Y = 40;
     g_Console.writeToBuffer(c, ss.str(), 0xF0);
