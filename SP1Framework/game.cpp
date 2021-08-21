@@ -364,17 +364,20 @@ void menuScreen(COORD& c)
 
 void renderSplashScreen() {             // renders the splash screen aka menu screen
     COORD c = g_Console.getConsoleSize();
-    c.Y = 11; c.X = c.X / 2 - 25;
+    c.Y = 11; c.X = c.X / 2 - 21;
     menuScreen(c);
     c = g_Console.getConsoleSize();
-    c.Y = c.Y / 2 + 12;
-    c.X = c.X / 2 - 16;
+    c.Y = 40;
+    c.X = c.X / 2 - 11;
     g_Console.writeToBuffer(c, "Press 'Enter' to start", 0xF0);
-    c.Y += 1;
+    c.Y++;
     c.X = g_Console.getConsoleSize().X / 2 - 16;
     g_Console.writeToBuffer(c, "Press 'W, A, S, D' to move around", 0xF0);
-    c.Y += 1;
-    c.X = g_Console.getConsoleSize().X / 2 - 16;
+    c.Y++;
+    c.X = g_Console.getConsoleSize().X / 2 - 14;
+    g_Console.writeToBuffer(c, "Press 'Left Click' to attack", 0xF0);
+    c.Y++;
+    c.X = g_Console.getConsoleSize().X / 2 - 10;
     g_Console.writeToBuffer(c, "Press 'Esc' to quit", 0xF0);
 }
 
