@@ -394,40 +394,40 @@ void renderSplashScreen() {             // renders the splash screen aka menu sc
 }
 
 void renderGame() {
-    renderMap();        // renders the map to the buffer first
+    if (mapVector.size() < 2400) { initMapVector(); }; renderMap(); // init map vector, then renders the map to the buffer first
     renderCharacter();  // renders the character into the buffer
     renderSlime();
-    if (E_KeyPressed == true) { renderInventory(); updateInventory(); } // renders inventory into the buffer then update it after
+    if (E_KeyPressed == true) { if (inventoryVector.size() < 1008) { initInventoryVector(); }; updateInventory(); renderInventory();  } // init inventory vector, after that update inventory (health, items etc), then render inventory (This is to ensure that players do not see the change when they press 'e' key)
+}
+
+void initMapVector()
+{
+    std::ifstream map;
+    switch (level_no)
+    {
+    case 1: map = std::ifstream("Map1.csv"); break; //opens map
+    case 2: map = std::ifstream("Map2.csv"); break; //opens map
+    case 3: map = std::ifstream("Map3.csv"); break; //opens map
+    case 4: map = std::ifstream("Map4.csv"); break; //opens map
+    case 5: map = std::ifstream("Map5.csv"); break; //opens map
+    }
+    std::string row;
+
+    while (std::getline(map, row))
+    {
+        std::stringstream rowStream(row);
+        std::string(cell);
+        std::vector<std::string> rowVector;
+
+        while (std::getline(rowStream, cell, ',')) { rowVector.push_back(cell); }
+
+        mapVector.push_back(rowVector);
+    }
+
+    map.close();
 }
 
 void renderMap() {
-    if (mapVector.size() < 2400)
-    {
-        std::ifstream map;
-        switch (level_no)
-        {
-        case 1: map = std::ifstream("Map1.csv"); break; //opens map
-        case 2: map = std::ifstream("Map2.csv"); break; //opens map
-        case 3: map = std::ifstream("Map3.csv"); break; //opens map
-        case 4: map = std::ifstream("Map4.csv"); break; //opens map
-        case 5: map = std::ifstream("Map5.csv"); break; //opens map
-        }
-        std::string row;
-
-        while (std::getline(map, row))
-        {
-            std::stringstream rowStream(row);
-            std::string(cell);
-            std::vector<std::string> rowVector;
-
-            while (std::getline(rowStream, cell, ',')) { rowVector.push_back(cell); }
-            
-            mapVector.push_back(rowVector);
-        }
-
-        map.close();
-    }
-
     for (unsigned y = 0; y < 40; y++)
     {
         for (unsigned x = 0; x < 60; x++)
@@ -469,6 +469,25 @@ void renderSlime() {
     }
 }
 
+void initInventoryVector()
+{
+    std::ifstream inventory("Inventory.csv");
+    std::string row;
+
+    while (std::getline(inventory, row))
+    {
+        std::stringstream rowStream(row);
+        std::string(cell);
+        std::vector<std::string> rowVector;
+
+        while (std::getline(rowStream, cell, ',')) { rowVector.push_back(cell); }
+
+        inventoryVector.push_back(rowVector);
+    }
+
+    inventory.close();
+}
+
 void updateInventoryHealth()
 {
     g_sChar.hp = 4; // for testing
@@ -507,25 +526,6 @@ void updateInventory()
 
 void renderInventory()
 {
-    if (inventoryVector.size() < 1008)
-    {
-        std::ifstream inventory("Inventory.csv");
-        std::string row;
-
-        while (std::getline(inventory, row))
-        {
-            std::stringstream rowStream(row);
-            std::string(cell);
-            std::vector<std::string> rowVector;
-
-            while (std::getline(rowStream, cell, ',')) { rowVector.push_back(cell); }
-
-            inventoryVector.push_back(rowVector);
-        }
-
-        inventory.close();
-    }
-
     for (unsigned y = 0; y < 24; y++)
     {
         for (unsigned x = 0; x < 42; x++)

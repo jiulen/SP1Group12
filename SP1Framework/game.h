@@ -65,9 +65,11 @@ void checkExitReached();    // checks if player reached the exit
 void clearScreen();         // clears the current screen and draw from scratch 
 void renderSplashScreen();  // renders the splash screen
 void renderGame();          // renders the game stuff
+void initMapVector();       // init map vector
 void renderMap();           // renders the map to the buffer first
 void renderCharacter();     // renders the character into the buffer
 void renderSlime();         // renders the slime into the buffer
+void initInventoryVector(); // init inventory vector
 void updateInventory();     // update inventory
 void renderInventory();     // renders the inventory into the buffer
 void renderFramerate();     // renders debug information, frame rate, elapsed time, etc
