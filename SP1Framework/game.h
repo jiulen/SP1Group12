@@ -47,7 +47,7 @@ enum EGAMESTATES
 struct SGameChar
 {
     COORD m_cLocation;
-    int hp, dmg, def;
+    int hp, dmg, def, weight;
 };
 
 void init        (void);      // initialize your variables, allocate memory, etc

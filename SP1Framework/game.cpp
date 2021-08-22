@@ -47,7 +47,7 @@ Entity* eptr[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullp
 // Output   : void
 //--------------------------------------------------------------
 void init(void) {
-    srand(time(NULL));
+    srand((unsigned int) time(NULL));
     // Set precision for floating point output
     g_dGameTime = 0.0;
 
@@ -59,6 +59,7 @@ void init(void) {
     g_sChar.hp = 10;
     g_sChar.dmg = 1;
     g_sChar.def = 0;
+    g_sChar.weight = 1;
     // sets the width, height and the font name to use in the console
     g_Console.setConsoleFont(0, 16, L"Consolas");
 
@@ -231,7 +232,12 @@ void update(double dt)
     switch (g_eGameState)
     {
     case S_SPLASHSCREEN: splashScreenWait(); break; // game logic for the splash screen
-    case S_GAME: if (E_KeyPressed == false) { g_dGameTime += dt; } updateGame(); break; // gameplay logic when we are in the game
+    case S_GAME:
+        if (E_KeyPressed == false) {
+            g_dGameTime += dt; 
+        } 
+        updateGame(); 
+        break; // gameplay logic when we are in the game
     case S_END: endScreenWait(); break;
     }
 }
