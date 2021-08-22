@@ -456,7 +456,7 @@ void renderCharacter() {
     g_Console.writeToBuffer(g_sChar.m_cLocation, playerChar.str(), 0x01);
 }
 
-void createSlimeObj() { ePtr[0] = new Slime; }
+void createSlimeObj() { ePtr[0] = new Slime; } // The creation of slime object MUST be inside a FUNCTION
 
 void renderSlime() {
     // draw location of slimes
