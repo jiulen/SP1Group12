@@ -35,9 +35,7 @@ int GUI_height = 10;
 // Arrays
 std::vector<std::vector<std::string>> mapVector;       // Map array for all maps
 std::vector<std::vector<std::string>> inventoryVector; // Inventory array
-Entity* entityptr[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
-
-Entity* eptr[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+Entity* ePtr[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 
 
 // Purpose  : Initialisation function
@@ -66,11 +64,6 @@ void init(void) {
     // remember to set your keyboard handler, so that your functions can be notified of input events
     g_Console.setKeyboardHandler(keyboardHandler);
     g_Console.setMouseHandler(mouseHandler);
-}
-void initEntities()
-{
-    Entity* eptr[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
-    eptr[0] = new Slime;
 }
 
 //--------------------------------------------------------------
@@ -463,15 +456,17 @@ void renderCharacter() {
     g_Console.writeToBuffer(g_sChar.m_cLocation, playerChar.str(), 0x01);
 }
 
+void createSlimeObj() { ePtr[0] = new Slime; }
+
 void renderSlime() {
     // draw location of slimes
+    createSlimeObj();
     std::ostringstream slimeChar;
     slimeChar << static_cast<char>(5) << static_cast<char>(5);
-    //eptr[0]->EntityPos.setPosition(test1, test2);
-   /*/ if (level_no == 1) {
-         g_Console.writeToBuffer(eptr[0]->get_posX(), eptr[0]->get_posY(), slimeChar.str(), 0xFD);
+    ePtr[0]->EntityPos.setPosition(test1, test2);
+    if (level_no == 1) {
+         g_Console.writeToBuffer(ePtr[0]->get_posX(), ePtr[0]->get_posY(), slimeChar.str(), 0xFD);
     }
-    */
 }
 
 void updateInventoryHealth()
