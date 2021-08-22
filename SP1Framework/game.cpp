@@ -13,6 +13,7 @@
 #include <stdio.h>      /*  NULL */
 #include <stdlib.h>     /* srand, rand */
 #include <time.h>  
+#include <math.h>
 
 int test1, test2; // ignore this test is for slime stuff
 
@@ -395,7 +396,8 @@ void renderSplashScreen() {             // renders the splash screen aka menu sc
 void renderGame() {
     if (mapVector.size() < 2400) { initMapVector(); }; renderMap(); // init map vector, then renders the map to the buffer first
     renderCharacter();  // renders the character into the buffer
-    if (slimeObjsCreated == false /* && (mapVector.size() == 2400)*/) { slimeObjsCreated = true; createSlimeObj(); } renderSlime();
+    if ((slimeObjsCreated == false) && (mapVector.size() == 2400)) { slimeObjsCreated = true; createSlimeObj(); }
+    if ((slimeObjsCreated == true) && (mapVector.size() == 2400)) { renderSlime(); }
     if (E_KeyPressed == true) { if (inventoryVector.size() < 1008) { initInventoryVector(); }; updateInventory(); renderInventory();  } // init inventory vector, after that update inventory (health, items etc), then render inventory (This is to ensure that players do not see the change when they press 'e' key)
 }
 
@@ -458,24 +460,24 @@ void renderCharacter() {
 void createSlimeObj() {  // The creation of slime object MUST be inside a FUNCTION
 
     ePtr[0] = new Slime;
-    ePtr[0]->EntityPos.setPosition(rand() % 60 * 2, rand() % 40);
-   // while (mapVector[ePtr[0]->get_posY()][ePtr[0]->get_posX()] != "0") { ePtr[0]->EntityPos.setPosition(rand() % 60 * 2, rand() % 40); }
+    ePtr[0]->EntityPos.setPosition(2 * ceil(rand() % 60 / 2), rand() % 40);
+    while (mapVector[ePtr[0]->get_posY()][ePtr[0]->get_posX()] != "0") { ePtr[0]->EntityPos.setPosition(2 * ceil(rand() % 60 / 2), rand() % 40); }
 
     ePtr[1] = new Slime;
-    ePtr[1]->EntityPos.setPosition(rand() % 60 * 2, rand() % 40);
-   // while (mapVector[ePtr[1]->get_posY()][ePtr[1]->get_posX()] != "0") { ePtr[1]->EntityPos.setPosition(rand() % 60 * 2, rand() % 40); }
+    ePtr[1]->EntityPos.setPosition(2 * ceil(rand() % 60 / 2), rand() % 40);
+    while (mapVector[ePtr[1]->get_posY()][ePtr[1]->get_posX()] != "0") { ePtr[1]->EntityPos.setPosition(2 * ceil(rand() % 60 / 2), rand() % 40); }
 
     ePtr[2] = new Slime;
-    ePtr[2]->EntityPos.setPosition(rand() % 60 * 2, rand() % 40);
-    //while (mapVector[ePtr[2]->get_posY()][ePtr[2]->get_posX()] != "0") { ePtr[2]->EntityPos.setPosition(rand() % 60 * 2, rand() % 40); }
+    ePtr[2]->EntityPos.setPosition(2 * ceil(rand() % 60 / 2), rand() % 40);
+    while (mapVector[ePtr[2]->get_posY()][ePtr[2]->get_posX()] != "0") { ePtr[2]->EntityPos.setPosition(2 * ceil(rand() % 60 / 2), rand() % 40); }
 
     ePtr[3] = new Slime;
-    ePtr[3]->EntityPos.setPosition(rand() % 60 * 2, rand() % 40);
-  //  while (mapVector[ePtr[3]->get_posY()][ePtr[3]->get_posX()] != "0") { ePtr[3]->EntityPos.setPosition(rand() % 60 * 2, rand() % 40); }
+    ePtr[3]->EntityPos.setPosition(2 * ceil(rand() % 60 / 2), rand() % 40);
+    while (mapVector[ePtr[3]->get_posY()][ePtr[3]->get_posX()] != "0") { ePtr[3]->EntityPos.setPosition(2 * ceil(rand() % 60 / 2), rand() % 40); }
 
     ePtr[4] = new Slime;
-    ePtr[4]->EntityPos.setPosition(rand() % 60 * 2, rand() % 40);
-    //while (mapVector[ePtr[4]->get_posY()][ePtr[4]->get_posX()] != "0") { ePtr[4]->EntityPos.setPosition(rand() % 60 * 2, rand() % 40); }
+    ePtr[4]->EntityPos.setPosition(2 * ceil(rand() % 60 / 2), rand() % 40);
+    while (mapVector[ePtr[4]->get_posY()][ePtr[4]->get_posX()] != "0") { ePtr[4]->EntityPos.setPosition(2 * ceil(rand() % 60 / 2), rand() % 40); }
 
 }
 
