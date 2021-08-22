@@ -68,6 +68,7 @@ void renderGame();          // renders the game stuff
 void initMapVector();       // init map vector
 void renderMap();           // renders the map to the buffer first
 void renderCharacter();     // renders the character into the buffer
+void createSlimeObj();      // creates position of slimes
 void renderSlime();         // renders the slime into the buffer
 void initInventoryVector(); // init inventory vector
 void updateInventory();     // update inventory

@@ -21,6 +21,7 @@ double  g_dGameTime; //time spent on levels
 SKeyEvent g_skKeyEvent[K_COUNT];
 SMouseEvent g_mouseEvent;
 Slime slimes;
+bool slimeObjsCreated = false;
 
 // Game specific variables here
 SGameChar   g_sChar;
@@ -239,8 +240,6 @@ void splashScreenWait()    // waits for time to pass in splash screen
 {
     if (g_skKeyEvent[K_ENTER].keyReleased) { // wait for user to press enter to switch to game mode, else do nothing
         g_eGameState = S_GAME;
-        test1 = (rand() % 60 * 2);
-        test2 = (rand() % 40);
         
        
     }
@@ -396,7 +395,7 @@ void renderSplashScreen() {             // renders the splash screen aka menu sc
 void renderGame() {
     if (mapVector.size() < 2400) { initMapVector(); }; renderMap(); // init map vector, then renders the map to the buffer first
     renderCharacter();  // renders the character into the buffer
-    renderSlime();
+    if (slimeObjsCreated == false /* && (mapVector.size() == 2400)*/) { slimeObjsCreated = true; createSlimeObj(); } renderSlime();
     if (E_KeyPressed == true) { if (inventoryVector.size() < 1008) { initInventoryVector(); }; updateInventory(); renderInventory();  } // init inventory vector, after that update inventory (health, items etc), then render inventory (This is to ensure that players do not see the change when they press 'e' key)
 }
 
@@ -456,16 +455,39 @@ void renderCharacter() {
     g_Console.writeToBuffer(g_sChar.m_cLocation, playerChar.str(), 0x01);
 }
 
-void createSlimeObj() { ePtr[0] = new Slime; } // The creation of slime object MUST be inside a FUNCTION
+void createSlimeObj() {  // The creation of slime object MUST be inside a FUNCTION
+
+    ePtr[0] = new Slime;
+    ePtr[0]->EntityPos.setPosition(rand() % 60 * 2, rand() % 40);
+   // while (mapVector[ePtr[0]->get_posY()][ePtr[0]->get_posX()] != "0") { ePtr[0]->EntityPos.setPosition(rand() % 60 * 2, rand() % 40); }
+
+    ePtr[1] = new Slime;
+    ePtr[1]->EntityPos.setPosition(rand() % 60 * 2, rand() % 40);
+   // while (mapVector[ePtr[1]->get_posY()][ePtr[1]->get_posX()] != "0") { ePtr[1]->EntityPos.setPosition(rand() % 60 * 2, rand() % 40); }
+
+    ePtr[2] = new Slime;
+    ePtr[2]->EntityPos.setPosition(rand() % 60 * 2, rand() % 40);
+    //while (mapVector[ePtr[2]->get_posY()][ePtr[2]->get_posX()] != "0") { ePtr[2]->EntityPos.setPosition(rand() % 60 * 2, rand() % 40); }
+
+    ePtr[3] = new Slime;
+    ePtr[3]->EntityPos.setPosition(rand() % 60 * 2, rand() % 40);
+  //  while (mapVector[ePtr[3]->get_posY()][ePtr[3]->get_posX()] != "0") { ePtr[3]->EntityPos.setPosition(rand() % 60 * 2, rand() % 40); }
+
+    ePtr[4] = new Slime;
+    ePtr[4]->EntityPos.setPosition(rand() % 60 * 2, rand() % 40);
+    //while (mapVector[ePtr[4]->get_posY()][ePtr[4]->get_posX()] != "0") { ePtr[4]->EntityPos.setPosition(rand() % 60 * 2, rand() % 40); }
+
+}
 
 void renderSlime() {
     // draw location of slimes
-    createSlimeObj();
     std::ostringstream slimeChar;
     slimeChar << static_cast<char>(5) << static_cast<char>(5);
-    ePtr[0]->EntityPos.setPosition(test1, test2);
+    
     if (level_no == 1) {
-         g_Console.writeToBuffer(ePtr[0]->get_posX(), ePtr[0]->get_posY(), slimeChar.str(), 0xFD);
+        for (int k = 0; k < 5; k++) {
+            g_Console.writeToBuffer(ePtr[k]->get_posX(), ePtr[k]->get_posY(), slimeChar.str(), 0xFD);
+        }
     }
 }
 
