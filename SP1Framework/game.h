@@ -70,7 +70,8 @@ void renderMap();           // renders the map to the buffer first
 void renderCharacter();     // renders the character into the buffer
 void createEnemies();       // creates enemy objects
 void deleteEnemies();       // deletes enemy objects
-void renderSlimes();         // renders the slime into the buffer
+void renderSlimes();        // renders the slime into the buffer
+void TouchSpikeTrap();      // damages player when he steps on spike trap
 void initInventoryVector(); // init inventory vector
 void updateInventory();     // update inventory
 void renderInventory();     // renders the inventory into the buffer

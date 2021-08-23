@@ -32,7 +32,8 @@ Inventory inventory;
 EGAMESTATES g_eGameState = S_SPLASHSCREEN; // initial state
 unsigned level_no = 1; //level number, increases when go next level
 bool E_KeyPressed = false, cloned = false, slotFilled = false;
-
+bool dmgalreadytaken = false;
+int damagetaken = 0;
 // Console object
 Console g_Console(120, 50, "Temple Escape");
 unsigned GUI_height = 10;
@@ -250,6 +251,14 @@ void updateGame()       // gameplay logic
     processUserInput(); // checks if you should change states or do something else with the game, e.g. pause, exit
     keyPressed();       // moves the character, collision detection, physics, etc
                         // sound can be played here too.
+    if (dmgalreadytaken == false){
+        TouchSpikeTrap(); 
+        
+    }
+    else if (dmgalreadytaken == true) {
+        dmgalreadytaken = false;
+    }
+    
     checkExitReached(); // checks if player reached the exit
     updateInventory(); // update player's inventory
 }
@@ -266,19 +275,19 @@ void keyPressed()
     // [NOTE]: PLAYER CAN ONLY MOVE AFTER THE MAP 1 ARRAY IS DONE LOADING
     if (E_KeyPressed == false)
     {
-        if ((g_skKeyEvent[K_UP].keyDown) && (g_sChar.m_cLocation.Y > 0) && ((mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "0") || (mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "7") || (mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "8")))
+        if ((g_skKeyEvent[K_UP].keyDown) && (g_sChar.m_cLocation.Y > 0) && ((mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "0") || (mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "7") || (mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "8") || (mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "9")))
         {
             g_sChar.m_cLocation.Y--;
         }
-        if ((g_skKeyEvent[K_LEFT].keyDown) && (g_sChar.m_cLocation.X > 1) && ((mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "0") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "7") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "8")))
+        if ((g_skKeyEvent[K_LEFT].keyDown) && (g_sChar.m_cLocation.X > 1) && ((mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "0") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "7") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "8") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "9")))
         {
             g_sChar.m_cLocation.X -= 2;
         }
-        if ((g_skKeyEvent[K_DOWN].keyDown) && (g_sChar.m_cLocation.Y < (g_Console.getConsoleSize().Y - 1 - GUI_height)) && ((mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "0") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "7") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "8")))
+        if ((g_skKeyEvent[K_DOWN].keyDown) && (g_sChar.m_cLocation.Y < (g_Console.getConsoleSize().Y - 1 - GUI_height)) && ((mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "0") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "7") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "8") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "9")))
         {
             g_sChar.m_cLocation.Y++;
         }
-        if ((g_skKeyEvent[K_RIGHT].keyDown) && (g_sChar.m_cLocation.X < (g_Console.getConsoleSize().X - 2)) && ((mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "0") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "7") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "8")))
+        if ((g_skKeyEvent[K_RIGHT].keyDown) && (g_sChar.m_cLocation.X < (g_Console.getConsoleSize().X - 2)) && ((mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "0") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "7") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "8") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "9")))
         {
             g_sChar.m_cLocation.X += 2;
         }
@@ -375,7 +384,7 @@ void renderSplashScreen() {             // renders the splash screen aka menu sc
     c.Y = 11; c.X = c.X / 2 - 21;
     menuScreen(c);
     c = g_Console.getConsoleSize();
-    c.Y = 40;
+    c.Y = 27;
     c.X = c.X / 2 - 11;
     g_Console.writeToBuffer(c, "Press 'Enter' to start", 0xF0);
     c.Y++;
@@ -507,7 +516,12 @@ void renderSlimes() { //will put in entity later
         }
     }
 }
-
+void TouchSpikeTrap() {
+    if ((mapVector[g_sChar.m_cLocation.Y][g_sChar.m_cLocation.X / 2] == "9") && (dmgalreadytaken == false)) {
+        g_sChar.hp -= 1;
+        dmgalreadytaken = true;
+    }
+}
 void initInventoryVector()
 {
     std::ifstream inventoryCsv("Inventory.csv");
