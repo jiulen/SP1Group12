@@ -438,7 +438,8 @@ void renderMap() {
             case 4: map_colour = 0xE0; break; //chest
             case 5: map_colour = 0x80; break; //fake chest    
             case 6: map_colour = 0x30; break; //prisoner
-            case 7: map_colour = 0x10; break; //exit     
+            case 7: map_colour = 0x10; break; //exit  
+            case 9: map_colour = 0xCC; break;
             }
             g_Console.writeToBuffer(x * 2, y, "  ", map_colour);
         }
