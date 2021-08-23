@@ -1,5 +1,6 @@
 // This is the main file for the game logic and function
 #include "game.h"
+#include "Golem.h"
 #include "Slime.h"
 #include "Entity.h"
 #include "Framework\console.h"
@@ -10,8 +11,8 @@
 #include <fstream>
 #include <string>
 #include <vector>
-#include <stdio.h>      /*  NULL */
-#include <stdlib.h>     /* srand, rand */
+#include <stdio.h> //NULL
+#include <stdlib.h> //srand() and rand()
 #include <time.h>  
 #include <math.h>
 
@@ -27,7 +28,8 @@ Slime slimes;
 SGameChar   g_sChar;
 EGAMESTATES g_eGameState = S_SPLASHSCREEN; // initial state
 int level_no = 1; //level number, increases when go next level
-bool E_KeyPressed = false, slimeObjsCreated = false;
+bool E_KeyPressed = false;
+std::ifstream map;
 
 // Console object
 Console g_Console(120, 50, "Temple Escape");
@@ -36,7 +38,7 @@ int GUI_height = 10;
 // Arrays
 std::vector<std::vector<std::string>> mapVector;       // Map array for all maps
 std::vector<std::vector<std::string>> inventoryVector; // Inventory array
-Entity* ePtr[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+Entity* enemies[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 
 // Purpose  : Initialisation function
 //            Initialize variables, allocate memory, load data from file, etc. 
@@ -234,8 +236,8 @@ void splashScreenWait()    // waits for time to pass in splash screen
 {
     if (g_skKeyEvent[K_ENTER].keyReleased) { // wait for user to press enter to switch to game mode, else do nothing
         g_eGameState = S_GAME;
-        
-       
+        initMapVector();
+        createEnemies(); //for level 1
     }
     processUserInput();
 }
@@ -261,19 +263,19 @@ void keyPressed()
     // [NOTE]: PLAYER CAN ONLY MOVE AFTER THE MAP 1 ARRAY IS DONE LOADING
     if (E_KeyPressed == false)
     {
-        if ((g_skKeyEvent[K_UP].keyDown) && (g_sChar.m_cLocation.Y > 0) && (mapVector.size() == 2400) && ((mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "0") || (mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "7") || (mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "8")))
+        if ((g_skKeyEvent[K_UP].keyDown) && (g_sChar.m_cLocation.Y > 0) && ((mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "0") || (mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "7") || (mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "8")))
         {
             g_sChar.m_cLocation.Y--;
         }
-        if ((g_skKeyEvent[K_LEFT].keyDown) && (g_sChar.m_cLocation.X > 1) && (mapVector.size() == 2400) && ((mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "0") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "7") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "8")))
+        if ((g_skKeyEvent[K_LEFT].keyDown) && (g_sChar.m_cLocation.X > 1) && ((mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "0") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "7") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "8")))
         {
             g_sChar.m_cLocation.X -= 2;
         }
-        if ((g_skKeyEvent[K_DOWN].keyDown) && (g_sChar.m_cLocation.Y < (g_Console.getConsoleSize().Y - 1 - GUI_height)) && (mapVector.size() == 2400) && ((mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "0") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "7") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "8")))
+        if ((g_skKeyEvent[K_DOWN].keyDown) && (g_sChar.m_cLocation.Y < (g_Console.getConsoleSize().Y - 1 - GUI_height)) && ((mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "0") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "7") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "8")))
         {
             g_sChar.m_cLocation.Y++;
         }
-        if ((g_skKeyEvent[K_RIGHT].keyDown) && (g_sChar.m_cLocation.X < (g_Console.getConsoleSize().X - 2)) && (mapVector.size() == 2400) && ((mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "0") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "7") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "8")))
+        if ((g_skKeyEvent[K_RIGHT].keyDown) && (g_sChar.m_cLocation.X < (g_Console.getConsoleSize().X - 2)) && ((mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "0") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "7") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "8")))
         {
             g_sChar.m_cLocation.X += 2;
         }
@@ -298,20 +300,18 @@ void processUserInput()
 
 void checkExitReached()
 {
-    if ((mapVector.size() == 2400) && (mapVector[g_sChar.m_cLocation.Y][g_sChar.m_cLocation.X / 2] == "7"))
-    {
+    if (mapVector[g_sChar.m_cLocation.Y][g_sChar.m_cLocation.X / 2] == "7") {
         if (level_no < 5) { mapVector.clear(); level_no++; }
-
+        initMapVector();
         switch (level_no)
         {
-        case 2: g_sChar.m_cLocation.X = 6; g_sChar.m_cLocation.Y = 36; break;
-        case 3: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 2; break;
-        case 4: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 20; break;
-        case 5: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 21; break;
+        case 2: g_sChar.m_cLocation.X = 6; g_sChar.m_cLocation.Y = 36; deleteEnemies(); createEnemies(); break;
+        case 3: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 2; deleteEnemies(); createEnemies(); break;
+        case 4: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 20; deleteEnemies(); createEnemies(); break;
+        case 5: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 21; deleteEnemies(); break;
         }
     }
-    if ((mapVector.size() == 2400) && (mapVector[g_sChar.m_cLocation.Y][g_sChar.m_cLocation.X / 2] == "8"))
-    {
+    if (mapVector[g_sChar.m_cLocation.Y][g_sChar.m_cLocation.X / 2] == "8") {
         // Ending scene
         g_eGameState = S_END;
     }
@@ -387,17 +387,14 @@ void renderSplashScreen() {             // renders the splash screen aka menu sc
 }
 
 void renderGame() {
-    if (mapVector.size() < 2400) { initMapVector(); }; // init map vector
     renderMap(); // then renders the map to the buffer first
-    renderCharacter();  // renders the character into the buffer
-    if (slimeObjsCreated == false) { createSlimeObjs(); } // create slime objects if they are not created
     renderSlimes(); // render slime objects
+    renderCharacter();  // renders the character into the buffer
     if (E_KeyPressed == true) { if (inventoryVector.size() < 1008) { initInventoryVector(); }; updateInventory(); renderInventory(); } // init inventory vector, after that update inventory (health, items etc), then render inventory (This is to ensure that players do not see the change when they press 'e' key)
 }
 
 void initMapVector()
 {
-    std::ifstream map;
     switch (level_no)
     {
     case 1: map = std::ifstream("Map1.csv"); break; //opens map
@@ -446,37 +443,64 @@ void renderMap() {
 
 void renderCharacter() {
     // Draw the location of the character
-    std::ostringstream playerChar;
-    playerChar << static_cast<char>(1) << static_cast<char>(1);
-    g_Console.writeToBuffer(g_sChar.m_cLocation, playerChar.str(), 0x01);
+    std::string playerChar = "..";
+    g_Console.writeToBuffer(g_sChar.m_cLocation, playerChar, 0xF0);
 }
 
-void createSlimeObjs() {  // The creation of slime object MUST be inside a FUNCTION
-
-    slimeObjsCreated = true;
-
-    ePtr[0] = new Slime;
-    ePtr[1] = new Slime;
-    ePtr[2] = new Slime;
-    ePtr[3] = new Slime;
-    ePtr[4] = new Slime;
-    
-    while (mapVector[ePtr[0]->get_posY()][ePtr[0]->get_posX()] != "0") { ePtr[0]->EntityPos.setPosition(2 * ceil(rand() % 60 / 2), rand() % 40); }
-    while (mapVector[ePtr[1]->get_posY()][ePtr[1]->get_posX()] != "0") { ePtr[1]->EntityPos.setPosition(2 * ceil(rand() % 60 / 2), rand() % 40); }
-    while (mapVector[ePtr[2]->get_posY()][ePtr[2]->get_posX()] != "0") { ePtr[2]->EntityPos.setPosition(2 * ceil(rand() % 60 / 2), rand() % 40); }
-    while (mapVector[ePtr[3]->get_posY()][ePtr[3]->get_posX()] != "0") { ePtr[3]->EntityPos.setPosition(2 * ceil(rand() % 60 / 2), rand() % 40); }
-    while (mapVector[ePtr[4]->get_posY()][ePtr[4]->get_posX()] != "0") { ePtr[4]->EntityPos.setPosition(2 * ceil(rand() % 60 / 2), rand() % 40); }
-
+void createEnemies() {  // The creation of slime object MUST be inside a FUNCTION
+    if (level_no == 1) {
+        for (int i = 0; i < 5; i++) {
+            enemies[i] = new Slime;
+        }
+        for (int i = 0; i < 5; i++) {
+            while (mapVector[enemies[i]->get_posY()][enemies[i]->get_posX()/2] != "0") {
+                enemies[i]->EntityPos.setPosition((2 * rand() % 60), rand() % 40);
+            }
+        }
+    }
+    if (level_no == 2) {
+        for (int i = 0; i < 10; i++) {
+            enemies[i] = new Slime;
+        }
+        for (int i = 0; i < 10; i++) {
+            while (mapVector[enemies[i]->get_posY()][enemies[i]->get_posX() / 2] != "0") {
+                enemies[i]->EntityPos.setPosition((2 * rand() % 60), rand() % 40);
+            }
+        }
+    }
+    if (level_no == 3) {
+        for (int i = 0; i < 10; i++) {
+            enemies[i] = new Slime;
+        }
+        for (int i = 0; i < 10; i++) {
+            while (mapVector[enemies[i]->get_posY()][enemies[i]->get_posX() / 2] != "0") {
+                enemies[i]->EntityPos.setPosition((2 * rand() % 60), rand() % 40);
+            }
+        }
+    }
+    if (level_no == 4) {
+        enemies[0] = new Golem;
+        while (mapVector[enemies[0]->get_posY()][enemies[0]->get_posX() / 2] != "0") {
+            enemies[0]->EntityPos.setPosition((2 * rand() % 60), rand() % 40);
+        }
+    }
 }
 
-void renderSlimes() {
+void deleteEnemies() {
+    for (int i = 0; i < 10; i++) {
+        if (enemies[i] != nullptr) {
+            delete enemies[i];
+            enemies[i] = nullptr;
+        }
+    }
+}
+
+void renderSlimes() { //will put in entity later
     // draw location of slimes
-    std::ostringstream slimeChar;
-    slimeChar << static_cast<char>(5) << static_cast<char>(5);
-    
+    std::string slimeChar = "--";
     if (level_no == 1) {
         for (int k = 0; k < 5; k++) {
-            g_Console.writeToBuffer((ePtr[k]->get_posX() * 2), ePtr[k]->get_posY(), slimeChar.str(), 0xFD);
+            g_Console.writeToBuffer(enemies[k]->get_posX(), enemies[k]->get_posY(), slimeChar, 0x20);
         }
     }
 }
@@ -573,8 +597,8 @@ void renderEndScreen() {
     c.Y = 1;
     g_Console.writeToBuffer(c, "Created by Group 12: Winston, Jun Hou, Jiu Len and Darius", 0xF0);
     c.Y += 1;
-    g_Console.writeToBuffer(c, "YOU WIN!!!", 0xF0);
-    //add more things later? -> dmg taken, dmg dealt, dmg healed, kills, time taken
+    g_Console.writeToBuffer(c, "YOU WIN!!!", 0xF0); //add a message for losing
+    //add kills, time taken
 }
 
 void renderFramerate() {
