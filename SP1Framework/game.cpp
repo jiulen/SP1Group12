@@ -5,35 +5,37 @@
 #include "Entity.h"
 #include "Framework\console.h"
 #include "Inventory.h"
+#include "Sword.h"
+#include "Chestplate.h"
+#include "Boot.h"
+#include "Potion.h"
 #include <iostream>
 #include <iomanip>
 #include <sstream>
 #include <fstream>
 #include <string>
 #include <vector>
+#include <typeinfo>
 #include <stdio.h> //NULL
 #include <stdlib.h> //srand() and rand()
-#include <time.h>  
-#include <math.h>
-
-int test1, test2; // ignore this test is for slime stuff
+#include <time.h>
 
 double  g_dDeltaTime;
 double  g_dGameTime; //time spent on levels
 SKeyEvent g_skKeyEvent[K_COUNT];
 SMouseEvent g_mouseEvent;
-Slime slimes;
 
 // Game specific variables here
 SGameChar   g_sChar;
+Slime slimes;
+Inventory inventory;
 EGAMESTATES g_eGameState = S_SPLASHSCREEN; // initial state
-int level_no = 1; //level number, increases when go next level
-bool E_KeyPressed = false;
-std::ifstream map;
+unsigned level_no = 1; //level number, increases when go next level
+bool E_KeyPressed = false, cloned = false, slotFilled = false;
 
 // Console object
 Console g_Console(120, 50, "Temple Escape");
-int GUI_height = 10;
+unsigned GUI_height = 10;
 
 // Arrays
 std::vector<std::vector<std::string>> mapVector;       // Map array for all maps
@@ -227,7 +229,7 @@ void update(double dt)
     switch (g_eGameState)
     {
     case S_SPLASHSCREEN: splashScreenWait(); break; // game logic for the splash screen
-    case S_GAME: if (E_KeyPressed == false) { g_dGameTime += dt; }; updateGame(); break; // gameplay logic when we are in the game
+    case S_GAME: g_dGameTime += dt; updateGame(); break; // gameplay logic when we are in the game
     case S_END: endScreenWait(); break;
     }
 }
@@ -237,18 +239,19 @@ void splashScreenWait()    // waits for time to pass in splash screen
     if (g_skKeyEvent[K_ENTER].keyReleased) { // wait for user to press enter to switch to game mode, else do nothing
         g_eGameState = S_GAME;
         initMapVector();
-        createEnemies(); //for level 1
+        createEnemies();
+        initInventoryVector();
     }
     processUserInput();
 }
 
 void updateGame()       // gameplay logic
 {
-    keyPressed();       // moves the character, collision detection, physics, etc
     processUserInput(); // checks if you should change states or do something else with the game, e.g. pause, exit
+    keyPressed();       // moves the character, collision detection, physics, etc
                         // sound can be played here too.
     checkExitReached(); // checks if player reached the exit
-    
+    updateInventory(); // update player's inventory
 }
 
 void endScreenWait()
@@ -301,14 +304,14 @@ void processUserInput()
 void checkExitReached()
 {
     if (mapVector[g_sChar.m_cLocation.Y][g_sChar.m_cLocation.X / 2] == "7") {
-        if (level_no < 5) { mapVector.clear(); level_no++; }
-        initMapVector();
+        if (level_no < 5) { deleteEnemies(); mapVector.clear(); level_no++; initMapVector(); createEnemies(); }
+
         switch (level_no)
         {
-        case 2: g_sChar.m_cLocation.X = 6; g_sChar.m_cLocation.Y = 36; deleteEnemies(); createEnemies(); break;
-        case 3: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 2; deleteEnemies(); createEnemies(); break;
-        case 4: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 20; deleteEnemies(); createEnemies(); break;
-        case 5: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 21; deleteEnemies(); break;
+        case 2: g_sChar.m_cLocation.X = 6; g_sChar.m_cLocation.Y = 36; break;
+        case 3: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 2; break;
+        case 4: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 20; break;
+        case 5: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 21; break;
         }
     }
     if (mapVector[g_sChar.m_cLocation.Y][g_sChar.m_cLocation.X / 2] == "8") {
@@ -388,24 +391,25 @@ void renderSplashScreen() {             // renders the splash screen aka menu sc
 
 void renderGame() {
     renderMap(); // then renders the map to the buffer first
-    renderSlimes(); // render slime objects
     renderCharacter();  // renders the character into the buffer
-    if (E_KeyPressed == true) { if (inventoryVector.size() < 1008) { initInventoryVector(); }; updateInventory(); renderInventory(); } // init inventory vector, after that update inventory (health, items etc), then render inventory (This is to ensure that players do not see the change when they press 'e' key)
+    renderSlimes(); // render slime objects
+    if (E_KeyPressed == true) { renderInventory(); } // render inventory
 }
 
 void initMapVector()
 {
+    std::ifstream mapCsv; // We dont need to move it to the top as we are not using it from other functions, this frees up memory after this function is ran
     switch (level_no)
     {
-    case 1: map = std::ifstream("Map1.csv"); break; //opens map
-    case 2: map = std::ifstream("Map2.csv"); break; //opens map
-    case 3: map = std::ifstream("Map3.csv"); break; //opens map
-    case 4: map = std::ifstream("Map4.csv"); break; //opens map
-    case 5: map = std::ifstream("Map5.csv"); break; //opens map
+    case 1: mapCsv = std::ifstream("Map1.csv"); break; //opens map
+    case 2: mapCsv = std::ifstream("Map2.csv"); break; //opens map
+    case 3: mapCsv = std::ifstream("Map3.csv"); break; //opens map
+    case 4: mapCsv = std::ifstream("Map4.csv"); break; //opens map
+    case 5: mapCsv = std::ifstream("Map5.csv"); break; //opens map
     }
     std::string row;
 
-    while (std::getline(map, row))
+    while (std::getline(mapCsv, row))
     {
         std::stringstream rowStream(row);
         std::string(cell);
@@ -416,7 +420,7 @@ void initMapVector()
         mapVector.push_back(rowVector);
     }
 
-    map.close();
+    mapCsv.close();
 }
 
 void renderMap() {
@@ -448,46 +452,43 @@ void renderCharacter() {
 }
 
 void createEnemies() {  // The creation of slime object MUST be inside a FUNCTION
-    if (level_no == 1) {
-        for (int i = 0; i < 5; i++) {
+    switch (level_no)
+    {
+    case 1:
+        for (unsigned i = 0; i < 5; i++) {
             enemies[i] = new Slime;
-        }
-        for (int i = 0; i < 5; i++) {
-            while (mapVector[enemies[i]->get_posY()][enemies[i]->get_posX()/2] != "0") {
-                enemies[i]->EntityPos.setPosition((2 * rand() % 60), rand() % 40);
-            }
-        }
-    }
-    if (level_no == 2) {
-        for (int i = 0; i < 10; i++) {
-            enemies[i] = new Slime;
-        }
-        for (int i = 0; i < 10; i++) {
             while (mapVector[enemies[i]->get_posY()][enemies[i]->get_posX() / 2] != "0") {
                 enemies[i]->EntityPos.setPosition((2 * rand() % 60), rand() % 40);
             }
         }
-    }
-    if (level_no == 3) {
-        for (int i = 0; i < 10; i++) {
+        break;
+    case 2:
+        for (unsigned i = 0; i < 10; i++) {
             enemies[i] = new Slime;
-        }
-        for (int i = 0; i < 10; i++) {
             while (mapVector[enemies[i]->get_posY()][enemies[i]->get_posX() / 2] != "0") {
                 enemies[i]->EntityPos.setPosition((2 * rand() % 60), rand() % 40);
             }
         }
-    }
-    if (level_no == 4) {
+        break;
+    case 3:
+        for (unsigned i = 0; i < 10; i++) {
+            enemies[i] = new Slime;
+            while (mapVector[enemies[i]->get_posY()][enemies[i]->get_posX() / 2] != "0") {
+                enemies[i]->EntityPos.setPosition((2 * rand() % 60), rand() % 40);
+            }
+        }
+        break;
+    case 4:
         enemies[0] = new Golem;
         while (mapVector[enemies[0]->get_posY()][enemies[0]->get_posX() / 2] != "0") {
             enemies[0]->EntityPos.setPosition((2 * rand() % 60), rand() % 40);
         }
+        break;
     }
 }
 
 void deleteEnemies() {
-    for (int i = 0; i < 10; i++) {
+    for (unsigned i = 0; i < 10; i++) {
         if (enemies[i] != nullptr) {
             delete enemies[i];
             enemies[i] = nullptr;
@@ -498,19 +499,20 @@ void deleteEnemies() {
 void renderSlimes() { //will put in entity later
     // draw location of slimes
     std::string slimeChar = "--";
-    if (level_no == 1) {
-        for (int k = 0; k < 5; k++) {
-            g_Console.writeToBuffer(enemies[k]->get_posX(), enemies[k]->get_posY(), slimeChar, 0x20);
+    for (unsigned i = 0; i < 10; i++) {
+        if (enemies[i] != nullptr)
+        {
+            g_Console.writeToBuffer(enemies[i]->get_posX(), enemies[i]->get_posY(), slimeChar, 0x20);
         }
     }
 }
 
 void initInventoryVector()
 {
-    std::ifstream inventory("Inventory.csv");
+    std::ifstream inventoryCsv("Inventory.csv");
     std::string row;
 
-    while (std::getline(inventory, row))
+    while (std::getline(inventoryCsv, row))
     {
         std::stringstream rowStream(row);
         std::string(cell);
@@ -521,12 +523,11 @@ void initInventoryVector()
         inventoryVector.push_back(rowVector);
     }
 
-    inventory.close();
+    inventoryCsv.close();
 }
 
 void updateInventoryHealth()
 {
-    g_sChar.hp = 4; // for testing
     for (unsigned r = 3; r < 8; r++)
     {
         for (unsigned c = 25; c < 31; c++)
@@ -534,24 +535,79 @@ void updateInventoryHealth()
             switch (g_sChar.hp)
             {
             case 0: ( (c < 29) ? ( ((c == 26 || c == 27) && (r >= 4 && r <= 6)) ? (inventoryVector[r][c] = "1") : (inventoryVector[r][c] = "0") ) : (inventoryVector[r][c] = "1") ); break;
-            case 1: ( (c == 25) ? (inventoryVector[r][c] = "0") : (inventoryVector[r][c] = "1") ); break;
+            case 1: ( (c != 25) ? (inventoryVector[r][c] = "1") : (inventoryVector[r][c] = "0") ); break;
             case 2: ( (c < 28) ? ( ((r == 4 && c != 27) || (r == 6 && c != 25)) ? (inventoryVector[r][c] = "1") : (inventoryVector[r][c] = "0") ) : (inventoryVector[r][c] = "1") ); break;
             case 3: ( (c < 28) ? ( (((r == 4 || r == 6) && c != 27 )) ? (inventoryVector[r][c] = "1") : (inventoryVector[r][c] = "0") ) : (inventoryVector[r][c] = "1") ); break;
             case 4: ( (c < 29) ? ( (((c == 25 && r <= 5) || (c == 27) || ((c == 26 || c == 28) && r == 5))) ? (inventoryVector[r][c] = "0") : (inventoryVector[r][c] = "1") ) : (inventoryVector[r][c] = "1") ); break;
-            case 5: break;
-            case 6: break;
-            case 7: break;
-            case 8: break;
-            case 9: break;
-            case 10: break;
+            case 5: ( (c < 28) ? ( ((r == 4 && c != 25) || (r == 6 && c != 27)) ? (inventoryVector[r][c] = "1") : (inventoryVector[r][c] = "0") ) : (inventoryVector[r][c] = "1") ); break;
+            case 6: ( (c < 28) ? ( ((r == 4 && c != 25) || (r == 6 && c == 26)) ? (inventoryVector[r][c] = "1") : (inventoryVector[r][c] = "0") ) : (inventoryVector[r][c] = "1") ); break;
+            case 7: ( (c < 28) ? ( (r != 3 && c != 27) ? (inventoryVector[r][c] = "1") : (inventoryVector[r][c] = "0") ) : (inventoryVector[r][c] = "1") ); break;
+            case 8: ( (c < 28) ? ( ((r == 4 || r == 6) && c == 26) ? (inventoryVector[r][c] = "1") : (inventoryVector[r][c] = "0") ) : (inventoryVector[r][c] = "1") ); break;
+            case 9: ( (c < 28) ? ( ((r == 4 && c == 26) || (r == 6 && c != 27)) ? (inventoryVector[r][c] = "1") : (inventoryVector[r][c] = "0") ) : (inventoryVector[r][c] = "1") ); break;
+            case 10: ( (c != 25) ? ( ((c == 26) || ((c == 28 || c == 29) && (r >= 4 && r <= 6))) ? (inventoryVector[r][c] = "1") : (inventoryVector[r][c] = "0") ) : (inventoryVector[r][c] = "0") ); break;
             }
         }
     }
 }
 
-void updateInventoryItems()
-{
+void updateInventoryItems() // TO-FIX BUG: CREATES FOR ALL SLOTS & typeid error
+{    
+    
+    if (cloned == false)
+    {
+        cloned = true;
+        Sword* sword = new Sword;                        // test
+        Boot* boot = new Boot;                           // test
+        inventory.AddInGameItem(sword);                  // test
+        inventory.AddInGameItem(boot);                   // test
+    }   
 
+    if (slotFilled == false)
+    {
+        InGameItem** items = inventory.GetInGameItems(); // test
+
+        for (unsigned count = 0; count < 8; count++)
+        {
+            if (items[count] != nullptr)
+            {
+                for (unsigned y = 0; y < 24; y++)
+                {
+                    for (unsigned x = 0; x < 42; x++)
+                    {
+                        if (inventoryVector[y][x] == "9")
+                        {
+                            for (unsigned j = 0; j < 3; j++) // dimension of each inventory slot
+                            {
+                                for (unsigned i = 0; i < 3; i++)
+                                {
+                                    if (typeid(*(items[count])).name() == "Sword")
+                                    {
+                                        ((j == i) ? ((j == 2 && i == 2) ? (inventoryVector[y + j][x + i] = "11") : (inventoryVector[y + j][x + i] = "12")) : (inventoryVector[y + j][x + i] = "1")); break;
+                                    }
+                                    else if (typeid(*(items[count])).name() == "Chestplate")
+                                    {
+                                        ((j == 0 && i == 1) ? (inventoryVector[y + j][x + i] = "1") : (inventoryVector[y + j][x + i] = "13")); break;
+                                    }
+                                    else if (typeid(*(items[count])).name() == "Boot")
+                                    {
+                                        ((j != 0 && (i == 0 || i == 2)) ? (inventoryVector[y + j][x + i] = "14") : (inventoryVector[y + j][x + i] = "1")); break;
+                                    }
+                                    else
+                                    {
+                                        (((j == 0 && i == 1) || (j == 1 || j == 2)) ? (inventoryVector[y + j][x + i] = "15") : (inventoryVector[y + j][x + i] = "1")); break;
+                                    }
+                                }
+                            }
+                            slotFilled = true;
+                        }
+                        if (slotFilled == true) { break; }
+                    }
+                    if (slotFilled == true) { break; }
+                }
+            }
+            if (slotFilled == true) { break; }
+        }
+    }
 }
 
 void updateInventory()

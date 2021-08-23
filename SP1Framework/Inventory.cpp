@@ -10,20 +10,19 @@ Inventory::~Inventory()
 
 }
 
-InGameItem* Inventory::GetInGameItems()
+InGameItem** Inventory::GetInGameItems()
 {
-	return (*items);
+	return items;
 }
 
-void Inventory::AddInGameItem(InGameItem& item)
+void Inventory::AddInGameItem(InGameItem* item)
 {
-	bool itemAdded = false;
-	for (int i = 0; i < 8; i++)
+	for (unsigned i = 0; i < 8; i++)
 	{
-		if ((itemAdded == false) && (items[i] != nullptr))
+		if (items[i] == nullptr)
 		{
-			(*items[i]) = item;
-			itemAdded = true;
+			items[i] = item;
+			break;
 		}
 	}
 }

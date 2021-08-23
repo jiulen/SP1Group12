@@ -9,6 +9,6 @@ private:
 public:
 	Inventory();
 	~Inventory();
-	InGameItem* GetInGameItems();
-	void AddInGameItem(InGameItem&);
+	InGameItem** GetInGameItems();
+	void AddInGameItem(InGameItem*);
 };
