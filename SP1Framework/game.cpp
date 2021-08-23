@@ -391,8 +391,8 @@ void renderSplashScreen() {             // renders the splash screen aka menu sc
 
 void renderGame() {
     renderMap(); // then renders the map to the buffer first
-    renderCharacter();  // renders the character into the buffer
     renderSlimes(); // render slime objects
+    renderCharacter();  // renders the character into the buffer (over slimes)
     if (E_KeyPressed == true) { renderInventory(); } // render inventory
 }
 
@@ -458,7 +458,7 @@ void createEnemies() {  // The creation of slime object MUST be inside a FUNCTIO
         for (unsigned i = 0; i < 5; i++) {
             enemies[i] = new Slime;
             while (mapVector[enemies[i]->get_posY()][enemies[i]->get_posX() / 2] != "0") {
-                enemies[i]->EntityPos.setPosition((2 * rand() % 60), rand() % 40);
+                enemies[i]->EntityPos.setPosition((2 * (rand() % 60)), rand() % 40);
             }
         }
         break;
@@ -466,7 +466,7 @@ void createEnemies() {  // The creation of slime object MUST be inside a FUNCTIO
         for (unsigned i = 0; i < 10; i++) {
             enemies[i] = new Slime;
             while (mapVector[enemies[i]->get_posY()][enemies[i]->get_posX() / 2] != "0") {
-                enemies[i]->EntityPos.setPosition((2 * rand() % 60), rand() % 40);
+                enemies[i]->EntityPos.setPosition((2 * (rand() % 60)), rand() % 40);
             }
         }
         break;
@@ -474,14 +474,14 @@ void createEnemies() {  // The creation of slime object MUST be inside a FUNCTIO
         for (unsigned i = 0; i < 10; i++) {
             enemies[i] = new Slime;
             while (mapVector[enemies[i]->get_posY()][enemies[i]->get_posX() / 2] != "0") {
-                enemies[i]->EntityPos.setPosition((2 * rand() % 60), rand() % 40);
+                enemies[i]->EntityPos.setPosition((2 * (rand() % 60)), rand() % 40);
             }
         }
         break;
     case 4:
         enemies[0] = new Golem;
         while (mapVector[enemies[0]->get_posY()][enemies[0]->get_posX() / 2] != "0") {
-            enemies[0]->EntityPos.setPosition((2 * rand() % 60), rand() % 40);
+            enemies[0]->EntityPos.setPosition((2 * (rand() % 60)), rand() % 40);
         }
         break;
     }
