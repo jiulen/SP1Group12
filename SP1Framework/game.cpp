@@ -30,7 +30,7 @@ SGameChar   g_sChar;
 Slime slimes;
 Inventory inventory;
 EGAMESTATES g_eGameState = S_SPLASHSCREEN; // initial state
-unsigned level_no = 1; //level number, increases when go next level
+unsigned level_no = 4; //level number, increases when go next level
 bool E_KeyPressed = false, cloned = false, slotFilled = false;
 bool dmgalreadytaken = false;
 int damagetaken = 0;
@@ -317,7 +317,7 @@ void checkExitReached()
 
         switch (level_no)
         {
-        case 2: g_sChar.m_cLocation.X = 6; g_sChar.m_cLocation.Y = 36; break;
+        case 2: g_sChar.m_cLocation.X = 8; g_sChar.m_cLocation.Y = 36; break;
         case 3: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 2; break;
         case 4: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 20; break;
         case 5: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 21; break;
@@ -401,6 +401,7 @@ void renderSplashScreen() {             // renders the splash screen aka menu sc
 void renderGame() {
     renderMap(); // then renders the map to the buffer first
     renderSlimes(); // render slime objects
+    renderGolems();
     renderCharacter();  // renders the character into the buffer (over slimes)
     if (E_KeyPressed == true) { renderInventory(); } // render inventory
 }
@@ -491,7 +492,7 @@ void createEnemies() {  // The creation of slime object MUST be inside a FUNCTIO
     case 4:
         enemies[0] = new Golem;
         while (mapVector[enemies[0]->get_posY()][enemies[0]->get_posX() / 2] != "0") {
-            enemies[0]->EntityPos.setPosition((2 * (rand() % 60)), rand() % 40);
+            enemies[0]->EntityPos.setPosition(60, 19);
         }
         break;
     }
@@ -509,12 +510,27 @@ void deleteEnemies() {
 void renderSlimes() { //will put in entity later
     // draw location of slimes
     std::string slimeChar = "--";
-    for (unsigned i = 0; i < 10; i++) {
-        if (enemies[i] != nullptr)
-        {
-            g_Console.writeToBuffer(enemies[i]->get_posX(), enemies[i]->get_posY(), slimeChar, 0x20);
+    if (level_no < 4) {
+        for (unsigned i = 0; i < 10; i++) {
+            if (enemies[i] != nullptr)
+            {
+                g_Console.writeToBuffer(enemies[i]->get_posX(), enemies[i]->get_posY(), slimeChar, 0x20);
+            }
         }
     }
+}
+void renderGolems() {
+    std::string golemChar = "ppp";
+    if (level_no == 4) {
+        g_Console.writeToBuffer(enemies[0]->get_posX(), enemies[0]->get_posY(), golemChar, 0x3F);
+    }
+}
+void SlimeMovement() {
+   /* switch (level_no)
+    {
+    case 1:
+
+    }*/
 }
 void TouchSpikeTrap() {
     if ((mapVector[g_sChar.m_cLocation.Y][g_sChar.m_cLocation.X / 2] == "9") && (dmgalreadytaken == false)) {
