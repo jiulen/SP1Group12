@@ -4,7 +4,8 @@ class Slime :public Entity {
 public:
 	Slime();
 	~Slime();
-	void move();
+	void move(int);
+
 private:
 	static int slime_kills;
 };

@@ -9,16 +9,6 @@ Entity::~Entity() {
 
 }
 
-void Entity::move() {
-
-}
-
-int Entity::Random_Integer() {
-	int randint;							//stands for RANDom INTeger
-	randint = rand() % 4 + 1;		//choosing random number start to step
-	return randint;
-}
-
 int Entity::get_hp(void) {
 	return hp;
 }
@@ -46,4 +36,8 @@ int Entity::get_posX(void) {
 
 int Entity::get_posY(void) {
 	return EntityPos.get_y();
+}
+
+void Entity::setPos(int h, int j) {
+	EntityPos.setPosition(h, j);
 }

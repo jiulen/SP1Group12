@@ -11,6 +11,15 @@ Golem::~Golem() {
 
 }
 
-void Golem::move() {
-	//when player within 10 units, charge at player at 4 units/90 frames, does 4 damage, wait 3 seconds and redo, deals damage in a 1 block radius around itself
+void Golem::move(int direction) {
+    switch (direction) {
+    case 0: // up
+        EntityPos.setPosition(get_posX(), get_posY() - 1); break;
+    case 1: // down
+        EntityPos.setPosition(get_posX(), get_posY() + 1); break;
+    case 2: // left
+        EntityPos.setPosition(get_posX() - 2, get_posY()); break;
+    case 3:
+        EntityPos.setPosition(get_posX() + 2, get_posY()); break;
+    }
 }

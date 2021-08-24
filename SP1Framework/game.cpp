@@ -15,8 +15,8 @@
 #include <stdlib.h> //srand() and rand()
 #include <time.h>
 
-double  g_dDeltaTime;
-double  g_dGameTime; //time spent on levels
+double  g_dDeltaTime, g_dGameTime, timerTrap, enemyMeleeAttackTimer, moveTimer;
+
 SKeyEvent g_skKeyEvent[K_COUNT];
 SMouseEvent g_mouseEvent;
 
@@ -28,7 +28,9 @@ EGAMESTATES g_eGameState = S_SPLASHSCREEN; // initial state
 
 int damagetaken = 0;
 unsigned level_no = 1, itemsCount = 0;
-bool E_KeyPressed = false, dmgalreadytaken = false, itemsAdded = false; // [NOTE]: itemsAdded variable is for testing!
+bool E_KeyPressed = false, dmgalreadytaken = false, itemsAdded = false, onDialogue = false; // [NOTE]: itemsAdded variable is for testing!
+
+std::string dialogue = "", dialogue2 = "", dialogue3 = "";
 
 // Console object
 Console g_Console(120, 50, "Temple Escape");
@@ -49,7 +51,7 @@ Entity* enemies[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nu
 void init(void) {
     srand((unsigned int) time(NULL));
     // Set precision for floating point output
-    g_dGameTime = 0.0;
+     g_dGameTime = 0.0, timerTrap = 0.0, enemyMeleeAttackTimer = 0.0, moveTimer = 0;
     // sets the initial state for the game
     g_eGameState = S_SPLASHSCREEN;
     //change values to change where player spawns
@@ -220,7 +222,7 @@ void update(double dt)
     switch (g_eGameState)
     {
     case S_SPLASHSCREEN: splashScreenWait(); break; // game logic for the splash screen
-    case S_GAME: g_dGameTime += dt; updateGame(); break; // gameplay logic when we are in the game
+    case S_GAME: g_dGameTime += dt; updateGame(dt); break; // gameplay logic when we are in the game
     case S_END: endScreenWait(); break;
     }
 }
@@ -232,23 +234,30 @@ void splashScreenWait()    // waits for time to pass in splash screen
         initMapVector();
         createEnemies();
         initInventoryVector();
+        getDialogue(1);
+        renderDialogues();
     }
     processUserInput();
 }
 
-void updateGame()       // gameplay logic
+void updateGame(double dt)       // gameplay logic
 {
     processUserInput(); // checks if you should change states or do something else with the game, e.g. pause, exit
     keyPressed();       // moves the character, collision detection, physics, etc
                         // sound can be played here too.
-    if (dmgalreadytaken == false){
-        TouchSpikeTrap(); 
+    if (E_KeyPressed == false)
+    {
+        moveTimer += dt;
+        if (moveTimer >= 0.075) { enemyMovement(); moveTimer = 0; }
+        enemyMeleeAttackTimer += dt;
+        if (enemyMeleeAttackTimer >= 0.1) { enemyMeleeAttack(); enemyMeleeAttackTimer = 0; }
     }
-    else {         //logic error, collisions occur very fast
-        dmgalreadytaken = false;
+    timerTrap += dt;
+    if (timerTrap >= 0.1) {
+        TouchSpikeTrap(dt);
+        timerTrap = 0;
     }
-    
-    checkExitReached(); // checks if player reached the exit
+    checkPosition(); // checks whether player's next position is an exit, a chest, 
     updateInventory(); // update player's inventory
     if (g_sChar.hp <= 0) {
         g_eGameState = S_END;
@@ -265,35 +274,40 @@ void keyPressed()
     // Updating the location of the character based on the key release
     // 
     // [NOTE]: PLAYER CAN ONLY MOVE AFTER THE MAP 1 ARRAY IS DONE LOADING
-    if (E_KeyPressed == false)
+    if (onDialogue == false)
     {
-        if ((g_skKeyEvent[K_UP].keyDown) && (g_sChar.m_cLocation.Y > 0) && ((mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "0") || (mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "7") || (mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "8") || (mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "9")))
+        if (E_KeyPressed == false)
         {
-            g_sChar.m_cLocation.Y--;
+            if ((g_skKeyEvent[K_UP].keyDown) && (g_sChar.m_cLocation.Y > 0) && ((mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "0") || (mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "7") || (mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "8") || (mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "9")))
+            {
+                g_sChar.m_cLocation.Y--;
+            }
+            if ((g_skKeyEvent[K_LEFT].keyDown) && (g_sChar.m_cLocation.X > 1) && ((mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "0") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "7") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "8") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "9")))
+            {
+                g_sChar.m_cLocation.X -= 2;
+            }
+            if ((g_skKeyEvent[K_DOWN].keyDown) && (g_sChar.m_cLocation.Y < (g_Console.getConsoleSize().Y - 1 - GUI_height)) && ((mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "0") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "7") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "8") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "9")))
+            {
+                g_sChar.m_cLocation.Y++;
+            }
+            if ((g_skKeyEvent[K_RIGHT].keyDown) && (g_sChar.m_cLocation.X < (g_Console.getConsoleSize().X - 2)) && ((mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "0") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "7") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "8") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "9")))
+            {
+                g_sChar.m_cLocation.X += 2;
+            }
+            if (g_skKeyEvent[K_INTERACTIVE].keyReleased) // we don't want player to spam
+            {
+                if (mapVector[g_sChar.m_cLocation.Y][g_sChar.m_cLocation.X / 2] == "3") { getDialogue(5); renderDialogues(); }
+                if (mapVector[g_sChar.m_cLocation.Y][g_sChar.m_cLocation.X / 2] == "4") { getDialogue(13); renderDialogues(); }
+                if (mapVector[g_sChar.m_cLocation.Y][g_sChar.m_cLocation.X / 2] == "5") { getDialogue(2); renderDialogues(); }
+                if (mapVector[g_sChar.m_cLocation.Y][g_sChar.m_cLocation.X / 2] == "6") { getDialogue(3); getDialogue(4); renderDialogues(); }
+            }
         }
-        if ((g_skKeyEvent[K_LEFT].keyDown) && (g_sChar.m_cLocation.X > 1) && ((mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "0") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "7") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "8") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "9")))
-        {
-            g_sChar.m_cLocation.X -= 2;
-        }
-        if ((g_skKeyEvent[K_DOWN].keyDown) && (g_sChar.m_cLocation.Y < (g_Console.getConsoleSize().Y - 1 - GUI_height)) && ((mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "0") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "7") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "8") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "9")))
-        {
-            g_sChar.m_cLocation.Y++;
-        }
-        if ((g_skKeyEvent[K_RIGHT].keyDown) && (g_sChar.m_cLocation.X < (g_Console.getConsoleSize().X - 2)) && ((mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "0") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "7") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "8") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "9")))
-        {
-            g_sChar.m_cLocation.X += 2;
-        }
-        if (g_skKeyEvent[K_INTERACTIVE].keyReleased) // we don't want player to spam
+        if (g_skKeyEvent[K_INVENTORY].keyReleased) // we don't want player to spam
         {
             if (E_KeyPressed == false) { E_KeyPressed = true; }
             else { E_KeyPressed = false; }
         }
-    }
-    if (g_skKeyEvent[K_INVENTORY].keyReleased) // we don't want player to spam
-    {
-        if (E_KeyPressed == false) { E_KeyPressed = true; }
-        else { E_KeyPressed = false; }
-    }
+    }   
 }
 
 void processUserInput()
@@ -303,7 +317,7 @@ void processUserInput()
     }
 }
 
-void checkExitReached()
+void checkPosition()
 {
     if (mapVector[g_sChar.m_cLocation.Y][g_sChar.m_cLocation.X / 2] == "7") {
         if (level_no < 5) { deleteEnemies(); mapVector.clear(); level_no++; initMapVector(); createEnemies(); }
@@ -311,11 +325,14 @@ void checkExitReached()
         switch (level_no)
         {
         case 2: g_sChar.m_cLocation.X = 8; g_sChar.m_cLocation.Y = 36; break;
-        case 3: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 2; break;
-        case 4: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 20; break;
-        case 5: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 21; break;
+        case 3: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 2; getDialogue(6); getDialogue(7); getDialogue(8); break;
+        case 4: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 20; getDialogue(9); getDialogue(10); break;
+        case 5: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 21; getDialogue(11); getDialogue(12); break;
         }
+
+        renderDialogues();
     }
+
     if (mapVector[g_sChar.m_cLocation.Y][g_sChar.m_cLocation.X / 2] == "8") {
         // Ending scene
         g_eGameState = S_END;
@@ -398,7 +415,6 @@ void renderSplashScreen() {             // renders the splash screen aka menu sc
 }
 
 void renderGame() {
-    g_Console.writeToBuffer(0, 48, std::to_string(inventory.GetInGameItems().size()), 0x09);
     renderMap(); // then renders the map to the buffer first
     renderSlimes(); // render slime objects
     renderGolems();
@@ -445,17 +461,12 @@ void renderMap() {
             case 5: map_colour = 0x80; break; //fake chest    
             case 6: map_colour = 0x30; break; //prisoner
             case 7: map_colour = 0x10; break; //exit  
+            case 8: map_colour = 0x00; break; //real exit for lv 5
             case 9: map_colour = 0xCC; break; //spike trap
             }
             g_Console.writeToBuffer(x * 2, y, "  ", map_colour);
         }
     }
-}
-
-void renderCharacter() {
-    // Draw the location of the character
-    std::string playerChar = "..";//face yey
-    g_Console.writeToBuffer(g_sChar.m_cLocation, playerChar, 0xF0);
 }
 
 void createEnemies() {  // The creation of slime object MUST be inside a FUNCTION
@@ -465,7 +476,7 @@ void createEnemies() {  // The creation of slime object MUST be inside a FUNCTIO
         for (unsigned i = 0; i < 5; i++) {      //i determines the number of enemies spawning
             enemies[i] = new Slime;
             while (mapVector[enemies[i]->get_posY()][enemies[i]->get_posX() / 2] != "0") {
-                enemies[i]->EntityPos.setPosition((2 * (rand() % 60)), rand() % 40);
+                enemies[i]->setPos((2 * (rand() % 60)), rand() % 40);
             }
         }
         break;
@@ -473,7 +484,7 @@ void createEnemies() {  // The creation of slime object MUST be inside a FUNCTIO
         for (unsigned i = 0; i < 10; i++) {
             enemies[i] = new Slime;
             while (mapVector[enemies[i]->get_posY()][enemies[i]->get_posX() / 2] != "0") {
-                enemies[i]->EntityPos.setPosition((2 * (rand() % 60)), rand() % 40);
+                enemies[i]->setPos((2 * (rand() % 60)), rand() % 40);
             }
         }
         break;
@@ -481,14 +492,14 @@ void createEnemies() {  // The creation of slime object MUST be inside a FUNCTIO
         for (unsigned i = 0; i < 10; i++) {
             enemies[i] = new Slime;
             while (mapVector[enemies[i]->get_posY()][enemies[i]->get_posX() / 2] != "0") {
-                enemies[i]->EntityPos.setPosition((2 * (rand() % 60)), rand() % 40);
+                enemies[i]->setPos((2 * (rand() % 60)), rand() % 40);
             }
         }
         break;
     case 4:
         enemies[0] = new Golem;
         while (mapVector[enemies[0]->get_posY()][enemies[0]->get_posX() / 2] != "0") {
-            enemies[0]->EntityPos.setPosition(60, 19);
+            enemies[0]->setPos(60, 19);
         }
         break;
     }
@@ -523,17 +534,93 @@ void renderGolems() {
     }
 }
 
-void SlimeMovement() {
-   /* switch (level_no)
-    {
-    case 1:
-
-    }*/
+void renderCharacter() {
+    // Draw the location of the character
+    std::string playerChar = "..";//face yey
+    g_Console.writeToBuffer(g_sChar.m_cLocation, playerChar, 0xF0);
 }
 
-void TouchSpikeTrap() {
-    if ((mapVector[g_sChar.m_cLocation.Y][g_sChar.m_cLocation.X / 2] == "9") && (dmgalreadytaken == false)) {
-        g_sChar.hp -= 1; dmgalreadytaken = true;
+void getDialogue(unsigned num)
+{
+    dialogue = "", dialogue2 = "", dialogue3 = "";
+
+    switch (num)
+    {
+        // First room (sees slimes)
+    case 1: dialogue = "Slimes! My punches are quite weak... Maybe there's a weapon lying around here?"; break;
+        // First room (fake chest)
+    case 2: dialogue = "Hmm... There's a looted chest here. Looks like I should keep an eye out for more chests around this area."; break;
+        // First room (prisoner)
+    case 3: dialogue = "Hey kid, I don't have much time left, the others have all died too. Here, take this sword and chestplate, they may be old, but they're better than nothing. Promise me you’ll survive."; break;
+        // First room (player's dialogue after prisoner's)
+    case 4: dialogue = "Thank you soldier. You will be remembered."; break;
+        // Second room (special dead body)
+    case 5: dialogue = "These boots look useful... I feel lighter. Thank you Ol’man!"; break;
+        // Third room (at the start of the room)
+    case 6: dialogue = "Hmm... Wounds suffered from sharp objects... Could there be spikes ahead? Anyway, I should be careful."; break;
+        // Third room (1/4 in room)
+    case 7: dialogue = " So many spike traps... and slimes!"; break;
+        // Third room (1/4 in room if boots equipped)
+    case 8: dialogue = "Hopefully the boots I put on just now can be of some benefit to me."; break;
+        // Fourth room (at the start of the room)
+    case 9: dialogue = "This creature looks tougher compared to those slimes.. A boss?"; break;
+        // Fourth room (boss defeated)
+    case 10: dialogue = "IT’S FINALLY DEAD!!!"; break;
+        // Fifth room (at the start of the room)
+    case 11: dialogue = "Finally... the treasure!!! With this, my village is saved! There won't be any more traps right?"; break;
+        // Fifth room (touches fake exit)
+    case 12: dialogue = "Wait, how do I leave????"; break;
+        // Opening chest (for potion)
+    case 13: dialogue = "A potion? That seems handy."; break;
+    }
+}
+
+void renderDialogues()
+{
+    double dialogueTimer = 0.0;
+}
+
+void enemyMovement() {
+    for (int z = 0; z < 10; z++) {
+        if (enemies[z] != nullptr) {
+            int random = rand() % 4;
+            switch (random) {
+            case 0:
+                if (mapVector[enemies[z]->get_posY() - 1][enemies[z]->get_posX() / 2] == "0") {
+                    enemies[z]->move(random);
+                } break;
+            case 1:
+                if (mapVector[enemies[z]->get_posY() + 1][enemies[z]->get_posX() / 2] == "0") {
+                    enemies[z]->move(random);
+                } break;
+            case 2:
+                if (mapVector[enemies[z]->get_posY()][enemies[z]->get_posX() / 2 - 1] == "0") {
+                    enemies[z]->move(random);
+                } break;
+            case 3:
+                if (mapVector[enemies[z]->get_posY()][enemies[z]->get_posX() / 2 + 1] == "0") {
+                    enemies[z]->move(random);
+                } break;
+
+            }
+        }
+    }
+
+}
+
+void enemyMeleeAttack() {
+    for (int j = 0; j < 10; j++) {
+        if (enemies[j] != nullptr) {
+            if ((g_sChar.m_cLocation.X == enemies[j]->get_posX()) && g_sChar.m_cLocation.Y == enemies[j]->get_posY()) {
+                g_sChar.hp -= (enemies[j]->get_dmg() - g_sChar.def);
+            }
+        }
+    }
+}
+
+void TouchSpikeTrap(double dt) {
+    if ((mapVector[g_sChar.m_cLocation.Y][g_sChar.m_cLocation.X / 2] == "9") && g_sChar.weight == 1) {
+        g_sChar.hp -= 1;
     }
 }
 
@@ -606,19 +693,19 @@ void updateInventoryItems() // TO-FIX BUG: CREATES FOR ALL SLOTS & typeid error
                     {
                         if (inventory.GetInGameItems()[itemsCount] == "Sword")
                         {
-                            ((j == i) ? ((j == 2 && i == 2) ? (inventoryVector[y + j][x + i] = "11") : (inventoryVector[y + j][x + i] = "12")) : (inventoryVector[y + j][x + i] = "1"));
+                            ( (j == i) ? ( (j == 2 && i == 2) ? (inventoryVector[y + j][x + i] = "11") : (inventoryVector[y + j][x + i] = "12") ) : (inventoryVector[y + j][x + i] = "1") );
                         }
                         else if (inventory.GetInGameItems()[itemsCount] == "Chestplate")
                         {
-                            ((j == 0 && i == 1) ? (inventoryVector[y + j][x + i] = "1") : (inventoryVector[y + j][x + i] = "13"));
+                            ( (j == 0 && i == 1) ? (inventoryVector[y + j][x + i] = "1") : (inventoryVector[y + j][x + i] = "13") );
                         }
                         else if (inventory.GetInGameItems()[itemsCount] == "Boot")
                         {
-                            ((j != 0 && (i == 0 || i == 2)) ? (inventoryVector[y + j][x + i] = "14") : (inventoryVector[y + j][x + i] = "1"));
+                            ( (j != 0 && (i == 0 || i == 2)) ? (inventoryVector[y + j][x + i] = "14") : (inventoryVector[y + j][x + i] = "1") );
                         }
                         else if (inventory.GetInGameItems()[itemsCount] == "Potion")
                         {
-                            (((j == 0 && i == 1) || (j == 1 || j == 2)) ? (inventoryVector[y + j][x + i] = "15") : (inventoryVector[y + j][x + i] = "1"));
+                            ( ((j == 0 && i == 1) || (j == 1 || j == 2)) ? (inventoryVector[y + j][x + i] = "15") : (inventoryVector[y + j][x + i] = "1") );
                         }
                     }
                 }
@@ -687,7 +774,7 @@ void renderEndScreen() {
     //update values
 }
 
-void renderFramerate() {
+void renderFramerate() {                //part of gui
     COORD c;
     std::ostringstream ss;
     ss << std::fixed << std::setprecision(2);
@@ -699,82 +786,31 @@ void renderFramerate() {
     c.X = 0; c.Y = 40;
     g_Console.writeToBuffer(c, ss.str(), 0xF0);
     std::ostringstream hb;              // displays the player's health
+    c.X = 10; c.Y = 40;
     if (g_sChar.hp <= 0) {
         hb << "HP: ";
     }
     else {
         hb << "HP: " << std::string(g_sChar.hp, (char)3); // (char)3 is heart symbol
     }
-    c.X = 10; c.Y = 40;
     g_Console.writeToBuffer(c, hb.str(), 0xF4); //white background, red text
+    c.X = 0; c.Y = 41;                              //add stuff after. include condition check for change color
+    WORD red = 0xF4;
+    WORD green = 0xF2;
+    g_Console.writeToBuffer(c, "Objectives: Find out where you are.", red);         //find prisoner, he'll explain stuff         
+    c.X += 12; c.Y++;
+    g_Console.writeToBuffer(c, "Defeat the slimes.", green);                        //kill all the slimes in level 2
+    c.Y++;
+    g_Console.writeToBuffer(c, "Look out for traps.", green);                       //get past level 3
+    c.Y++;
+    g_Console.writeToBuffer(c, "Get past the golem.", green);                       //kill the golem to unlock gate
+    c.Y++;
+    g_Console.writeToBuffer(c, "Locate the treasure.", red);                        //take the treasure
+    c.Y++;
+    g_Console.writeToBuffer(c, "Leave the temple ALIVE!", red);                     //find a way to escape
 }
 
 void renderToScreen() {
     // Writes the buffer to the console, hence you will see what you have written
     g_Console.flushBufferToConsole();
 }
-
-// this is an example of how you would use the input events
-//void renderInputEvents() {
-//    // keyboard events
-//    COORD startPos = { 50, 2 };
-//    std::ostringstream ss;
-//    std::string key;
-//    for (unsigned i = 0; i < K_COUNT; ++i) {
-//        ss.str("");
-//        switch (i) {
-//        case K_UP: key = "UP"; break;
-//        case K_DOWN: key = "DOWN"; break;
-//        case K_LEFT: key = "LEFT"; break;
-//        case K_RIGHT: key = "RIGHT"; break;
-//        default: continue;
-//        }
-//        /*if (g_skKeyEvent[i].keyDown)
-//            ss << key << " pressed";
-//        else if (g_skKeyEvent[i].keyReleased)
-//            ss << key << " released";
-//        else
-//            ss << key << " not pressed";
-//        */
-//        COORD c = { startPos.X, startPos.Y + i };
-//        g_Console.writeToBuffer(c, ss.str(), 0x17);
-//    }
-//
-//    // mouse events    
-//    /*ss.str("");
-//    ss << "Mouse position (" << g_mouseEvent.mousePosition.X << ", " << g_mouseEvent.mousePosition.Y << ")";
-//    g_Console.writeToBuffer(g_mouseEvent.mousePosition, ss.str(), 0x59);
-//    ss.str("");
-//    switch (g_mouseEvent.eventFlags) {
-//    case 0:
-//        if (g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED)
-//        {
-//            ss.str("Left Button Pressed");
-//            g_Console.writeToBuffer(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y + 1, ss.str(), 0x59);
-//        }
-//        else if (g_mouseEvent.buttonState == RIGHTMOST_BUTTON_PRESSED)
-//        {
-//            ss.str("Right Button Pressed");
-//            g_Console.writeToBuffer(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y + 2, ss.str(), 0x59);
-//        }
-//        else
-//        {
-//            ss.str("Some Button Pressed");
-//            g_Console.writeToBuffer(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y + 3, ss.str(), 0x59);
-//        }
-//        break;
-//    case DOUBLE_CLICK:
-//        ss.str("Double Clicked");
-//        g_Console.writeToBuffer(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y + 4, ss.str(), 0x59);
-//        break;
-//    case MOUSE_WHEELED:
-//        if (g_mouseEvent.buttonState & 0xFF000000)
-//           ss.str("Mouse wheeled down");
-//        else
-//           ss.str("Mouse wheeled up");
-//        g_Console.writeToBuffer(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y + 5, ss.str(), 0x59);
-//        break;
-//    default:
-//        break;
-//    }*/
-//}

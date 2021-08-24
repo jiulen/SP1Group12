@@ -4,7 +4,7 @@ class Golem :public Entity {
 public:
 	Golem();
 	~Golem();
-	void move();
+	void move(int);
 
 private:
 

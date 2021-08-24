@@ -2,6 +2,7 @@
 #define _GAME_H
 
 #include "Framework\timer.h"
+#include <string>
 
 extern CStopWatch g_swTimer;
 extern bool g_bQuitGame;
@@ -56,31 +57,33 @@ void update      (double dt); // update the game and the state of the game
 void render      (void);      // renders the current state of the game to the console
 void shutdown    (void);      // do clean up, free memory
 
-void splashScreenWait();    // waits for time to pass in splash screen
-void updateGame();          // gameplay logic
-void endScreenWait();       // wait for 5 seconds after end scene then quitting game
-void keyPressed();          // moves the character, collision detection, physics, etc
-void processUserInput();    // checks if you should change states or do something else with the game, e.g. pause, exit
-void checkExitReached();    // checks if player reached the exit
-void clearScreen();         // clears the current screen and draw from scratch 
-void renderSplashScreen();  // renders the splash screen
-void renderGame();          // renders the game stuff
-void initMapVector();       // init map vector
-void renderMap();           // renders the map to the buffer first
-void renderCharacter();     // renders the character into the buffer
-void createEnemies();        // creates slime objects
-void deleteEnemies();        // deletes slime objects
-void renderSlimes();        // renders the slime into the buffer
-void renderGolems();
-void SlimeMovement();       // movement of slime
-void TouchSpikeTrap();      // damages player when he steps on spike trap
-void initInventoryVector(); // init inventory vector
-void updateInventory();     // update inventory
-void renderInventory();     // renders the inventory into the buffer
-void renderFramerate();     // renders debug information, frame rate, elapsed time, etc
-void renderEndScreen();     // renders ending and credit screen
-void renderToScreen();      // dump the contents of the buffer to the screen, one frame worth of game
-void renderInputEvents();   // renders the status of input events
+void splashScreenWait();        // waits for time to pass in splash screen
+void updateGame(double);              // gameplay logic
+void endScreenWait();           // wait for 5 seconds after end scene then quitting game
+void keyPressed();              // moves the character, collision detection, physics, etc
+void processUserInput();        // checks if you should change states or do something else with the game, e.g. pause, exit
+void checkPosition();           // checks if player reached the exit
+void clearScreen();             // clears the current screen and draw from scratch 
+void renderSplashScreen();      // renders the splash screen
+void renderGame();              // renders the game stuff
+void initMapVector();           // init map vector
+void renderMap();               // renders the map to the buffer first
+void createEnemies();           // creates slime objects
+void deleteEnemies();           // deletes slime objects
+void renderSlimes();            // renders the slime into the buffer
+void renderGolems();            // renders golems into the buffer
+void renderCharacter();         // renders the character into the buffer
+void getDialogue(unsigned);     // get dialogues
+void renderDialogues();         // renders the dialogue into the buffer
+void enemyMovement();           
+void enemyMeleeAttack();
+void TouchSpikeTrap(double); // damages player when he steps on spike trap
+void initInventoryVector();     // init inventory vector
+void updateInventory();         // update inventory
+void renderInventory();         // renders the inventory into the buffer
+void renderFramerate();         // renders debug information, frame rate, elapsed time, etc
+void renderEndScreen();         // renders ending and credit screen
+void renderToScreen();          // dump the contents of the buffer to the screen, one frame worth of game
 
 // keyboard and mouse input event managers
 void keyboardHandler(const KEY_EVENT_RECORD& keyboardEvent);  // define this function for the console to call when there are keyboard events

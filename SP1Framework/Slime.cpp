@@ -12,20 +12,15 @@ Slime::~Slime() {
 	slime_kills++;
 }
 
-void Slime::move() {				//1 2 3 4 for up down left right
-	int randint = Random_Integer();
-	if (randint == 1) {
-
-	}
-	else if (randint == 2) {
-
-	}
-	else if (randint == 3) {
-
-	}
-	else if (randint == 4) {
-
-	}
-
-
+void Slime::move(int direction) {
+    switch (direction) {
+    case 0: // up
+        EntityPos.setPosition(get_posX(), get_posY() - 1); break;
+    case 1: // down
+        EntityPos.setPosition(get_posX(), get_posY() + 1); break;
+    case 2: // left
+        EntityPos.setPosition(get_posX() - 2, get_posY()); break;
+    case 3:
+        EntityPos.setPosition(get_posX() + 2, get_posY()); break;
+    }
 }

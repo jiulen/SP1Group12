@@ -25,11 +25,11 @@
     <Filter Include="Header Files\ENTITES">
       <UniqueIdentifier>{3350608f-443d-4d65-96cc-04b63b54ca83}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\In-game items">
-      <UniqueIdentifier>{3be6c4bd-8ead-4e78-8fce-22095f8332ae}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\In-game items">
       <UniqueIdentifier>{9e277f60-9caf-4353-b135-86e0323cc2d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ENTITIES\In-game items">
+      <UniqueIdentifier>{3be6c4bd-8ead-4e78-8fce-22095f8332ae}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -58,19 +58,19 @@
       <Filter>Source Files\ENTITIES</Filter>
     </ClCompile>
     <ClCompile Include="Boot.cpp">
-      <Filter>Source Files\In-game items</Filter>
+      <Filter>Source Files\ENTITIES\In-game items</Filter>
     </ClCompile>
     <ClCompile Include="Chestplate.cpp">
-      <Filter>Source Files\In-game items</Filter>
+      <Filter>Source Files\ENTITIES\In-game items</Filter>
     </ClCompile>
     <ClCompile Include="InGameItem.cpp">
-      <Filter>Source Files\In-game items</Filter>
+      <Filter>Source Files\ENTITIES\In-game items</Filter>
     </ClCompile>
     <ClCompile Include="Potion.cpp">
-      <Filter>Source Files\In-game items</Filter>
+      <Filter>Source Files\ENTITIES\In-game items</Filter>
     </ClCompile>
     <ClCompile Include="Sword.cpp">
-      <Filter>Source Files\In-game items</Filter>
+      <Filter>Source Files\ENTITIES\In-game items</Filter>
     </ClCompile>
     <ClCompile Include="Inventory.cpp">
       <Filter>Source Files</Filter>
