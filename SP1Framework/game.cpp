@@ -571,9 +571,9 @@ void changeDialogue(unsigned num)
         // First room (fake chest)
     case 2: dialogue = "Hmm... There's a looted chest here. Looks like I should keep an eye out for more chests around this area."; break;
         // First room (prisoner)
-    case 3: dialogue = "Hey kid, I don't have much time left, the others have all died too. Here, take this sword and chestplate, they may be old, but they're better than nothing. Promise me you’ll survive."; break;
+    case 3: dialogue = "Hey kid, I don't have much time left, the others have all died too. Here, take this sword and chestplate, they may be old, but they're better than nothing. Promise me you'll survive."; break;
         // Second room (special dead body)
-    case 4: dialogue = "These boots look useful... I feel lighter. Thank you Ol’man!"; break;
+    case 4: dialogue = "These boots look useful... I feel lighter. Thank you Ol'man!"; break;
         // Third room (at the start of the room)
     case 5: dialogue = "Hmm... Wounds suffered from sharp objects... Could there be spikes ahead? Anyway, I should be careful."; break;
         // Third room (1/4 in room)
@@ -583,7 +583,7 @@ void changeDialogue(unsigned num)
         // Fourth room (at the start of the room)
     case 8: dialogue = "This creature looks tougher compared to those slimes.. A boss?"; break;
         // Fourth room (boss defeated)
-    case 9: dialogue = "IT’S FINALLY DEAD!!!"; break;
+    case 9: dialogue = "IT'S FINALLY DEAD!!!"; break;
         // Fifth room (at the start of the room)
     case 10: dialogue = "Finally... the treasure!!! With this, my village is saved! There won't be any more traps right?"; break;
         // Fifth room (touches fake exit)
