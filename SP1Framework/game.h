@@ -7,6 +7,8 @@
 extern CStopWatch g_swTimer;
 extern bool g_bQuitGame;
 
+using namespace std;
+
 // struct to store keyboard events
 // a small subset of KEY_EVENT_RECORD
 struct SKeyEvent
@@ -51,15 +53,16 @@ struct SGameChar
     int hp, dmg, def, weight;
 };
 
-void init        (void);      // initialize your variables, allocate memory, etc
-void getInput    (void);      // get input from player
-void update      (double dt); // update the game and the state of the game
-void render      (void);      // renders the current state of the game to the console
-void shutdown    (void);      // do clean up, free memory
+void init        (void);        // initialize your variables, allocate memory, etc
+void getInput    (void);        // get input from player
+void update      (double dt);   // update the game and the state of the game
+void render      (void);        // renders the current state of the game to the console
+void shutdown    (void);        // do clean up, free memory
 
 void splashScreenWait();        // waits for time to pass in splash screen
-void updateGame(double);              // gameplay logic
+void updateGame(double);        // gameplay logic
 void endScreenWait();           // wait for 5 seconds after end scene then quitting game
+
 void keyPressed();              // moves the character, collision detection, physics, etc
 void processUserInput();        // checks if you should change states or do something else with the game, e.g. pause, exit
 void checkPosition();           // checks if player reached the exit
@@ -73,11 +76,11 @@ void deleteEnemies();           // deletes slime objects
 void renderSlimes();            // renders the slime into the buffer
 void renderGolems();            // renders golems into the buffer
 void renderCharacter();         // renders the character into the buffer
-void getDialogue(unsigned);     // get dialogues
-void renderDialogues();         // renders the dialogue into the buffer
+string getDialogue(unsigned);     // get dialogues
+void renderDialogues(string);   // renders the dialogue into the buffer
 void enemyMovement();           
 void enemyMeleeAttack();
-void TouchSpikeTrap(double); // damages player when he steps on spike trap
+void TouchSpikeTrap(double);    // damages player when he steps on spike trap
 void initInventoryVector();     // init inventory vector
 void updateInventory();         // update inventory
 void renderInventory();         // renders the inventory into the buffer

@@ -15,6 +15,8 @@
 #include <stdlib.h> //srand() and rand()
 #include <time.h>
 
+using namespace std;
+
 double  g_dDeltaTime, g_dGameTime, timerTrap, enemyMeleeAttackTimer, moveTimer;
 
 SKeyEvent g_skKeyEvent[K_COUNT];
@@ -234,8 +236,7 @@ void splashScreenWait()    // waits for time to pass in splash screen
         initMapVector();
         createEnemies();
         initInventoryVector();
-        getDialogue(1);
-        renderDialogues();
+        renderDialogues(getDialogue(1));
     }
     processUserInput();
 }
@@ -248,7 +249,7 @@ void updateGame(double dt)       // gameplay logic
     if (E_KeyPressed == false)
     {
         moveTimer += dt;
-        if (moveTimer >= 0.075) { enemyMovement(); moveTimer = 0; }
+        if (moveTimer >= 0.2) { enemyMovement(); moveTimer = 0; }
         enemyMeleeAttackTimer += dt;
         if (enemyMeleeAttackTimer >= 0.1) { enemyMeleeAttack(); enemyMeleeAttackTimer = 0; }
     }
@@ -296,10 +297,11 @@ void keyPressed()
             }
             if (g_skKeyEvent[K_INTERACTIVE].keyReleased) // we don't want player to spam
             {
-                if (mapVector[g_sChar.m_cLocation.Y][g_sChar.m_cLocation.X / 2] == "3") { getDialogue(5); renderDialogues(); }
-                if (mapVector[g_sChar.m_cLocation.Y][g_sChar.m_cLocation.X / 2] == "4") { getDialogue(13); renderDialogues(); }
-                if (mapVector[g_sChar.m_cLocation.Y][g_sChar.m_cLocation.X / 2] == "5") { getDialogue(2); renderDialogues(); }
-                if (mapVector[g_sChar.m_cLocation.Y][g_sChar.m_cLocation.X / 2] == "6") { getDialogue(3); getDialogue(4); renderDialogues(); }
+                if (mapVector[g_sChar.m_cLocation.Y][g_sChar.m_cLocation.X / 2] == "3") { renderDialogues(getDialogue(5)); }
+                if (mapVector[g_sChar.m_cLocation.Y][g_sChar.m_cLocation.X / 2] == "4") { renderDialogues(getDialogue(13)); }
+                if (mapVector[g_sChar.m_cLocation.Y][g_sChar.m_cLocation.X / 2] == "5") { renderDialogues(getDialogue(2)); }
+                if (mapVector[g_sChar.m_cLocation.Y][g_sChar.m_cLocation.X / 2] == "6") { renderDialogues(getDialogue(3)); renderDialogues(getDialogue(4));
+                }
             }
         }
         if (g_skKeyEvent[K_INVENTORY].keyReleased) // we don't want player to spam
@@ -325,12 +327,10 @@ void checkPosition()
         switch (level_no)
         {
         case 2: g_sChar.m_cLocation.X = 8; g_sChar.m_cLocation.Y = 36; break;
-        case 3: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 2; getDialogue(6); getDialogue(7); getDialogue(8); break;
-        case 4: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 20; getDialogue(9); getDialogue(10); break;
-        case 5: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 21; getDialogue(11); getDialogue(12); break;
+        case 3: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 2; renderDialogues(getDialogue(6)); renderDialogues(getDialogue(7)); renderDialogues(getDialogue(8)); break;
+        case 4: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 20; renderDialogues(getDialogue(9)); renderDialogues(getDialogue(10)); break;
+        case 5: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 21; renderDialogues(getDialogue(11)); renderDialogues(getDialogue(12)); break;
         }
-
-        renderDialogues();
     }
 
     if (mapVector[g_sChar.m_cLocation.Y][g_sChar.m_cLocation.X / 2] == "8") {
@@ -540,10 +540,9 @@ void renderCharacter() {
     g_Console.writeToBuffer(g_sChar.m_cLocation, playerChar, 0xF0);
 }
 
-void getDialogue(unsigned num)
+string getDialogue(unsigned num)
 {
     dialogue = "", dialogue2 = "", dialogue3 = "";
-
     switch (num)
     {
         // First room (sees slimes)
@@ -573,11 +572,24 @@ void getDialogue(unsigned num)
         // Opening chest (for potion)
     case 13: dialogue = "A potion? That seems handy."; break;
     }
+    return dialogue;
 }
 
-void renderDialogues()
+void renderDialogues(string text)
 {
     double dialogueTimer = 0.0;
+    string dialogueWrap;
+    COORD c; c.X = 50; c.Y = 41;            //perfect area to create dialogue, needs word wrap
+    std::ostringstream ss;
+    ss.str(""); ss << text.length() << "chars";             //when run this, shows 78, means there shouldnt be out of bounds
+    g_Console.writeToBuffer(c, ss.str(), 0xF0);
+    for (unsigned int i = 0; i <= text.length(); i++) {
+        //g_Console.writeToBuffer(c.X, c.Y, dialogueWrap.substr(i,1), 0xF0);      //bruh this doesnt work, fix error ig
+        if (i == 65) {      //theoritical wrap
+            c.X = 50; c.Y = 42;
+        }
+        c.X++;
+    }
 }
 
 void enemyMovement() {
@@ -808,6 +820,8 @@ void renderFramerate() {                //part of gui
     g_Console.writeToBuffer(c, "Locate the treasure.", red);                        //take the treasure
     c.Y++;
     g_Console.writeToBuffer(c, "Leave the temple ALIVE!", red);                     //find a way to escape
+    //put objectives with condition check, maybe render_objectives
+    renderDialogues(getDialogue(1)); //technically works, but word wrap and switch cases
 }
 
 void renderToScreen() {
