@@ -398,7 +398,6 @@ void renderSplashScreen() {             // renders the splash screen aka menu sc
 }
 
 void renderGame() {
-    g_Console.writeToBuffer(0, 48, std::to_string(inventory.GetInGameItems().size()), 0x09);
     renderMap(); // then renders the map to the buffer first
     renderSlimes(); // render slime objects
     renderGolems();
