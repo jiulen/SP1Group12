@@ -21,5 +21,5 @@ public:
 	void AddInGameItem(Chestplate&);
 	void AddInGameItem(Boot&);
 	void AddInGameItem(Potion&);
-	//void RemoveItem(std::string&);
+	void RemoveItem(std::string);
 };

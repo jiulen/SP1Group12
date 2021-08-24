@@ -398,6 +398,7 @@ void renderSplashScreen() {             // renders the splash screen aka menu sc
 }
 
 void renderGame() {
+    g_Console.writeToBuffer(0, 48, std::to_string(inventory.GetInGameItems().size()), 0x09);
     renderMap(); // then renders the map to the buffer first
     renderSlimes(); // render slime objects
     renderGolems();
@@ -582,11 +583,15 @@ void updateInventoryItems() // TO-FIX BUG: CREATES FOR ALL SLOTS & typeid error
     {
         itemsAdded = true;
         Sword sword;                                      // test
+        Chestplate chestplate;                            // test
         Boot boot;                                        // test
         Potion potion;                                    // test
         inventory.AddInGameItem(sword);                   // test
         inventory.AddInGameItem(boot);                    // test
         inventory.AddInGameItem(potion);                  // test
+        inventory.AddInGameItem(boot);                    // test
+        inventory.AddInGameItem(chestplate);              // test
+        inventory.RemoveItem("Boot");
     }
 
     for (unsigned y = 0; y < 24; y++)
