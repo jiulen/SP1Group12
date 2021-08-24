@@ -15,9 +15,7 @@
 #include <stdlib.h> //srand() and rand()
 #include <time.h>
 
-using namespace std;
-
-double  g_dDeltaTime, g_dGameTime, timerTrap, enemyMeleeAttackTimer, moveTimer;
+double  g_dDeltaTime, g_dGameTime, timerTrap, enemyMeleeAttackTimer, moveTimer, dialogueTimer, dialogueDelay;
 
 SKeyEvent g_skKeyEvent[K_COUNT];
 SMouseEvent g_mouseEvent;
@@ -29,10 +27,12 @@ Inventory inventory;
 EGAMESTATES g_eGameState = S_SPLASHSCREEN; // initial state
 
 int damagetaken = 0;
-unsigned level_no = 1, itemsCount = 0;
-bool E_KeyPressed = false, dmgalreadytaken = false, itemsAdded = false, onDialogue = false; // [NOTE]: itemsAdded variable is for testing!
+unsigned level_no = 1, itemsCount = 0, charCount = 0;
+bool E_KeyPressed = false, dmgalreadytaken = false, onDialogue = false, updatedDialogueTimer = false, bossDefeated = false;
+bool lv3_DialogueShown = false, lv4_DialogueShown = false, lv5_DialogueShown = false;
+bool usingSword = false, usingChestplate = false, usingBoot = false;
 
-std::string dialogue = "", dialogue2 = "", dialogue3 = "";
+std::string dialogue = "", renderingDialogue = "";
 
 // Console object
 Console g_Console(120, 50, "Temple Escape");
@@ -53,12 +53,12 @@ Entity* enemies[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nu
 void init(void) {
     srand((unsigned int) time(NULL));
     // Set precision for floating point output
-     g_dGameTime = 0.0, timerTrap = 0.0, enemyMeleeAttackTimer = 0.0, moveTimer = 0;
+    g_dGameTime = 0.0, timerTrap = 0.0, enemyMeleeAttackTimer = 0.0, moveTimer = 0.0, dialogueTimer = 0.0, dialogueDelay = 0.0;
     // sets the initial state for the game
     g_eGameState = S_SPLASHSCREEN;
     //change values to change where player spawns
     g_sChar.m_cLocation.X = 10; g_sChar.m_cLocation.Y = 37;
-    g_sChar.hp = 10; g_sChar.dmg = 1; g_sChar.def = 0; g_sChar.weight = 1;
+    g_sChar.hp = 10; g_sChar.dmg = 1; g_sChar.def = 0; g_sChar.weight = 2;
     // sets the width, height and the font name to use in the console
     g_Console.setConsoleFont(0, 16, L"Consolas");
     // remember to set your keyboard handler, so that your functions can be notified of input events
@@ -170,6 +170,7 @@ void gameplayKBHandler(const KEY_EVENT_RECORD& keyboardEvent)
     case 0x41: key = K_LEFT; break;
     case 0x44: key = K_RIGHT; break;
     case 0x45: key = K_INVENTORY; break;
+    case 0x46: key = K_INTERACTIVE; break;
     case VK_RETURN: key = K_ENTER; break;
     case VK_ESCAPE: key = K_ESCAPE; break;
     }
@@ -236,7 +237,7 @@ void splashScreenWait()    // waits for time to pass in splash screen
         initMapVector();
         createEnemies();
         initInventoryVector();
-        renderDialogues(getDialogue(1));
+        changeDialogue(1);
     }
     processUserInput();
 }
@@ -249,20 +250,22 @@ void updateGame(double dt)       // gameplay logic
     if (E_KeyPressed == false)
     {
         moveTimer += dt;
-        if (moveTimer >= 0.2) { enemyMovement(); moveTimer = 0; }
+        if (moveTimer >= 0.2) { enemyMovement(); moveTimer = 0.0; }
         enemyMeleeAttackTimer += dt;
-        if (enemyMeleeAttackTimer >= 0.1) { enemyMeleeAttack(); enemyMeleeAttackTimer = 0; }
+        if (enemyMeleeAttackTimer >= 0.1) { enemyMeleeAttack(); enemyMeleeAttackTimer = 0.0; }
     }
     timerTrap += dt;
     if (timerTrap >= 0.1) {
         TouchSpikeTrap(dt);
-        timerTrap = 0;
+        timerTrap = 0.0;
     }
     checkPosition(); // checks whether player's next position is an exit, a chest, 
+    updateStats();
     updateInventory(); // update player's inventory
     if (g_sChar.hp <= 0) {
         g_eGameState = S_END;
     }
+    if ((onDialogue == true) && (updatedDialogueTimer == false)) { updatedDialogueTimer = true; dialogueTimer = g_dGameTime; }
 }
 
 void endScreenWait()
@@ -297,11 +300,10 @@ void keyPressed()
             }
             if (g_skKeyEvent[K_INTERACTIVE].keyReleased) // we don't want player to spam
             {
-                if (mapVector[g_sChar.m_cLocation.Y][g_sChar.m_cLocation.X / 2] == "3") { renderDialogues(getDialogue(5)); }
-                if (mapVector[g_sChar.m_cLocation.Y][g_sChar.m_cLocation.X / 2] == "4") { renderDialogues(getDialogue(13)); }
-                if (mapVector[g_sChar.m_cLocation.Y][g_sChar.m_cLocation.X / 2] == "5") { renderDialogues(getDialogue(2)); }
-                if (mapVector[g_sChar.m_cLocation.Y][g_sChar.m_cLocation.X / 2] == "6") { renderDialogues(getDialogue(3)); renderDialogues(getDialogue(4));
-                }
+                if ((mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "3") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "3") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "3") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "3")) { changeDialogue(4); }
+                if ((mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "4") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "4") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "4") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "4")) { changeDialogue(12); }
+                if ((mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "5") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "5") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "5") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "5")) { changeDialogue(2); }
+                if ((mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "6") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "6") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "6") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "6")) { changeDialogue(3); }
             }
         }
         if (g_skKeyEvent[K_INVENTORY].keyReleased) // we don't want player to spam
@@ -321,15 +323,20 @@ void processUserInput()
 
 void checkPosition()
 {
+    if ((level_no == 3) && (lv3_DialogueShown == false) && (g_sChar.m_cLocation.Y > 20)) { lv3_DialogueShown = true; changeDialogue(6); if (usingBoot == true) { changeDialogue(7); } }
+    if ((level_no == 4) && (lv4_DialogueShown == false) && (bossDefeated == true)) { lv4_DialogueShown = true; changeDialogue(9); }
+    if ((level_no == 5) && (lv5_DialogueShown == false) && (mapVector[g_sChar.m_cLocation.Y][g_sChar.m_cLocation.X / 2] == "7")) { lv5_DialogueShown = true; changeDialogue(11); }
+
     if (mapVector[g_sChar.m_cLocation.Y][g_sChar.m_cLocation.X / 2] == "7") {
+        
         if (level_no < 5) { deleteEnemies(); mapVector.clear(); level_no++; initMapVector(); createEnemies(); }
 
         switch (level_no)
         {
         case 2: g_sChar.m_cLocation.X = 8; g_sChar.m_cLocation.Y = 36; break;
-        case 3: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 2; renderDialogues(getDialogue(6)); renderDialogues(getDialogue(7)); renderDialogues(getDialogue(8)); break;
-        case 4: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 20; renderDialogues(getDialogue(9)); renderDialogues(getDialogue(10)); break;
-        case 5: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 21; renderDialogues(getDialogue(11)); renderDialogues(getDialogue(12)); break;
+        case 3: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 2; changeDialogue(5); break;
+        case 4: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 20; changeDialogue(8); break;
+        case 5: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 21; if (lv5_DialogueShown == false) { changeDialogue(10); } break;
         }
     }
 
@@ -337,6 +344,18 @@ void checkPosition()
         // Ending scene
         g_eGameState = S_END;
     }
+}
+
+void updateStats()
+{
+    if (usingSword == true) { g_sChar.dmg = 3; }
+    else if (usingSword == false) { g_sChar.dmg = 1; }
+
+    if (usingChestplate == true) { g_sChar.def = 1; }
+    else if (usingChestplate == false) { g_sChar.def = 0; }
+
+    if (usingBoot == true) { g_sChar.weight = 1; }
+    else if (usingBoot == false) { g_sChar.weight = 2; }
 }
 
 //--------------------------------------------------------------
@@ -419,7 +438,8 @@ void renderGame() {
     renderSlimes(); // render slime objects
     renderGolems();
     renderCharacter();  // renders the character into the buffer (over slimes)
-    if (E_KeyPressed == true) { renderInventory(); } // render inventory
+    if (E_KeyPressed == true) { renderInventory(); } // renders inventory
+    if (onDialogue == true) { renderDialogues(); } // renders dialogues
 }
 
 void initMapVector()
@@ -540,9 +560,10 @@ void renderCharacter() {
     g_Console.writeToBuffer(g_sChar.m_cLocation, playerChar, 0xF0);
 }
 
-string getDialogue(unsigned num)
+void changeDialogue(unsigned num)
 {
-    dialogue = "", dialogue2 = "", dialogue3 = "";
+    dialogue = "";
+
     switch (num)
     {
         // First room (sees slimes)
@@ -551,44 +572,52 @@ string getDialogue(unsigned num)
     case 2: dialogue = "Hmm... There's a looted chest here. Looks like I should keep an eye out for more chests around this area."; break;
         // First room (prisoner)
     case 3: dialogue = "Hey kid, I don't have much time left, the others have all died too. Here, take this sword and chestplate, they may be old, but they're better than nothing. Promise me you’ll survive."; break;
-        // First room (player's dialogue after prisoner's)
-    case 4: dialogue = "Thank you soldier. You will be remembered."; break;
         // Second room (special dead body)
-    case 5: dialogue = "These boots look useful... I feel lighter. Thank you Ol’man!"; break;
+    case 4: dialogue = "These boots look useful... I feel lighter. Thank you Ol’man!"; break;
         // Third room (at the start of the room)
-    case 6: dialogue = "Hmm... Wounds suffered from sharp objects... Could there be spikes ahead? Anyway, I should be careful."; break;
+    case 5: dialogue = "Hmm... Wounds suffered from sharp objects... Could there be spikes ahead? Anyway, I should be careful."; break;
         // Third room (1/4 in room)
-    case 7: dialogue = " So many spike traps... and slimes!"; break;
+    case 6: dialogue = "So many spike traps... and slimes!"; break;
         // Third room (1/4 in room if boots equipped)
-    case 8: dialogue = "Hopefully the boots I put on just now can be of some benefit to me."; break;
+    case 7: dialogue = "Hopefully the boots I put on just now can be of some benefit to me."; break;
         // Fourth room (at the start of the room)
-    case 9: dialogue = "This creature looks tougher compared to those slimes.. A boss?"; break;
+    case 8: dialogue = "This creature looks tougher compared to those slimes.. A boss?"; break;
         // Fourth room (boss defeated)
-    case 10: dialogue = "IT’S FINALLY DEAD!!!"; break;
+    case 9: dialogue = "IT’S FINALLY DEAD!!!"; break;
         // Fifth room (at the start of the room)
-    case 11: dialogue = "Finally... the treasure!!! With this, my village is saved! There won't be any more traps right?"; break;
+    case 10: dialogue = "Finally... the treasure!!! With this, my village is saved! There won't be any more traps right?"; break;
         // Fifth room (touches fake exit)
-    case 12: dialogue = "Wait, how do I leave????"; break;
+    case 11: dialogue = "Wait, how do I leave????"; break;
         // Opening chest (for potion)
-    case 13: dialogue = "A potion? That seems handy."; break;
+    case 12: dialogue = "A potion? That seems handy."; break;
     }
-    return dialogue;
+
+    onDialogue = true;
 }
 
-void renderDialogues(string text)
+void renderDialogues()
 {
-    double dialogueTimer = 0.0;
-    string dialogueWrap;
-    COORD c; c.X = 50; c.Y = 41;            //perfect area to create dialogue, needs word wrap
-    std::ostringstream ss;
-    ss.str(""); ss << text.length() << "chars";             //when run this, shows 78, means there shouldnt be out of bounds
-    g_Console.writeToBuffer(c, ss.str(), 0xF0);
-    for (unsigned int i = 0; i <= text.length(); i++) {
-        //g_Console.writeToBuffer(c.X, c.Y, dialogueWrap.substr(i,1), 0xF0);      //bruh this doesnt work, fix error ig
-        if (i == 65) {      //theoritical wrap
-            c.X = 50; c.Y = 42;
+    g_Console.writeToBuffer(0, 48, renderingDialogue, 0x1F);
+
+    if (g_dGameTime >= (dialogueTimer + dialogueDelay))
+    {
+        if (dialogue != "")
+        {
+            if (charCount != dialogue.length())
+            {
+                renderingDialogue += dialogue[charCount];
+                charCount++;
+                dialogueDelay += 0.05;
+            }
+
+            if (charCount == dialogue.length()) { charCount = 0; dialogue = ""; }
         }
-        c.X++;
+    }
+
+    // wait for 4 seconds before removing the rendering dialogue
+    if ((charCount == 0) && (g_dGameTime >= (dialogueTimer + dialogueDelay + 3)))
+    { 
+        renderingDialogue = ""; dialogueTimer = 0.0; dialogueDelay = 0.0; onDialogue = false; updatedDialogueTimer = false;
     }
 }
 
@@ -617,7 +646,6 @@ void enemyMovement() {
             }
         }
     }
-
 }
 
 void enemyMeleeAttack() {
@@ -631,7 +659,7 @@ void enemyMeleeAttack() {
 }
 
 void TouchSpikeTrap(double dt) {
-    if ((mapVector[g_sChar.m_cLocation.Y][g_sChar.m_cLocation.X / 2] == "9") && g_sChar.weight == 1) {
+    if ((mapVector[g_sChar.m_cLocation.Y][g_sChar.m_cLocation.X / 2] == "9") && g_sChar.weight == 2) {
         g_sChar.hp -= 1;
     }
 }
@@ -676,23 +704,8 @@ void updateInventoryHealth()
     }
 }
 
-void updateInventoryItems() // TO-FIX BUG: CREATES FOR ALL SLOTS & typeid error
+void updateInventoryItems()
 {    
-    if (itemsAdded == false)
-    {
-        itemsAdded = true;
-        Sword sword;                                      // test
-        Chestplate chestplate;                            // test
-        Boot boot;                                        // test
-        Potion potion;                                    // test
-        inventory.AddInGameItem(sword);                   // test
-        inventory.AddInGameItem(boot);                    // test
-        inventory.AddInGameItem(potion);                  // test
-        inventory.AddInGameItem(boot);                    // test
-        inventory.AddInGameItem(chestplate);              // test
-        inventory.RemoveItem("Boot");
-    }
-
     for (unsigned y = 0; y < 24; y++)
     {
         for (unsigned x = 0; x < 42; x++)
@@ -821,7 +834,6 @@ void renderFramerate() {                //part of gui
     c.Y++;
     g_Console.writeToBuffer(c, "Leave the temple ALIVE!", red);                     //find a way to escape
     //put objectives with condition check, maybe render_objectives
-    renderDialogues(getDialogue(1)); //technically works, but word wrap and switch cases
 }
 
 void renderToScreen() {
