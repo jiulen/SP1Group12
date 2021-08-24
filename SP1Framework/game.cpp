@@ -5,17 +5,11 @@
 #include "Entity.h"
 #include "Framework\console.h"
 #include "Inventory.h"
-#include "Sword.h"
-#include "Chestplate.h"
-#include "Boot.h"
-#include "Potion.h"
 
 #include <iostream>
 #include <iomanip>
 #include <sstream>
 #include <fstream>
-#include <string>
-#include <vector>
 #include <typeinfo>
 #include <stdio.h> //NULL
 #include <stdlib.h> //srand() and rand()
@@ -31,10 +25,11 @@ SGameChar   g_sChar;
 Slime slimes;
 Inventory inventory;
 EGAMESTATES g_eGameState = S_SPLASHSCREEN; // initial state
-unsigned level_no = 1; //level number, increases when go next level
-bool E_KeyPressed = false, cloned = false, slotFilled = false;
-bool dmgalreadytaken = false;
+
 int damagetaken = 0;
+unsigned level_no = 1, itemsCount = 0;
+bool E_KeyPressed = false, dmgalreadytaken = false, itemsAdded = false; // [NOTE]: itemsAdded variable is for testing!
+
 // Console object
 Console g_Console(120, 50, "Temple Escape");
 unsigned GUI_height = 10;
@@ -43,6 +38,7 @@ unsigned GUI_height = 10;
 std::vector<std::vector<std::string>> mapVector;       // Map array for all maps
 std::vector<std::vector<std::string>> inventoryVector; // Inventory array
 Entity* enemies[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+
 
 // Purpose  : Initialisation function
 //            Initialize variables, allocate memory, load data from file, etc. 
@@ -395,6 +391,7 @@ void renderSplashScreen() {             // renders the splash screen aka menu sc
 }
 
 void renderGame() {
+    g_Console.writeToBuffer(0, 48, std::to_string(inventory.GetInGameItems().size()), 0x09);
     renderMap(); // then renders the map to the buffer first
     renderSlimes(); // render slime objects
     renderGolems();
@@ -578,57 +575,47 @@ void updateInventoryHealth()
 
 void updateInventoryItems() // TO-FIX BUG: CREATES FOR ALL SLOTS & typeid error
 {    
-    if (cloned == false)
+    if (itemsAdded == false)
     {
-        cloned = true;
-        Sword* sword = new Sword;                        // test
-        Boot* boot = new Boot;                           // test
-        inventory.AddInGameItem(sword);                  // test
-        inventory.AddInGameItem(boot);                   // test
+        itemsAdded = true;
+        Sword sword;                                      // test
+        Boot boot;                                        // test
+        Potion potion;                                    // test
+        inventory.AddInGameItem(sword);                   // test
+        inventory.AddInGameItem(boot);                    // test
+        inventory.AddInGameItem(potion);                  // test
     }
-    if (slotFilled == false)
+
+    for (unsigned y = 0; y < 24; y++)
     {
-        InGameItem** items = inventory.GetInGameItems(); // test
-        for (unsigned count = 0; count < 8; count++)
+        for (unsigned x = 0; x < 42; x++)
         {
-            if (items[count] != nullptr)
+            if ((inventoryVector[y][x] == "9") && (itemsCount < inventory.GetInGameItems().size()))
             {
-                for (unsigned y = 0; y < 24; y++)
+                for (unsigned j = 0; j < 3; j++) // dimension of each inventory slot
                 {
-                    for (unsigned x = 0; x < 42; x++)
+                    for (unsigned i = 0; i < 3; i++)
                     {
-                        if (inventoryVector[y][x] == "9")
+                        if (inventory.GetInGameItems()[itemsCount] == "Sword")
                         {
-                            for (unsigned j = 0; j < 3; j++) // dimension of each inventory slot
-                            {
-                                for (unsigned i = 0; i < 3; i++)
-                                {
-                                    if (typeid(*(items[count])).name() == "Sword")
-                                    {
-                                        ((j == i) ? ((j == 2 && i == 2) ? (inventoryVector[y + j][x + i] = "11") : (inventoryVector[y + j][x + i] = "12")) : (inventoryVector[y + j][x + i] = "1")); break;
-                                    }
-                                    else if (typeid(*(items[count])).name() == "Chestplate")
-                                    {
-                                        ((j == 0 && i == 1) ? (inventoryVector[y + j][x + i] = "1") : (inventoryVector[y + j][x + i] = "13")); break;
-                                    }
-                                    else if (typeid(*(items[count])).name() == "Boot")
-                                    {
-                                        ((j != 0 && (i == 0 || i == 2)) ? (inventoryVector[y + j][x + i] = "14") : (inventoryVector[y + j][x + i] = "1")); break;
-                                    }
-                                    else
-                                    {
-                                        (((j == 0 && i == 1) || (j == 1 || j == 2)) ? (inventoryVector[y + j][x + i] = "15") : (inventoryVector[y + j][x + i] = "1")); break;
-                                    }
-                                }
-                            }
-                            slotFilled = true;
+                            ((j == i) ? ((j == 2 && i == 2) ? (inventoryVector[y + j][x + i] = "11") : (inventoryVector[y + j][x + i] = "12")) : (inventoryVector[y + j][x + i] = "1"));
                         }
-                        if (slotFilled == true) { break; }
+                        else if (inventory.GetInGameItems()[itemsCount] == "Chestplate")
+                        {
+                            ((j == 0 && i == 1) ? (inventoryVector[y + j][x + i] = "1") : (inventoryVector[y + j][x + i] = "13"));
+                        }
+                        else if (inventory.GetInGameItems()[itemsCount] == "Boot")
+                        {
+                            ((j != 0 && (i == 0 || i == 2)) ? (inventoryVector[y + j][x + i] = "14") : (inventoryVector[y + j][x + i] = "1"));
+                        }
+                        else if (inventory.GetInGameItems()[itemsCount] == "Potion")
+                        {
+                            (((j == 0 && i == 1) || (j == 1 || j == 2)) ? (inventoryVector[y + j][x + i] = "15") : (inventoryVector[y + j][x + i] = "1"));
+                        }
                     }
-                    if (slotFilled == true) { break; }
                 }
+                itemsCount++;
             }
-            if (slotFilled == true) { break; }
         }
     }
 }

@@ -10,19 +10,38 @@ Inventory::~Inventory()
 
 }
 
-InGameItem** Inventory::GetInGameItems()
+std::vector<std::string> Inventory::GetInGameItems()
 {
 	return items;
 }
 
-void Inventory::AddInGameItem(InGameItem* item)
+void Inventory::AddInGameItem(Sword& item)
 {
-	for (unsigned i = 0; i < 8; i++)
+	items.push_back("Sword");
+}
+
+void Inventory::AddInGameItem(Chestplate& item)
+{
+	items.push_back("Chestplate");
+}
+
+void Inventory::AddInGameItem(Boot& item)
+{
+	items.push_back("Boot");
+}
+
+void Inventory::AddInGameItem(Potion& item)
+{
+	items.push_back("Potion");
+}
+
+/*void Inventory::RemoveItem(std::string& str)
+{
+	for (int i = 0; i < items.size(); i++)
 	{
-		if (items[i] == nullptr)
+		if (items[i] == str)
 		{
-			items[i] = item;
-			break;
+			items.erase(i);
 		}
 	}
-}
+}*/
