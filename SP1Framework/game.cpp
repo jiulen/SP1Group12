@@ -5,17 +5,11 @@
 #include "Entity.h"
 #include "Framework\console.h"
 #include "Inventory.h"
-#include "Sword.h"
-#include "Chestplate.h"
-#include "Boot.h"
-#include "Potion.h"
 
 #include <iostream>
 #include <iomanip>
 #include <sstream>
 #include <fstream>
-#include <string>
-#include <vector>
 #include <typeinfo>
 #include <stdio.h> //NULL
 #include <stdlib.h> //srand() and rand()
@@ -31,10 +25,11 @@ SGameChar   g_sChar;
 Slime slimes;
 Inventory inventory;
 EGAMESTATES g_eGameState = S_SPLASHSCREEN; // initial state
-unsigned level_no = 1; //level number, increases when go next level
-bool E_KeyPressed = false, cloned = false, slotFilled = false;
-bool dmgalreadytaken = false;
+
 int damagetaken = 0;
+unsigned level_no = 1, itemsCount = 0;
+bool E_KeyPressed = false, dmgalreadytaken = false, itemsAdded = false; // [NOTE]: itemsAdded variable is for testing!
+
 // Console object
 Console g_Console(120, 50, "Temple Escape");
 unsigned GUI_height = 10;
@@ -43,6 +38,7 @@ unsigned GUI_height = 10;
 std::vector<std::vector<std::string>> mapVector;       // Map array for all maps
 std::vector<std::vector<std::string>> inventoryVector; // Inventory array
 Entity* enemies[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+
 
 // Purpose  : Initialisation function
 //            Initialize variables, allocate memory, load data from file, etc. 
@@ -289,7 +285,8 @@ void keyPressed()
         }
         if (g_skKeyEvent[K_INTERACTIVE].keyReleased) // we don't want player to spam
         {
-
+            if (E_KeyPressed == false) { E_KeyPressed = true; }
+            else { E_KeyPressed = false; }
         }
     }
     if (g_skKeyEvent[K_INVENTORY].keyReleased) // we don't want player to spam
@@ -383,18 +380,25 @@ void renderSplashScreen() {             // renders the splash screen aka menu sc
     c.Y = 27;
     c.X = c.X / 2 - 11;
     g_Console.writeToBuffer(c, "Press 'Enter' to start", 0xF0);
-    c.Y++;
+    c.Y += 2;
     c.X = g_Console.getConsoleSize().X / 2 - 16;
     g_Console.writeToBuffer(c, "Press 'W, A, S, D' to move around", 0xF0);
     c.Y++;
     c.X = g_Console.getConsoleSize().X / 2 - 14;
-    g_Console.writeToBuffer(c, "Press 'Left Click' to attack", 0xF0);
+    g_Console.writeToBuffer(c, "Press 'E' to open inventory", 0xF0);
     c.Y++;
+    c.X = g_Console.getConsoleSize().X / 2 - 16;
+    g_Console.writeToBuffer(c, "Press 'F' to interact with items", 0xF0);
+    c.Y++;
+    c.X = g_Console.getConsoleSize().X / 2 - 14;
+    g_Console.writeToBuffer(c, "Press 'Left Click' to attack", 0xF0);
+    c.Y += 3;
     c.X = g_Console.getConsoleSize().X / 2 - 10;
     g_Console.writeToBuffer(c, "Press 'Esc' to quit", 0xF0);
 }
 
 void renderGame() {
+    g_Console.writeToBuffer(0, 48, std::to_string(inventory.GetInGameItems().size()), 0x09);
     renderMap(); // then renders the map to the buffer first
     renderSlimes(); // render slime objects
     renderGolems();
@@ -414,15 +418,12 @@ void initMapVector()
     case 5: mapCsv = std::ifstream("Map5.csv"); break; //opens map
     }
     std::string row;
-
     while (std::getline(mapCsv, row))
     {
         std::stringstream rowStream(row);
         std::string(cell);
         std::vector<std::string> rowVector;
-
         while (std::getline(rowStream, cell, ',')) { rowVector.push_back(cell); }
-
         mapVector.push_back(rowVector);
     }
     mapCsv.close();
@@ -516,7 +517,7 @@ void renderSlimes() { //will put in entity later
 }
 
 void renderGolems() {
-    std::string golemChar = "ppp";
+    std::string golemChar = "pp";           //golem should be 3x3
     if (level_no == 4) {
         g_Console.writeToBuffer(enemies[0]->get_posX(), enemies[0]->get_posY(), golemChar, 0x3F);
     }
@@ -578,57 +579,51 @@ void updateInventoryHealth()
 
 void updateInventoryItems() // TO-FIX BUG: CREATES FOR ALL SLOTS & typeid error
 {    
-    if (cloned == false)
+    if (itemsAdded == false)
     {
-        cloned = true;
-        Sword* sword = new Sword;                        // test
-        Boot* boot = new Boot;                           // test
-        inventory.AddInGameItem(sword);                  // test
-        inventory.AddInGameItem(boot);                   // test
+        itemsAdded = true;
+        Sword sword;                                      // test
+        Chestplate chestplate;                            // test
+        Boot boot;                                        // test
+        Potion potion;                                    // test
+        inventory.AddInGameItem(sword);                   // test
+        inventory.AddInGameItem(boot);                    // test
+        inventory.AddInGameItem(potion);                  // test
+        inventory.AddInGameItem(boot);                    // test
+        inventory.AddInGameItem(chestplate);              // test
+        inventory.RemoveItem("Boot");
     }
-    if (slotFilled == false)
+
+    for (unsigned y = 0; y < 24; y++)
     {
-        InGameItem** items = inventory.GetInGameItems(); // test
-        for (unsigned count = 0; count < 8; count++)
+        for (unsigned x = 0; x < 42; x++)
         {
-            if (items[count] != nullptr)
+            if ((inventoryVector[y][x] == "9") && (itemsCount < inventory.GetInGameItems().size()))
             {
-                for (unsigned y = 0; y < 24; y++)
+                for (unsigned j = 0; j < 3; j++) // dimension of each inventory slot
                 {
-                    for (unsigned x = 0; x < 42; x++)
+                    for (unsigned i = 0; i < 3; i++)
                     {
-                        if (inventoryVector[y][x] == "9")
+                        if (inventory.GetInGameItems()[itemsCount] == "Sword")
                         {
-                            for (unsigned j = 0; j < 3; j++) // dimension of each inventory slot
-                            {
-                                for (unsigned i = 0; i < 3; i++)
-                                {
-                                    if (typeid(*(items[count])).name() == "Sword")
-                                    {
-                                        ((j == i) ? ((j == 2 && i == 2) ? (inventoryVector[y + j][x + i] = "11") : (inventoryVector[y + j][x + i] = "12")) : (inventoryVector[y + j][x + i] = "1")); break;
-                                    }
-                                    else if (typeid(*(items[count])).name() == "Chestplate")
-                                    {
-                                        ((j == 0 && i == 1) ? (inventoryVector[y + j][x + i] = "1") : (inventoryVector[y + j][x + i] = "13")); break;
-                                    }
-                                    else if (typeid(*(items[count])).name() == "Boot")
-                                    {
-                                        ((j != 0 && (i == 0 || i == 2)) ? (inventoryVector[y + j][x + i] = "14") : (inventoryVector[y + j][x + i] = "1")); break;
-                                    }
-                                    else
-                                    {
-                                        (((j == 0 && i == 1) || (j == 1 || j == 2)) ? (inventoryVector[y + j][x + i] = "15") : (inventoryVector[y + j][x + i] = "1")); break;
-                                    }
-                                }
-                            }
-                            slotFilled = true;
+                            ((j == i) ? ((j == 2 && i == 2) ? (inventoryVector[y + j][x + i] = "11") : (inventoryVector[y + j][x + i] = "12")) : (inventoryVector[y + j][x + i] = "1"));
                         }
-                        if (slotFilled == true) { break; }
+                        else if (inventory.GetInGameItems()[itemsCount] == "Chestplate")
+                        {
+                            ((j == 0 && i == 1) ? (inventoryVector[y + j][x + i] = "1") : (inventoryVector[y + j][x + i] = "13"));
+                        }
+                        else if (inventory.GetInGameItems()[itemsCount] == "Boot")
+                        {
+                            ((j != 0 && (i == 0 || i == 2)) ? (inventoryVector[y + j][x + i] = "14") : (inventoryVector[y + j][x + i] = "1"));
+                        }
+                        else if (inventory.GetInGameItems()[itemsCount] == "Potion")
+                        {
+                            (((j == 0 && i == 1) || (j == 1 || j == 2)) ? (inventoryVector[y + j][x + i] = "15") : (inventoryVector[y + j][x + i] = "1"));
+                        }
                     }
-                    if (slotFilled == true) { break; }
                 }
+                itemsCount++;
             }
-            if (slotFilled == true) { break; }
         }
     }
 }
@@ -672,8 +667,8 @@ void renderInventory()
 
 void renderEndScreen() {
     COORD c;
-    c.X = 1; c.Y = 1;
-    g_Console.writeToBuffer(c, "Created by Group 12: Jun Hou, Jiu Len, Darius and winston", 0xF0);
+    c.X = 10; c.Y = 5;
+    g_Console.writeToBuffer(c, "Created by Group 12: Jun Hou, Jiu Len, Darius and winston.", 0xF0);
     c.Y += 1;
     if (g_sChar.hp > 0) {
         g_Console.writeToBuffer(c, "YOU WIN!!!", 0xF0);
@@ -685,7 +680,11 @@ void renderEndScreen() {
         c.Y += 1;
         g_Console.writeToBuffer(c, "The village mourns your death.", 0xF0);
     }
-    //add kills, time taken
+    c.Y += 1;
+    g_Console.writeToBuffer(c, "Kills: ", 0xF0);
+    c.Y += 1;
+    g_Console.writeToBuffer(c, "Time: ", 0xF0);
+    //update values
 }
 
 void renderFramerate() {

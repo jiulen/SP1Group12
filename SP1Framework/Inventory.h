@@ -1,14 +1,25 @@
 #pragma once
 #include "InGameItem.h"
+#include "Sword.h"
+#include "Chestplate.h"
+#include "Boot.h"
+#include "Potion.h"
+
+#include <string>
+#include <vector>
 
 class Inventory
 {
 private:
-	InGameItem* items[8] = { nullptr, nullptr, nullptr, nullptr,nullptr, nullptr,nullptr, nullptr };
+	std::vector<std::string> items;
 
 public:
 	Inventory();
 	~Inventory();
-	InGameItem** GetInGameItems();
-	void AddInGameItem(InGameItem*);
+	std::vector<std::string> GetInGameItems();
+	void AddInGameItem(Sword&);
+	void AddInGameItem(Chestplate&);
+	void AddInGameItem(Boot&);
+	void AddInGameItem(Potion&);
+	void RemoveItem(std::string);
 };
