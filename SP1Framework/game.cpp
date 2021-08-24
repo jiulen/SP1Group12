@@ -255,7 +255,7 @@ void updateGame()       // gameplay logic
     checkExitReached(); // checks if player reached the exit
     updateInventory(); // update player's inventory
     if (g_sChar.hp <= 0) {
-        renderEndScreen();
+        g_eGameState = S_END;
     }
 }
 
@@ -425,7 +425,6 @@ void initMapVector()
 
         mapVector.push_back(rowVector);
     }
-
     mapCsv.close();
 }
 
@@ -701,7 +700,12 @@ void renderFramerate() {
     c.X = 0; c.Y = 40;
     g_Console.writeToBuffer(c, ss.str(), 0xF0);
     std::ostringstream hb;              // displays the player's health
-    hb << "HP: " << std::string(g_sChar.hp, (char)3); // (char)3 is heart symbol
+    if (g_sChar.hp <= 0) {
+        hb << "HP: ";
+    }
+    else {
+        hb << "HP: " << std::string(g_sChar.hp, (char)3); // (char)3 is heart symbol
+    }
     c.X = 10; c.Y = 40;
     g_Console.writeToBuffer(c, hb.str(), 0xF4); //white background, red text
 }
