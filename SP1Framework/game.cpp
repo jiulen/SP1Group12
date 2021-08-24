@@ -9,6 +9,7 @@
 #include "Chestplate.h"
 #include "Boot.h"
 #include "Potion.h"
+
 #include <iostream>
 #include <iomanip>
 #include <sstream>
@@ -30,7 +31,7 @@ SGameChar   g_sChar;
 Slime slimes;
 Inventory inventory;
 EGAMESTATES g_eGameState = S_SPLASHSCREEN; // initial state
-unsigned level_no = 4; //level number, increases when go next level
+unsigned level_no = 1; //level number, increases when go next level
 bool E_KeyPressed = false, cloned = false, slotFilled = false;
 bool dmgalreadytaken = false;
 int damagetaken = 0;
@@ -53,19 +54,13 @@ void init(void) {
     srand((unsigned int) time(NULL));
     // Set precision for floating point output
     g_dGameTime = 0.0;
-
     // sets the initial state for the game
     g_eGameState = S_SPLASHSCREEN;
     //change values to change where player spawns
-    g_sChar.m_cLocation.X = 10;
-    g_sChar.m_cLocation.Y = 37;
-    g_sChar.hp = 10;
-    g_sChar.dmg = 1;
-    g_sChar.def = 0;
-    g_sChar.weight = 1;
+    g_sChar.m_cLocation.X = 10; g_sChar.m_cLocation.Y = 37;
+    g_sChar.hp = 10; g_sChar.dmg = 1; g_sChar.def = 0; g_sChar.weight = 1;
     // sets the width, height and the font name to use in the console
     g_Console.setConsoleFont(0, 16, L"Consolas");
-
     // remember to set your keyboard handler, so that your functions can be notified of input events
     g_Console.setKeyboardHandler(keyboardHandler);
     g_Console.setMouseHandler(mouseHandler);
@@ -82,7 +77,6 @@ void shutdown(void)
 {
     // Reset to white text on black background
     colour(FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED);
-
     g_Console.clearBuffer();
 }
 
@@ -253,14 +247,16 @@ void updateGame()       // gameplay logic
                         // sound can be played here too.
     if (dmgalreadytaken == false){
         TouchSpikeTrap(); 
-        
     }
-    else if (dmgalreadytaken == true) {
+    else {         //logic error, collisions occur very fast
         dmgalreadytaken = false;
     }
     
     checkExitReached(); // checks if player reached the exit
     updateInventory(); // update player's inventory
+    if (g_sChar.hp <= 0) {
+        renderEndScreen();
+    }
 }
 
 void endScreenWait()
@@ -375,7 +371,7 @@ void menuScreen(COORD& c)
     g_Console.writeToBuffer(c, title.str(), 0xF0); title.str(""); c.Y += 1;
     title << char(244) << "   " << char(186) << "         " << char(186) << " " << char(186) << "     " << char(186) << "   " << char(186) << " " << char(186) << "     " << char(186) << "       " << char(244);
     g_Console.writeToBuffer(c, title.str(), 0xF0); title.str(""); c.Y += 1;
-    title << char(245) << "   " << char(200) << char(205) << char(205) << char(205) << char(205) << " " << char(198) << char(205) << char(205) << char(205) << char(188) << " " << char(200) << char(205) << char(205) << char(205) << char(188) << " " << char(208) << "   " << char(208) << " " << char(208) << "     " << char(200) << char(205) << char(205) << char(205) << char(205) << "   " << char(245);
+    title << char(245) << "   " << char(200) << char(205) << char(205) << char(205) << char(205) << " " << char(198) << char(205) << char(205) << char(205) << char(188) << " " << char(200) << char(205) << char(205) << char(205) << char(181) << " " << char(208) << "   " << char(208) << " " << char(208) << "     " << char(200) << char(205) << char(205) << char(205) << char(205) << "   " << char(245);
     g_Console.writeToBuffer(c, title.str(), 0xF0); title.str("");
 }
 
@@ -449,7 +445,7 @@ void renderMap() {
             case 5: map_colour = 0x80; break; //fake chest    
             case 6: map_colour = 0x30; break; //prisoner
             case 7: map_colour = 0x10; break; //exit  
-            case 9: map_colour = 0xCC; break;
+            case 9: map_colour = 0xCC; break; //spike trap
             }
             g_Console.writeToBuffer(x * 2, y, "  ", map_colour);
         }
@@ -458,7 +454,7 @@ void renderMap() {
 
 void renderCharacter() {
     // Draw the location of the character
-    std::string playerChar = "..";
+    std::string playerChar = "..";//face yey
     g_Console.writeToBuffer(g_sChar.m_cLocation, playerChar, 0xF0);
 }
 
@@ -466,7 +462,7 @@ void createEnemies() {  // The creation of slime object MUST be inside a FUNCTIO
     switch (level_no)
     {
     case 1:
-        for (unsigned i = 0; i < 5; i++) {
+        for (unsigned i = 0; i < 5; i++) {      //i determines the number of enemies spawning
             enemies[i] = new Slime;
             while (mapVector[enemies[i]->get_posY()][enemies[i]->get_posX() / 2] != "0") {
                 enemies[i]->EntityPos.setPosition((2 * (rand() % 60)), rand() % 40);
@@ -509,7 +505,7 @@ void deleteEnemies() {
 
 void renderSlimes() { //will put in entity later
     // draw location of slimes
-    std::string slimeChar = "--";
+    std::string slimeChar = "--";//also face yey
     if (level_no < 4) {
         for (unsigned i = 0; i < 10; i++) {
             if (enemies[i] != nullptr)
@@ -519,12 +515,14 @@ void renderSlimes() { //will put in entity later
         }
     }
 }
+
 void renderGolems() {
     std::string golemChar = "ppp";
     if (level_no == 4) {
         g_Console.writeToBuffer(enemies[0]->get_posX(), enemies[0]->get_posY(), golemChar, 0x3F);
     }
 }
+
 void SlimeMovement() {
    /* switch (level_no)
     {
@@ -532,12 +530,13 @@ void SlimeMovement() {
 
     }*/
 }
+
 void TouchSpikeTrap() {
     if ((mapVector[g_sChar.m_cLocation.Y][g_sChar.m_cLocation.X / 2] == "9") && (dmgalreadytaken == false)) {
-        g_sChar.hp -= 1;
-        dmgalreadytaken = true;
+        g_sChar.hp -= 1; dmgalreadytaken = true;
     }
 }
+
 void initInventoryVector()
 {
     std::ifstream inventoryCsv("Inventory.csv");
@@ -548,12 +547,9 @@ void initInventoryVector()
         std::stringstream rowStream(row);
         std::string(cell);
         std::vector<std::string> rowVector;
-
         while (std::getline(rowStream, cell, ',')) { rowVector.push_back(cell); }
-
         inventoryVector.push_back(rowVector);
     }
-
     inventoryCsv.close();
 }
 
@@ -583,7 +579,6 @@ void updateInventoryHealth()
 
 void updateInventoryItems() // TO-FIX BUG: CREATES FOR ALL SLOTS & typeid error
 {    
-    
     if (cloned == false)
     {
         cloned = true;
@@ -591,12 +586,10 @@ void updateInventoryItems() // TO-FIX BUG: CREATES FOR ALL SLOTS & typeid error
         Boot* boot = new Boot;                           // test
         inventory.AddInGameItem(sword);                  // test
         inventory.AddInGameItem(boot);                   // test
-    }   
-
+    }
     if (slotFilled == false)
     {
         InGameItem** items = inventory.GetInGameItems(); // test
-
         for (unsigned count = 0; count < 8; count++)
         {
             if (items[count] != nullptr)
@@ -680,11 +673,19 @@ void renderInventory()
 
 void renderEndScreen() {
     COORD c;
-    c.X = 1;
-    c.Y = 1;
-    g_Console.writeToBuffer(c, "Created by Group 12: Winston, Jun Hou, Jiu Len and Darius", 0xF0);
+    c.X = 1; c.Y = 1;
+    g_Console.writeToBuffer(c, "Created by Group 12: Jun Hou, Jiu Len, Darius and winston", 0xF0);
     c.Y += 1;
-    g_Console.writeToBuffer(c, "YOU WIN!!!", 0xF0); //add a message for losing
+    if (g_sChar.hp > 0) {
+        g_Console.writeToBuffer(c, "YOU WIN!!!", 0xF0);
+        c.Y += 1;
+        g_Console.writeToBuffer(c, "The village is saved!", 0xF0);
+    }
+    else {
+        g_Console.writeToBuffer(c, "YOU LOSE. ", 0xF0);
+        c.Y += 1;
+        g_Console.writeToBuffer(c, "The village mourns your death.", 0xF0);
+    }
     //add kills, time taken
 }
 
@@ -693,18 +694,15 @@ void renderFramerate() {
     std::ostringstream ss;
     ss << std::fixed << std::setprecision(2);
     ss << 1.0 / g_dDeltaTime << " fps";         // displays the framerate
-    c.X = g_Console.getConsoleSize().X - 9;
-    c.Y = 40;
+    c.X = g_Console.getConsoleSize().X - 9; c.Y = 40;
     g_Console.writeToBuffer(c, ss.str(), 0xF0);
     ss.str("");
     ss << g_dGameTime << "secs";             // displays the elapsed time
-    c.X = 0;
-    c.Y = 40;
+    c.X = 0; c.Y = 40;
     g_Console.writeToBuffer(c, ss.str(), 0xF0);
     std::ostringstream hb;              // displays the player's health
     hb << "HP: " << std::string(g_sChar.hp, (char)3); // (char)3 is heart symbol
-    c.X = 10;
-    c.Y = 40;
+    c.X = 10; c.Y = 40;
     g_Console.writeToBuffer(c, hb.str(), 0xF4); //white background, red text
 }
 
@@ -714,66 +712,66 @@ void renderToScreen() {
 }
 
 // this is an example of how you would use the input events
-void renderInputEvents() {
-    // keyboard events
-    COORD startPos = { 50, 2 };
-    std::ostringstream ss;
-    std::string key;
-    for (unsigned i = 0; i < K_COUNT; ++i) {
-        ss.str("");
-        switch (i) {
-        case K_UP: key = "UP"; break;
-        case K_DOWN: key = "DOWN"; break;
-        case K_LEFT: key = "LEFT"; break;
-        case K_RIGHT: key = "RIGHT"; break;
-        default: continue;
-        }
-        /*if (g_skKeyEvent[i].keyDown)
-            ss << key << " pressed";
-        else if (g_skKeyEvent[i].keyReleased)
-            ss << key << " released";
-        else
-            ss << key << " not pressed";
-        */
-        COORD c = { startPos.X, startPos.Y + i };
-        g_Console.writeToBuffer(c, ss.str(), 0x17);
-    }
-
-    // mouse events    
-    /*ss.str("");
-    ss << "Mouse position (" << g_mouseEvent.mousePosition.X << ", " << g_mouseEvent.mousePosition.Y << ")";
-    g_Console.writeToBuffer(g_mouseEvent.mousePosition, ss.str(), 0x59);
-    ss.str("");
-    switch (g_mouseEvent.eventFlags) {
-    case 0:
-        if (g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED)
-        {
-            ss.str("Left Button Pressed");
-            g_Console.writeToBuffer(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y + 1, ss.str(), 0x59);
-        }
-        else if (g_mouseEvent.buttonState == RIGHTMOST_BUTTON_PRESSED)
-        {
-            ss.str("Right Button Pressed");
-            g_Console.writeToBuffer(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y + 2, ss.str(), 0x59);
-        }
-        else
-        {
-            ss.str("Some Button Pressed");
-            g_Console.writeToBuffer(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y + 3, ss.str(), 0x59);
-        }
-        break;
-    case DOUBLE_CLICK:
-        ss.str("Double Clicked");
-        g_Console.writeToBuffer(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y + 4, ss.str(), 0x59);
-        break;
-    case MOUSE_WHEELED:
-        if (g_mouseEvent.buttonState & 0xFF000000)
-           ss.str("Mouse wheeled down");
-        else
-           ss.str("Mouse wheeled up");
-        g_Console.writeToBuffer(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y + 5, ss.str(), 0x59);
-        break;
-    default:
-        break;
-    }*/
-}
+//void renderInputEvents() {
+//    // keyboard events
+//    COORD startPos = { 50, 2 };
+//    std::ostringstream ss;
+//    std::string key;
+//    for (unsigned i = 0; i < K_COUNT; ++i) {
+//        ss.str("");
+//        switch (i) {
+//        case K_UP: key = "UP"; break;
+//        case K_DOWN: key = "DOWN"; break;
+//        case K_LEFT: key = "LEFT"; break;
+//        case K_RIGHT: key = "RIGHT"; break;
+//        default: continue;
+//        }
+//        /*if (g_skKeyEvent[i].keyDown)
+//            ss << key << " pressed";
+//        else if (g_skKeyEvent[i].keyReleased)
+//            ss << key << " released";
+//        else
+//            ss << key << " not pressed";
+//        */
+//        COORD c = { startPos.X, startPos.Y + i };
+//        g_Console.writeToBuffer(c, ss.str(), 0x17);
+//    }
+//
+//    // mouse events    
+//    /*ss.str("");
+//    ss << "Mouse position (" << g_mouseEvent.mousePosition.X << ", " << g_mouseEvent.mousePosition.Y << ")";
+//    g_Console.writeToBuffer(g_mouseEvent.mousePosition, ss.str(), 0x59);
+//    ss.str("");
+//    switch (g_mouseEvent.eventFlags) {
+//    case 0:
+//        if (g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED)
+//        {
+//            ss.str("Left Button Pressed");
+//            g_Console.writeToBuffer(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y + 1, ss.str(), 0x59);
+//        }
+//        else if (g_mouseEvent.buttonState == RIGHTMOST_BUTTON_PRESSED)
+//        {
+//            ss.str("Right Button Pressed");
+//            g_Console.writeToBuffer(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y + 2, ss.str(), 0x59);
+//        }
+//        else
+//        {
+//            ss.str("Some Button Pressed");
+//            g_Console.writeToBuffer(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y + 3, ss.str(), 0x59);
+//        }
+//        break;
+//    case DOUBLE_CLICK:
+//        ss.str("Double Clicked");
+//        g_Console.writeToBuffer(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y + 4, ss.str(), 0x59);
+//        break;
+//    case MOUSE_WHEELED:
+//        if (g_mouseEvent.buttonState & 0xFF000000)
+//           ss.str("Mouse wheeled down");
+//        else
+//           ss.str("Mouse wheeled up");
+//        g_Console.writeToBuffer(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y + 5, ss.str(), 0x59);
+//        break;
+//    default:
+//        break;
+//    }*/
+//}
