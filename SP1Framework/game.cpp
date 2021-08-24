@@ -285,7 +285,8 @@ void keyPressed()
         }
         if (g_skKeyEvent[K_INTERACTIVE].keyReleased) // we don't want player to spam
         {
-
+            if (E_KeyPressed == false) { E_KeyPressed = true; }
+            else { E_KeyPressed = false; }
         }
     }
     if (g_skKeyEvent[K_INVENTORY].keyReleased) // we don't want player to spam
@@ -379,13 +380,19 @@ void renderSplashScreen() {             // renders the splash screen aka menu sc
     c.Y = 27;
     c.X = c.X / 2 - 11;
     g_Console.writeToBuffer(c, "Press 'Enter' to start", 0xF0);
-    c.Y++;
+    c.Y += 2;
     c.X = g_Console.getConsoleSize().X / 2 - 16;
     g_Console.writeToBuffer(c, "Press 'W, A, S, D' to move around", 0xF0);
     c.Y++;
     c.X = g_Console.getConsoleSize().X / 2 - 14;
-    g_Console.writeToBuffer(c, "Press 'Left Click' to attack", 0xF0);
+    g_Console.writeToBuffer(c, "Press 'E' to open inventory", 0xF0);
     c.Y++;
+    c.X = g_Console.getConsoleSize().X / 2 - 16;
+    g_Console.writeToBuffer(c, "Press 'F' to interact with items", 0xF0);
+    c.Y++;
+    c.X = g_Console.getConsoleSize().X / 2 - 14;
+    g_Console.writeToBuffer(c, "Press 'Left Click' to attack", 0xF0);
+    c.Y += 3;
     c.X = g_Console.getConsoleSize().X / 2 - 10;
     g_Console.writeToBuffer(c, "Press 'Esc' to quit", 0xF0);
 }
@@ -411,15 +418,12 @@ void initMapVector()
     case 5: mapCsv = std::ifstream("Map5.csv"); break; //opens map
     }
     std::string row;
-
     while (std::getline(mapCsv, row))
     {
         std::stringstream rowStream(row);
         std::string(cell);
         std::vector<std::string> rowVector;
-
         while (std::getline(rowStream, cell, ',')) { rowVector.push_back(cell); }
-
         mapVector.push_back(rowVector);
     }
     mapCsv.close();
@@ -513,7 +517,7 @@ void renderSlimes() { //will put in entity later
 }
 
 void renderGolems() {
-    std::string golemChar = "ppp";
+    std::string golemChar = "pp";           //golem should be 3x3
     if (level_no == 4) {
         g_Console.writeToBuffer(enemies[0]->get_posX(), enemies[0]->get_posY(), golemChar, 0x3F);
     }
@@ -659,8 +663,8 @@ void renderInventory()
 
 void renderEndScreen() {
     COORD c;
-    c.X = 1; c.Y = 1;
-    g_Console.writeToBuffer(c, "Created by Group 12: Jun Hou, Jiu Len, Darius and winston", 0xF0);
+    c.X = 10; c.Y = 5;
+    g_Console.writeToBuffer(c, "Created by Group 12: Jun Hou, Jiu Len, Darius and winston.", 0xF0);
     c.Y += 1;
     if (g_sChar.hp > 0) {
         g_Console.writeToBuffer(c, "YOU WIN!!!", 0xF0);
@@ -672,7 +676,11 @@ void renderEndScreen() {
         c.Y += 1;
         g_Console.writeToBuffer(c, "The village mourns your death.", 0xF0);
     }
-    //add kills, time taken
+    c.Y += 1;
+    g_Console.writeToBuffer(c, "Kills: ", 0xF0);
+    c.Y += 1;
+    g_Console.writeToBuffer(c, "Time: ", 0xF0);
+    //update values
 }
 
 void renderFramerate() {
