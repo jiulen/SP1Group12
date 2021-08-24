@@ -614,7 +614,7 @@ void renderDialogues()
         }
     }
 
-    // wait for 4 seconds before removing the rendering dialogue
+    // wait for 3 seconds before removing the rendering dialogue
     if ((charCount == 0) && (g_dGameTime >= (dialogueTimer + dialogueDelay + 3)))
     { 
         renderingDialogue = ""; dialogueTimer = 0.0; dialogueDelay = 0.0; onDialogue = false; updatedDialogueTimer = false;
