@@ -493,7 +493,7 @@ void renderSplashScreen() {             // renders the splash screen aka menu sc
     g_Console.writeToBuffer(c, "Press 'F' to interact with items", 0xF0);
     c.Y++;
     c.X = g_Console.getConsoleSize().X / 2 - 14;
-    g_Console.writeToBuffer(c, "Press 'Left Click' to attack", 0xF0);
+    g_Console.writeToBuffer(c, "Press 'Arrow Keys to attack", 0xF0);
     c.Y += 3;
     c.X = g_Console.getConsoleSize().X / 2 - 10;
     g_Console.writeToBuffer(c, "Press 'Esc' to quit", 0xF0);
