@@ -266,12 +266,12 @@ void updateGame(double dt)       // gameplay logic
     checkPosition(); // checks whether player's next position is an exit, a chest, 
     updateStats();
     updateInventory(); // update player's inventory
-    if (g_sChar.hp <= 0) {
+    if (g_sChar.hp <= 0) { // check if player dead
         g_eGameState = S_END;
     }
     for (int i = 0; i < 10; i++) {
         if (enemies[i] != nullptr) {
-            if (enemies[i]->get_hp() <= 0) {
+            if (enemies[i]->get_hp() <= 0) { // check if enemy dead
                 delete enemies[i];
                 enemies[i] = nullptr;
                 kills++;
@@ -613,7 +613,7 @@ void renderEnemies() {
 
 void renderCharacter() {
     // Draw the location of the character
-    std::string playerChar = "..";//face yey
+    std::string playerChar = "..";
     g_Console.writeToBuffer(g_sChar.m_cLocation, playerChar, 0xF0);
 }
 
@@ -866,10 +866,18 @@ void renderEndScreen() {
         c.Y += 1;
         g_Console.writeToBuffer(c, "The village mourns your death.", 0xF0);
     }
+    std::ostringstream ss;
     c.Y += 1;
-    g_Console.writeToBuffer(c, "Kills: ", 0xF0);
+    ss << "Kills: " << kills;
+    g_Console.writeToBuffer(c, ss.str(), 0xF0);
+    ss.str("");
     c.Y += 1;
-    g_Console.writeToBuffer(c, "Time: ", 0xF0);
+    ss << "Time: " << g_dGameTime << "secs";
+    g_Console.writeToBuffer(c, ss.str(), 0xF0);
+    ss.str("");
+    c.Y += 1;
+    ss << "HP: " << g_sChar.hp;
+    g_Console.writeToBuffer(c, ss.str(), 0xF0);
     //update values
 }
 
