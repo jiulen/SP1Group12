@@ -15,7 +15,7 @@
 #include <stdlib.h> //srand() and rand()
 #include <time.h>
 
-double  g_dDeltaTime, g_dGameTime, timerTrap, enemyMeleeAttackTimer, moveTimer, dialogueTimer, dialogueDelay;
+double  g_dDeltaTime, g_dGameTime, timerTrap, enemyMeleeAttackTimer, golemRadiusAttackTimer, moveTimer, dialogueTimer, dialogueDelay;
 
 SKeyEvent g_skKeyEvent[K_COUNT];
 SMouseEvent g_mouseEvent;
@@ -27,8 +27,8 @@ Inventory inventory;
 EGAMESTATES g_eGameState = S_SPLASHSCREEN; // initial state
 
 int damagetaken = 0, kills = 0;
-unsigned level_no = 1, itemsCount = 0, charCount = 0;
-bool E_KeyPressed = false, onDialogue = false, updatedDialogueTimer = false, golemDefeated = false;
+unsigned level_no = 4, itemsCount = 0, charCount = 0;
+bool E_KeyPressed = false, onDialogue = false, updatedDialogueTimer = false, golemDefeated = false, golemIsAttacking = false;
 bool lv3_DialogueShown = false, lv4_StartingDialogueShown = false, lv4_GolemDefeatDialogueShown = false, lv5_DialogueShown = false;
 bool usingSword = false, usingChestplate = false, usingBoot = false;
 bool SWORD_AND_CHESTPLATE_GIVEN = false, bootGiven = false, chestOpened = false;
@@ -54,7 +54,7 @@ Entity* enemies[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nu
 void init(void) {
     srand((unsigned int)time(NULL));
     // Set precision for floating point output
-    g_dGameTime = 0.0, timerTrap = 0.0, enemyMeleeAttackTimer = 0.0, moveTimer = 0.0, dialogueTimer = 0.0, dialogueDelay = 0.0;
+    g_dGameTime = 0.0, timerTrap = 0.0, enemyMeleeAttackTimer = 0.0, golemRadiusAttackTimer = 0.0, moveTimer = 0.0, dialogueTimer = 0.0, dialogueDelay = 0.0;
     // sets the initial state for the game
     g_eGameState = S_SPLASHSCREEN;
     //change values to change where player spawns
@@ -264,6 +264,8 @@ void updateGame(double dt)                          // gameplay logic
             if (moveTimer >= 0.2) { enemyMovement(); moveTimer = 0.0; }
             enemyMeleeAttackTimer += dt;
             if (enemyMeleeAttackTimer >= 0.1) { enemyMeleeAttack(); enemyMeleeAttackTimer = 0.0; }
+            golemRadiusAttackTimer += dt;
+            if (golemRadiusAttackTimer >= 1) { golemRadiusAttack(); golemIsAttacking = true; golemRadiusAttackTimer = 0.0; }
             timerTrap += dt;
             if (timerTrap >= 0.1) { TouchSpikeTrap(); timerTrap = 0.0; }
         }
@@ -502,6 +504,7 @@ void renderGame() {
     renderEnemies();
     renderCharacter();  // renders the character into the buffer (over slimes and golems)
     renderPlayerAttack();
+    if (golemIsAttacking == true) { rendergolemRadiusAttack(); golemIsAttacking = false; }
     if (E_KeyPressed == true) { renderInventory(); } // renders inventory
     if (onDialogue == true) { renderDialogues(); } // renders dialogues
 }
@@ -638,7 +641,19 @@ void renderPlayerAttack() {
         break;
     }
 }
-
+void rendergolemRadiusAttack() {
+    if (level_no == 4) {
+        g_Console.writeToBuffer(enemies[0]->get_posX() + 1, enemies[0]->get_posY(), "!", 0x6F);
+        g_Console.writeToBuffer(enemies[0]->get_posX() - 1, enemies[0]->get_posY(), "!", 0x6F);
+        g_Console.writeToBuffer(enemies[0]->get_posX(), enemies[0]->get_posY() + 1, "!", 0x6F);
+        g_Console.writeToBuffer(enemies[0]->get_posX(), enemies[0]->get_posY() - 1, "!", 0x6F);
+        g_Console.writeToBuffer(enemies[0]->get_posX() + 1, enemies[0]->get_posY() + 1, "!", 0x6F);
+        g_Console.writeToBuffer(enemies[0]->get_posX() - 1, enemies[0]->get_posY() - 1, "!", 0x6F);
+        g_Console.writeToBuffer(enemies[0]->get_posX() + 1, enemies[0]->get_posY() - 1, "!", 0x6F);
+        g_Console.writeToBuffer(enemies[0]->get_posX() - 1, enemies[0]->get_posY() + 1, "!", 0x6F);
+      
+    }
+}
 void changeDialogue(unsigned num)
 {
     dialogue = "";
@@ -733,6 +748,22 @@ void enemyMeleeAttack() {
             if ((g_sChar.m_cLocation.X == enemies[j]->get_posX()) && g_sChar.m_cLocation.Y == enemies[j]->get_posY()) {
                 g_sChar.hp -= (enemies[j]->get_dmg() - g_sChar.def);
             }
+        }
+    }
+}
+void golemRadiusAttack() {
+    if (enemies[0] != nullptr && level_no == 4) {
+        if ((g_sChar.m_cLocation.X == enemies[0]->get_posX() - 1 && g_sChar.m_cLocation.Y == enemies[0]->get_posY())        // left
+            || (g_sChar.m_cLocation.X == enemies[0]->get_posX() + 1 && g_sChar.m_cLocation.Y == enemies[0]->get_posY())     // right
+            || (g_sChar.m_cLocation.X == enemies[0]->get_posX() && g_sChar.m_cLocation.Y == enemies[0]->get_posY() - 1)     // up
+            || (g_sChar.m_cLocation.X == enemies[0]->get_posX() && g_sChar.m_cLocation.Y == enemies[0]->get_posY() + 1)     //down
+            || (g_sChar.m_cLocation.X == enemies[0]->get_posX() - 1 && g_sChar.m_cLocation.Y == enemies[0]->get_posY() - 1) // top left corner
+            || (g_sChar.m_cLocation.X == enemies[0]->get_posX() + 1 && g_sChar.m_cLocation.Y == enemies[0]->get_posY() + 1) // bottom right corner
+            || (g_sChar.m_cLocation.X == enemies[0]->get_posX() - 1 && g_sChar.m_cLocation.Y == enemies[0]->get_posY() + 1) // bottom left corner
+            || (g_sChar.m_cLocation.X == enemies[0]->get_posX() + 1 && g_sChar.m_cLocation.Y == enemies[0]->get_posY() - 1))// top right corner
+        {
+            g_sChar.hp -= (enemies[0]->get_dmg() - g_sChar.def);
+           
         }
     }
 }
