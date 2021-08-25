@@ -77,6 +77,7 @@ void createEnemies();           // creates slime objects
 void deleteEnemies();           // deletes slime objects
 void renderEnemies();           // renders slime and golem
 void renderCharacter();         // renders the character into the buffer
+void renderHurtCharacter();
 void renderPlayerAttack();      // renders the player's attack
 void changeDialogue(unsigned);  // change dialogues
 void renderDialogues();         // renders the dialogue into the buffer

@@ -15,7 +15,7 @@
 #include <stdlib.h> //srand() and rand()
 #include <time.h>
 
-double  g_dDeltaTime, g_dGameTime, timerTrap, enemyMeleeAttackTimer, golemRadiusAttackTimer, moveTimer, dialogueTimer, dialogueDelay;
+double  g_dDeltaTime, g_dGameTime, timerTrap, enemyMeleeAttackTimer, golemRadiusAttackTimer, moveTimer, dialogueTimer, dialogueDelay, playerHurt;
 
 SKeyEvent g_skKeyEvent[K_COUNT];
 SMouseEvent g_mouseEvent;
@@ -28,7 +28,7 @@ EGAMESTATES g_eGameState = S_SPLASHSCREEN; // initial state
 
 int damagetaken = 0, kills = 0;
 unsigned level_no = 1, itemsCount = 0, charCount = 0;
-bool E_KeyPressed = false, onDialogue = false, updatedDialogueTimer = false, golemDefeated = false, golemIsAttacking = false;
+bool E_KeyPressed = false, onDialogue = false, updatedDialogueTimer = false, golemDefeated = false, golemIsAttacking = false, playerTookDamage = false;
 bool lv3_DialogueShown = false, lv4_StartingDialogueShown = false, lv4_GolemDefeatDialogueShown = false, lv5_DialogueShown = false;
 bool usingSword = false, usingChestplate = false, usingBoot = false;
 bool SWORD_AND_CHESTPLATE_GIVEN = false, bootGiven = false, chestOpened = false;
@@ -54,7 +54,7 @@ Entity* enemies[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nu
 void init(void) {
     srand((unsigned int)time(NULL));
     // Set precision for floating point output
-    g_dGameTime = 0.0, timerTrap = 0.0, enemyMeleeAttackTimer = 0.0, golemRadiusAttackTimer = 0.0, moveTimer = 0.0, dialogueTimer = 0.0, dialogueDelay = 0.0;
+    g_dGameTime = 0.0, timerTrap = 0.0, enemyMeleeAttackTimer = 0.0, golemRadiusAttackTimer = 0.0, moveTimer = 0.0, dialogueTimer = 0.0, dialogueDelay = 0.0, playerHurt = 0.0;
     // sets the initial state for the game
     g_eGameState = S_SPLASHSCREEN;
     //change values to change where player spawns
@@ -502,7 +502,9 @@ void renderSplashScreen() {             // renders the splash screen aka menu sc
 void renderGame() {
     renderMap(); // then renders the map to the buffer first
     renderEnemies();
-    renderCharacter();  // renders the character into the buffer (over slimes and golems)
+   
+    if (playerTookDamage == true) { renderHurtCharacter(); playerTookDamage = false; } // renders the character into the buffer (over slimes and golems)
+    else { renderCharacter();}
     renderPlayerAttack();
     if (golemIsAttacking == true) { rendergolemRadiusAttack(); golemIsAttacking = false; }
     if (E_KeyPressed == true) { renderInventory(); } // renders inventory
@@ -623,6 +625,10 @@ void renderCharacter() {
     // Draw the location of the character
     std::string playerChar = "^^";
     g_Console.writeToBuffer(g_sChar.m_cLocation, playerChar, 0xF0);
+}
+void renderHurtCharacter() {
+    std::string playerChar = "00";
+    g_Console.writeToBuffer(g_sChar.m_cLocation, playerChar, 0x40);
 }
 
 void renderPlayerAttack() {
@@ -747,6 +753,7 @@ void enemyMeleeAttack() {
         if (enemies[j] != nullptr) {
             if ((g_sChar.m_cLocation.X == enemies[j]->get_posX()) && g_sChar.m_cLocation.Y == enemies[j]->get_posY()) {
                 g_sChar.hp -= (enemies[j]->get_dmg() - g_sChar.def);
+                playerTookDamage = true;
             }
         }
     }
