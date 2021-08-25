@@ -1,13 +1,14 @@
 #include "Golem.h"
 
 Golem::Golem() {
-	hp = 20;
-	dmg = 5;
+	hp = 15;
+	dmg = 4;
 	def = 1;
 }
-//has 20 health and 1 def, so with sword, deals 2 dmg, 10 hits
+//has 15 health and 1 def, so with sword, deals 4 dmg, 3 hits
 
-Golem::~Golem() {
+Golem::~Golem()
+{
 
 }
 

@@ -28,9 +28,10 @@ EGAMESTATES g_eGameState = S_SPLASHSCREEN; // initial state
 
 int damagetaken = 0, kills = 0;
 unsigned level_no = 1, itemsCount = 0, charCount = 0;
-bool E_KeyPressed = false, onDialogue = false, updatedDialogueTimer = false, bossDefeated = false;
-bool lv3_DialogueShown = false, lv4_DialogueShown = false, lv5_DialogueShown = false;
+bool E_KeyPressed = false, onDialogue = false, updatedDialogueTimer = false, golemDefeated = false;
+bool lv3_DialogueShown = false, lv4_StartingDialogueShown = false, lv4_GolemDefeatDialogueShown = false, lv5_DialogueShown = false;
 bool usingSword = false, usingChestplate = false, usingBoot = false;
+bool SWORD_AND_CHESTPLATE_GIVEN = false, bootGiven = false, chestOpened = false;
 
 std::string dialogue = "", renderingDialogue = "";
 
@@ -246,39 +247,46 @@ void splashScreenWait()    // waits for time to pass in splash screen
     processUserInput();
 }
 
-void updateGame(double dt)       // gameplay logic
+void updateGame(double dt)                          // gameplay logic
 {
-    processUserInput(); // checks if you should change states or do something else with the game, e.g. pause, exit
-    keyPressed();       // moves the character, collision detection, physics, etc
-                        // sound can be played here too.
+    processUserInput();                             // checks if you should change states or do something else with the game, e.g. pause, exit
+    if (onDialogue == false) { keyPressed(); }      // moves the character, collision detection, physics, etc
+                                                    // sound can be played here too.
     if (E_KeyPressed == false)
     {
         g_dGameTime += dt;
-        g_sChar.dir = 'N';
-        playerAttack(); //will add atk speed later
-        moveTimer += dt;
-        if (moveTimer >= 0.2) { enemyMovement(); moveTimer = 0.0; }
-        enemyMeleeAttackTimer += dt;
-        if (enemyMeleeAttackTimer >= 0.1) { enemyMeleeAttack(); enemyMeleeAttackTimer = 0.0; }
-        timerTrap += dt;
-        if (timerTrap >= 0.1) { TouchSpikeTrap(); timerTrap = 0.0; }
+
+        if (onDialogue == false)
+        {
+            g_sChar.dir = 'N';
+            playerAttack();                         //will add atk speed later
+            moveTimer += dt;
+            if (moveTimer >= 0.2) { enemyMovement(); moveTimer = 0.0; }
+            enemyMeleeAttackTimer += dt;
+            if (enemyMeleeAttackTimer >= 0.1) { enemyMeleeAttack(); enemyMeleeAttackTimer = 0.0; }
+            timerTrap += dt;
+            if (timerTrap >= 0.1) { TouchSpikeTrap(); timerTrap = 0.0; }
+        }
     }
-    checkPosition(); // checks whether player's next position is an exit, a chest, 
-    updateStats();
-    updateInventory(); // update player's inventory
-    if (g_sChar.hp <= 0) { // check if player dead
+    checkPosition();                                // checks whether player's next position is an exit, a chest, 
+    if (onDialogue == false) { updateStats(); updateInventory(); }
+    if (g_sChar.hp <= 0) {                          // check if player dead
         g_eGameState = S_END;
     }
-    for (int i = 0; i < 10; i++) {
-        if (enemies[i] != nullptr) {
-            if (enemies[i]->get_hp() <= 0) { // check if enemy dead
-                delete enemies[i];
-                enemies[i] = nullptr;
-                kills++;
+    if (onDialogue == false)
+    {
+        for (int i = 0; i < 10; i++) {
+            if (enemies[i] != nullptr) {
+                if (enemies[i]->get_hp() <= 0) {    // check if enemy dead
+                    delete enemies[i];
+                    enemies[i] = nullptr;
+                    kills++;
+                }
             }
         }
     }
     if ((onDialogue == true) && (updatedDialogueTimer == false)) { updatedDialogueTimer = true; dialogueTimer = g_dGameTime; }
+    if ((level_no == 4) && (enemies[0] != nullptr) && (enemies[0]->get_hp() <= 0)) { golemDefeated = true; }
 }
 
 void endScreenWait()
@@ -289,39 +297,36 @@ void endScreenWait()
 void keyPressed()
 {
     // Updating the location of the character based on the key held down
-    if (onDialogue == false)
+    if (E_KeyPressed == false)
     {
-        if (E_KeyPressed == false)
+        if ((g_skKeyEvent[K_UP].keyDown) && (g_sChar.m_cLocation.Y > 0) && ((mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "0") || (mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "7") || (mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "8") || (mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "9")))
         {
-            if ((g_skKeyEvent[K_UP].keyDown) && (g_sChar.m_cLocation.Y > 0) && ((mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "0") || (mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "7") || (mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "8") || (mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "9")))
-            {
-                g_sChar.m_cLocation.Y--;
-            }
-            if ((g_skKeyEvent[K_LEFT].keyDown) && (g_sChar.m_cLocation.X > 1) && ((mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "0") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "7") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "8") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "9")))
-            {
-                g_sChar.m_cLocation.X -= 2;
-            }
-            if ((g_skKeyEvent[K_DOWN].keyDown) && (g_sChar.m_cLocation.Y < (g_Console.getConsoleSize().Y - 1 - GUI_height)) && ((mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "0") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "7") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "8") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "9")))
-            {
-                g_sChar.m_cLocation.Y++;
-            }
-            if ((g_skKeyEvent[K_RIGHT].keyDown) && (g_sChar.m_cLocation.X < (g_Console.getConsoleSize().X - 2)) && ((mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "0") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "7") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "8") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "9")))
-            {
-                g_sChar.m_cLocation.X += 2;
-            }
-            if (g_skKeyEvent[K_INTERACTIVE].keyReleased) // we don't want player to spam
-            {
-                if ((mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "3") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "3") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "3") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "3")) { changeDialogue(4); }
-                if ((mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "4") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "4") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "4") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "4")) { changeDialogue(12); }
-                if ((mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "5") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "5") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "5") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "5")) { changeDialogue(2); }
-                if ((mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "6") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "6") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "6") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "6")) { changeDialogue(3); }
-            }
+            g_sChar.m_cLocation.Y--;
         }
-        if (g_skKeyEvent[K_INVENTORY].keyReleased) // we don't want player to spam
+        if ((g_skKeyEvent[K_LEFT].keyDown) && (g_sChar.m_cLocation.X > 1) && ((mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "0") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "7") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "8") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "9")))
         {
-            if (E_KeyPressed == false) { E_KeyPressed = true; }
-            else { E_KeyPressed = false; }
+            g_sChar.m_cLocation.X -= 2;
         }
+        if ((g_skKeyEvent[K_DOWN].keyDown) && (g_sChar.m_cLocation.Y < (g_Console.getConsoleSize().Y - 1 - GUI_height)) && ((mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "0") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "7") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "8") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "9")))
+        {
+            g_sChar.m_cLocation.Y++;
+        }
+        if ((g_skKeyEvent[K_RIGHT].keyDown) && (g_sChar.m_cLocation.X < (g_Console.getConsoleSize().X - 2)) && ((mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "0") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "7") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "8") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "9")))
+        {
+            g_sChar.m_cLocation.X += 2;
+        }
+        if (g_skKeyEvent[K_INTERACTIVE].keyReleased) // we don't want player to spam
+        {
+            if ((mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "3") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "3") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "3") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "3")) { if (bootGiven == false) { bootGiven = true; changeDialogue(4); inventory.AddInGameItem("Boot"); } }
+            if ((mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "4") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "4") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "4") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "4")) { if (chestOpened == false) { chestOpened = true; changeDialogue(12); inventory.AddInGameItem("Potion"); } }
+            if ((mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "5") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "5") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "5") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "5")) { changeDialogue(2); }
+            if ((mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "6") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "6") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "6") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "6")) { if (SWORD_AND_CHESTPLATE_GIVEN == false) { SWORD_AND_CHESTPLATE_GIVEN = true; changeDialogue(3); inventory.AddInGameItem("Sword"); inventory.AddInGameItem("Chestplate"); } }
+        }
+    }
+    if (g_skKeyEvent[K_INVENTORY].keyReleased) // we don't want player to spam
+    {
+        if (E_KeyPressed == false) { E_KeyPressed = true; }
+        else { E_KeyPressed = false; }
     }
 }
 
@@ -383,23 +388,23 @@ void processUserInput()
 void checkPosition()
 {
     if ((level_no == 3) && (lv3_DialogueShown == false) && (g_sChar.m_cLocation.Y > 20)) { lv3_DialogueShown = true; changeDialogue(6); if (usingBoot == true) { changeDialogue(7); } }
-    if ((level_no == 4) && (lv4_DialogueShown == false) && (bossDefeated == true)) { lv4_DialogueShown = true; changeDialogue(9); }
+    if ((level_no == 4) && (lv4_GolemDefeatDialogueShown == false) && (golemDefeated == true)) { lv4_GolemDefeatDialogueShown = true; changeDialogue(9); }
     if ((level_no == 5) && (lv5_DialogueShown == false) && (mapVector[g_sChar.m_cLocation.Y][g_sChar.m_cLocation.X / 2] == "7")) { lv5_DialogueShown = true; changeDialogue(11); }
 
     if (mapVector[g_sChar.m_cLocation.Y][g_sChar.m_cLocation.X / 2] == "7") {
 
-        if (level_no < 5) { deleteEnemies(); mapVector.clear(); level_no++; initMapVector(); createEnemies(); }
+        if ((level_no == 4 && golemDefeated == true) || (level_no < 5 && level_no != 4)) { deleteEnemies(); mapVector.clear(); level_no++; initMapVector(); createEnemies(); }
 
         switch (level_no)
         {
-        case 2: g_sChar.m_cLocation.X = 8; g_sChar.m_cLocation.Y = 36; break;
-        case 3: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 2; changeDialogue(5); break;
-        case 4: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 20; changeDialogue(8); break;
-        case 5: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 21; if (lv5_DialogueShown == false) { changeDialogue(10); } break;
+        case 2: g_sChar.m_cLocation.X = 8; g_sChar.m_cLocation.Y = 36; chestOpened = false; break;
+        case 3: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 2; chestOpened = false; changeDialogue(5); break;
+        case 4: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 20; chestOpened = false; if (lv4_StartingDialogueShown == false) { lv4_StartingDialogueShown = true; changeDialogue(8); } break;
+        case 5: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 21; chestOpened = false; if (lv5_DialogueShown == false) { changeDialogue(10); } break;
         }
     }
 
-    if (mapVector[g_sChar.m_cLocation.Y][g_sChar.m_cLocation.X / 2] == "8") {
+    if ((lv5_DialogueShown == true) && (mapVector[g_sChar.m_cLocation.Y][g_sChar.m_cLocation.X / 2] == "8")) {
         // Ending scene
         g_eGameState = S_END;
     }

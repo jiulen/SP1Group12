@@ -15,24 +15,9 @@ std::vector<std::string> Inventory::GetInGameItems()
 	return items;
 }
 
-void Inventory::AddInGameItem(Sword& item)
+void Inventory::AddInGameItem(std::string itemName)
 {
-	if (items.size() < 10) { items.push_back("Sword"); }
-}
-
-void Inventory::AddInGameItem(Chestplate& item)
-{
-	if (items.size() < 10) { items.push_back("Chestplate"); }
-}
-
-void Inventory::AddInGameItem(Boot& item)
-{
-	if (items.size() < 10) { items.push_back("Boot"); }
-}
-
-void Inventory::AddInGameItem(Potion& item)
-{
-	if (items.size() < 10) { items.push_back("Potion"); }
+	if (items.size() < 10) { items.push_back(itemName); }
 }
 
 void Inventory::RemoveItem(std::string str)

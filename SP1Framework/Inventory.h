@@ -17,9 +17,6 @@ public:
 	Inventory();
 	~Inventory();
 	std::vector<std::string> GetInGameItems();
-	void AddInGameItem(Sword&);
-	void AddInGameItem(Chestplate&);
-	void AddInGameItem(Boot&);
-	void AddInGameItem(Potion&);
+	void AddInGameItem(std::string);
 	void RemoveItem(std::string);
 };
