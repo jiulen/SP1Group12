@@ -643,14 +643,14 @@ void renderPlayerAttack() {
 }
 void rendergolemRadiusAttack() {
     if (level_no == 4) {
-        g_Console.writeToBuffer(enemies[0]->get_posX() + 1, enemies[0]->get_posY(), "!!", 0x6F);
-        g_Console.writeToBuffer(enemies[0]->get_posX() - 1, enemies[0]->get_posY(), "!!", 0x6F);
+        g_Console.writeToBuffer(enemies[0]->get_posX() + 2, enemies[0]->get_posY(), "!!", 0x6F);
+        g_Console.writeToBuffer(enemies[0]->get_posX() - 2, enemies[0]->get_posY(), "!!", 0x6F);
         g_Console.writeToBuffer(enemies[0]->get_posX(), enemies[0]->get_posY() + 1, "!!", 0x6F);
         g_Console.writeToBuffer(enemies[0]->get_posX(), enemies[0]->get_posY() - 1, "!!", 0x6F);
-        g_Console.writeToBuffer(enemies[0]->get_posX() + 1, enemies[0]->get_posY() + 1, "!!", 0x6F);
-        g_Console.writeToBuffer(enemies[0]->get_posX() - 1, enemies[0]->get_posY() - 1, "!!", 0x6F);
-        g_Console.writeToBuffer(enemies[0]->get_posX() + 1, enemies[0]->get_posY() - 1, "!!", 0x6F);
-        g_Console.writeToBuffer(enemies[0]->get_posX() - 1, enemies[0]->get_posY() + 1, "!!", 0x6F);
+        g_Console.writeToBuffer(enemies[0]->get_posX() + 2, enemies[0]->get_posY() + 1, "!!", 0x6F);
+        g_Console.writeToBuffer(enemies[0]->get_posX() - 2, enemies[0]->get_posY() - 1, "!!", 0x6F);
+        g_Console.writeToBuffer(enemies[0]->get_posX() + 2, enemies[0]->get_posY() - 1, "!!", 0x6F);
+        g_Console.writeToBuffer(enemies[0]->get_posX() - 2, enemies[0]->get_posY() + 1, "!!", 0x6F);
       
     }
 }
