@@ -28,6 +28,7 @@ struct SMouseEvent
 enum EKEYS
 {
     K_UP, K_DOWN, K_LEFT, K_RIGHT,
+    K_ATK_UP, K_ATK_DOWN, K_ATK_LEFT, K_ATK_RIGHT,
     K_ENTER, K_ESCAPE,
     K_INTERACTIVE, K_INVENTORY,
     K_COUNT
@@ -49,6 +50,7 @@ struct SGameChar
 {
     COORD m_cLocation;
     int hp, dmg, def, weight;
+    char dir; //U,D,L,R,N
 };
 
 void init(void);        // initialize your variables, allocate memory, etc
@@ -62,24 +64,25 @@ void updateGame(double);        // gameplay logic
 void endScreenWait();           // wait for 5 seconds after end scene then quitting game
 
 void keyPressed();              // moves the character, collision detection, physics, etc
+void playerAttack();            // player attacks
 void processUserInput();        // checks if you should change states or do something else with the game, e.g. pause, exit
 void checkPosition();           // checks if player reached the exit
 void updateStats();             // update player's char stats
 void clearScreen();             // clears the current screen and draw from scratch 
 void renderSplashScreen();      // renders the splash screen
-void renderGame();       // renders the game stuff
+void renderGame();              // renders the game stuff
 void initMapVector();           // init map vector
 void renderMap();               // renders the map to the buffer first
 void createEnemies();           // creates slime objects
 void deleteEnemies();           // deletes slime objects
-void renderSlimes();            // renders the slime into the buffer
-void renderGolems();            // renders golems into the buffer
+void renderEnemies();           // renders slime and golem
 void renderCharacter();         // renders the character into the buffer
+void renderPlayerAttack();      // renders the player's attack
 void changeDialogue(unsigned);  // change dialogues
-void renderDialogues();  // renders the dialogue into the buffer
-void enemyMovement();
-void enemyMeleeAttack();
-void TouchSpikeTrap(double);    // damages player when he steps on spike trap
+void renderDialogues();         // renders the dialogue into the buffer
+void enemyMovement();           // moves slime and golem
+void enemyMeleeAttack();        // contact damage dealt by slime and golem
+void TouchSpikeTrap();          // damages player when he steps on spike trap
 void initInventoryVector();     // init inventory vector
 void updateInventory();         // update inventory
 void renderInventory();         // renders the inventory into the buffer

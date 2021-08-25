@@ -26,9 +26,9 @@ Slime slimes;
 Inventory inventory;
 EGAMESTATES g_eGameState = S_SPLASHSCREEN; // initial state
 
-int damagetaken = 0;
+int damagetaken = 0, kills = 0;
 unsigned level_no = 1, itemsCount = 0, charCount = 0;
-bool E_KeyPressed = false, dmgalreadytaken = false, onDialogue = false, updatedDialogueTimer = false, bossDefeated = false;
+bool E_KeyPressed = false, onDialogue = false, updatedDialogueTimer = false, bossDefeated = false;
 bool lv3_DialogueShown = false, lv4_DialogueShown = false, lv5_DialogueShown = false;
 bool usingSword = false, usingChestplate = false, usingBoot = false;
 
@@ -173,6 +173,10 @@ void gameplayKBHandler(const KEY_EVENT_RECORD& keyboardEvent)
     case 0x46: key = K_INTERACTIVE; break;
     case VK_RETURN: key = K_ENTER; break;
     case VK_ESCAPE: key = K_ESCAPE; break;
+    case VK_UP: key = K_ATK_UP; break;
+    case VK_DOWN: key = K_ATK_DOWN; break;
+    case VK_LEFT: key = K_ATK_LEFT; break;
+    case VK_RIGHT: key = K_ATK_RIGHT; break;
     }
     // a key pressed event would be one with bKeyDown == true
     // a key released event would be one with bKeyDown == false
@@ -225,7 +229,7 @@ void update(double dt)
     switch (g_eGameState)
     {
     case S_SPLASHSCREEN: splashScreenWait(); break; // game logic for the splash screen
-    case S_GAME: g_dGameTime += dt; updateGame(dt); break; // gameplay logic when we are in the game
+    case S_GAME: updateGame(dt); break; // gameplay logic when we are in the game
     case S_END: endScreenWait(); break;
     }
 }
@@ -249,21 +253,30 @@ void updateGame(double dt)       // gameplay logic
                         // sound can be played here too.
     if (E_KeyPressed == false)
     {
+        g_dGameTime += dt;
+        g_sChar.dir = 'N';
+        playerAttack(); //will add atk speed later
         moveTimer += dt;
         if (moveTimer >= 0.2) { enemyMovement(); moveTimer = 0.0; }
         enemyMeleeAttackTimer += dt;
         if (enemyMeleeAttackTimer >= 0.1) { enemyMeleeAttack(); enemyMeleeAttackTimer = 0.0; }
-    }
-    timerTrap += dt;
-    if (timerTrap >= 0.1) {
-        TouchSpikeTrap(dt);
-        timerTrap = 0.0;
+        timerTrap += dt;
+        if (timerTrap >= 0.1) { TouchSpikeTrap(); timerTrap = 0.0; }
     }
     checkPosition(); // checks whether player's next position is an exit, a chest, 
     updateStats();
     updateInventory(); // update player's inventory
     if (g_sChar.hp <= 0) {
         g_eGameState = S_END;
+    }
+    for (int i = 0; i < 10; i++) {
+        if (enemies[i] != nullptr) {
+            if (enemies[i]->get_hp() <= 0) {
+                delete enemies[i];
+                enemies[i] = nullptr;
+                kills++;
+            }
+        }
     }
     if ((onDialogue == true) && (updatedDialogueTimer == false)) { updatedDialogueTimer = true; dialogueTimer = g_dGameTime; }
 }
@@ -275,9 +288,7 @@ void endScreenWait()
 
 void keyPressed()
 {
-    // Updating the location of the character based on the key release
-    // 
-    // [NOTE]: PLAYER CAN ONLY MOVE AFTER THE MAP 1 ARRAY IS DONE LOADING
+    // Updating the location of the character based on the key held down
     if (onDialogue == false)
     {
         if (E_KeyPressed == false)
@@ -311,6 +322,54 @@ void keyPressed()
             if (E_KeyPressed == false) { E_KeyPressed = true; }
             else { E_KeyPressed = false; }
         }
+    }
+}
+
+void playerAttack()
+{
+    if (g_skKeyEvent[K_ATK_UP].keyReleased)
+    {
+        for (int i = 0; i < 10; i++) {
+            if (enemies[i] != nullptr) {
+                if (enemies[i]->get_posX() == g_sChar.m_cLocation.X && enemies[i]->get_posY() == g_sChar.m_cLocation.Y - 1) {
+                    enemies[i]->set_hp(enemies[i]->get_hp() - (g_sChar.dmg - enemies[i]->get_def()));
+                }
+            }
+        }
+        g_sChar.dir = 'U';
+    }
+    if (g_skKeyEvent[K_ATK_DOWN].keyReleased)
+    {
+        for (int i = 0; i < 10; i++) {
+            if (enemies[i] != nullptr) {
+                if (enemies[i]->get_posX() == g_sChar.m_cLocation.X && enemies[i]->get_posY() == g_sChar.m_cLocation.Y + 1) {
+                    enemies[i]->set_hp(enemies[i]->get_hp() - (g_sChar.dmg - enemies[i]->get_def()));
+                }
+            }
+        }
+        g_sChar.dir = 'D';
+    }
+    if (g_skKeyEvent[K_ATK_LEFT].keyReleased)
+    {
+        for (int i = 0; i < 10; i++) {
+            if (enemies[i] != nullptr) {
+                if (enemies[i]->get_posX() == g_sChar.m_cLocation.X - 2 && enemies[i]->get_posY() == g_sChar.m_cLocation.Y) {
+                    enemies[i]->set_hp(enemies[i]->get_hp() - (g_sChar.dmg - enemies[i]->get_def()));
+                }
+            }
+        }
+        g_sChar.dir = 'L';
+    }
+    if (g_skKeyEvent[K_ATK_RIGHT].keyReleased)
+    {
+        for (int i = 0; i < 10; i++) {
+            if (enemies[i] != nullptr) {
+                if (enemies[i]->get_posX() == g_sChar.m_cLocation.X + 2 && enemies[i]->get_posY() == g_sChar.m_cLocation.Y) {
+                    enemies[i]->set_hp(enemies[i]->get_hp() - (g_sChar.dmg - enemies[i]->get_def()));
+                }
+            }
+        }
+        g_sChar.dir = 'R';
     }
 }
 
@@ -435,9 +494,9 @@ void renderSplashScreen() {             // renders the splash screen aka menu sc
 
 void renderGame() {
     renderMap(); // then renders the map to the buffer first
-    renderSlimes(); // render slime objects
-    renderGolems();
-    renderCharacter();  // renders the character into the buffer (over slimes)
+    renderEnemies();
+    renderCharacter();  // renders the character into the buffer (over slimes and golems)
+    renderPlayerAttack();
     if (E_KeyPressed == true) { renderInventory(); } // renders inventory
     if (onDialogue == true) { renderDialogues(); } // renders dialogues
 }
@@ -534,9 +593,9 @@ void deleteEnemies() {
     }
 }
 
-void renderSlimes() { //will put in entity later
+void renderEnemies() {
     // draw location of slimes
-    std::string slimeChar = "--";//also face yey
+    std::string slimeChar = "--";
     if (level_no < 4) {
         for (unsigned i = 0; i < 10; i++) {
             if (enemies[i] != nullptr)
@@ -545,12 +604,10 @@ void renderSlimes() { //will put in entity later
             }
         }
     }
-}
-
-void renderGolems() {
-    std::string golemChar = "pp";           //golem should be 3x3
+    // draw location of golems
+    std::string golemChar = "==";
     if (level_no == 4) {
-        g_Console.writeToBuffer(enemies[0]->get_posX(), enemies[0]->get_posY(), golemChar, 0x3F);
+        g_Console.writeToBuffer(enemies[0]->get_posX(), enemies[0]->get_posY(), golemChar, 0x70);
     }
 }
 
@@ -558,6 +615,23 @@ void renderCharacter() {
     // Draw the location of the character
     std::string playerChar = "..";//face yey
     g_Console.writeToBuffer(g_sChar.m_cLocation, playerChar, 0xF0);
+}
+
+void renderPlayerAttack() {
+    switch (g_sChar.dir) {
+    case 'U':
+        g_Console.writeToBuffer(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y - 1, "/\\", 0xF0);
+        break;
+    case 'D':
+        g_Console.writeToBuffer(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y + 1, "\\/", 0xF0);
+        break;
+    case 'L':
+        g_Console.writeToBuffer(g_sChar.m_cLocation.X - 2, g_sChar.m_cLocation.Y, "<<", 0xF0);
+        break;
+    case 'R':
+        g_Console.writeToBuffer(g_sChar.m_cLocation.X + 2, g_sChar.m_cLocation.Y, ">>", 0xF0);
+        break;
+    }
 }
 
 void changeDialogue(unsigned num)
@@ -658,7 +732,7 @@ void enemyMeleeAttack() {
     }
 }
 
-void TouchSpikeTrap(double dt) {
+void TouchSpikeTrap() {
     if ((mapVector[g_sChar.m_cLocation.Y][g_sChar.m_cLocation.X / 2] == "9") && g_sChar.weight == 2) {
         g_sChar.hp -= 1;
     }
