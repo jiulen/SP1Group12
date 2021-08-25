@@ -82,8 +82,8 @@ void changeDialogue(unsigned);  // change dialogues
 void renderDialogues();         // renders the dialogue into the buffer
 void enemyMovement();           // moves slime and golem
 void enemyMeleeAttack();        // contact damage dealt by slime and golem
-void golemRadiusAttack();
-void rendergolemRadiusAttack();
+void golemRadiusAttack();       // radius damage dealt by golem
+void rendergolemRadiusAttack(); // show radius damage of golem
 void TouchSpikeTrap();          // damages player when he steps on spike trap
 void initInventoryVector();     // init inventory vector
 void updateInventory();         // update inventory
