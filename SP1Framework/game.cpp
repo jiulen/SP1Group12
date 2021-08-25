@@ -75,6 +75,12 @@ void init(void) {
 //--------------------------------------------------------------
 void shutdown(void)
 {
+    for (int i = 0; i < 10; i++) {
+        if (enemies[i] != nullptr) {
+            delete enemies[i];
+            enemies[i] = nullptr;
+        }
+    }
     // Reset to white text on black background
     colour(FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED);
     g_Console.clearBuffer();
@@ -173,6 +179,10 @@ void gameplayKBHandler(const KEY_EVENT_RECORD& keyboardEvent)
     case 0x46: key = K_INTERACTIVE; break;
     case VK_RETURN: key = K_ENTER; break;
     case VK_ESCAPE: key = K_ESCAPE; break;
+    case VK_UP: key = K_ATK_UP; break;
+    case VK_DOWN: key = K_ATK_DOWN; break;
+    case VK_LEFT: key = K_ATK_LEFT; break;
+    case VK_RIGHT: key = K_ATK_RIGHT; break;
     }
     // a key pressed event would be one with bKeyDown == true
     // a key released event would be one with bKeyDown == false
@@ -225,7 +235,7 @@ void update(double dt)
     switch (g_eGameState)
     {
     case S_SPLASHSCREEN: splashScreenWait(); break; // game logic for the splash screen
-    case S_GAME: g_dGameTime += dt; updateGame(dt); break; // gameplay logic when we are in the game
+    case S_GAME: updateGame(dt); break; // gameplay logic when we are in the game
     case S_END: endScreenWait(); break;
     }
 }
@@ -244,11 +254,13 @@ void splashScreenWait()    // waits for time to pass in splash screen
 
 void updateGame(double dt)       // gameplay logic
 {
+    g_sChar.dir = 'N';  // resets attack direction
     processUserInput(); // checks if you should change states or do something else with the game, e.g. pause, exit
     keyPressed();       // moves the character, collision detection, physics, etc
                         // sound can be played here too.
     if (E_KeyPressed == false)
     {
+        g_dGameTime += dt;
         moveTimer += dt;
         if (moveTimer >= 0.2) { enemyMovement(); moveTimer = 0.0; }
         enemyMeleeAttackTimer += dt;
@@ -265,7 +277,18 @@ void updateGame(double dt)       // gameplay logic
     if (g_sChar.hp <= 0) {
         g_eGameState = S_END;
     }
+<<<<<<< Updated upstream
     if ((onDialogue == true) && (updatedDialogueTimer == false)) { updatedDialogueTimer = true; dialogueTimer = g_dGameTime; }
+=======
+    for (int i = 0; i < 10; i++) {
+        if (enemies[i] != nullptr) {
+            if (enemies[i]->get_hp() <= 0) {
+                delete enemies[i];
+                enemies[i] = nullptr;
+            }
+        }
+    }
+>>>>>>> Stashed changes
 }
 
 void endScreenWait()
@@ -304,6 +327,38 @@ void keyPressed()
                 if ((mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "4") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "4") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "4") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "4")) { changeDialogue(12); }
                 if ((mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "5") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "5") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "5") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "5")) { changeDialogue(2); }
                 if ((mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "6") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "6") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "6") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "6")) { changeDialogue(3); }
+            }
+            if (g_skKeyEvent[K_ATK_UP].keyReleased)
+            {
+                for (int i = 0; i < 10; i++) {
+                    if (enemies[i] != nullptr) {
+                        if (enemies[i]->get_posX() == g_sChar.m_cLocation.X && enemies[i]->get_posY() == g_sChar.m_cLocation.Y - 1) {
+                            enemies[i]->set_hp(enemies[i]->get_hp() - (g_sChar.dmg - enemies[i]->get_def()));
+                        }
+                    }
+                }
+                g_sChar.dir = 'U';
+            }
+            if (g_skKeyEvent[K_ATK_DOWN].keyReleased)
+            {
+                for (int i = 0; i < 10; i++) {
+                    if (enemies[i] != nullptr) {
+                        if (enemies[i]->get_posX() == g_sChar.m_cLocation.X && enemies[i]->get_posY() == g_sChar.m_cLocation.Y + 1) {
+                            enemies[i]->set_hp(enemies[i]->get_hp() - (g_sChar.dmg - enemies[i]->get_def()));
+                        }
+                    }
+                }
+                g_sChar.dir = 'D';
+            }
+            if (g_skKeyEvent[K_ATK_LEFT].keyReleased)
+            {
+                //attack
+                g_sChar.dir = 'L';
+            }
+            if (g_skKeyEvent[K_ATK_RIGHT].keyReleased)
+            {
+                //attack
+                g_sChar.dir = 'R';
             }
         }
         if (g_skKeyEvent[K_INVENTORY].keyReleased) // we don't want player to spam
@@ -435,11 +490,15 @@ void renderSplashScreen() {             // renders the splash screen aka menu sc
 
 void renderGame() {
     renderMap(); // then renders the map to the buffer first
-    renderSlimes(); // render slime objects
-    renderGolems();
+    renderEnemies();
     renderCharacter();  // renders the character into the buffer (over slimes)
+<<<<<<< Updated upstream
     if (E_KeyPressed == true) { renderInventory(); } // renders inventory
     if (onDialogue == true) { renderDialogues(); } // renders dialogues
+=======
+    renderPlayerAttack(g_sChar.dir);
+    if (E_KeyPressed == true) { renderInventory(); } // render inventory
+>>>>>>> Stashed changes
 }
 
 void initMapVector()
@@ -534,9 +593,9 @@ void deleteEnemies() {
     }
 }
 
-void renderSlimes() { //will put in entity later
-    // draw location of slimes
-    std::string slimeChar = "--";//also face yey
+void renderEnemies() {
+    // draw location of slimes/golems
+    std::string slimeChar = "--";
     if (level_no < 4) {
         for (unsigned i = 0; i < 10; i++) {
             if (enemies[i] != nullptr)
@@ -545,12 +604,9 @@ void renderSlimes() { //will put in entity later
             }
         }
     }
-}
-
-void renderGolems() {
-    std::string golemChar = "pp";           //golem should be 3x3
+    std::string golemChar = "==";
     if (level_no == 4) {
-        g_Console.writeToBuffer(enemies[0]->get_posX(), enemies[0]->get_posY(), golemChar, 0x3F);
+        g_Console.writeToBuffer(enemies[0]->get_posX(), enemies[0]->get_posY(), golemChar, 0x70);
     }
 }
 
@@ -560,7 +616,28 @@ void renderCharacter() {
     g_Console.writeToBuffer(g_sChar.m_cLocation, playerChar, 0xF0);
 }
 
+<<<<<<< Updated upstream
 void changeDialogue(unsigned num)
+=======
+void renderPlayerAttack(char direction) {
+    switch (direction) {
+    case 'U':
+        g_Console.writeToBuffer(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y - 1, "/\\", 0xF0);
+        break;
+    case 'D':
+        g_Console.writeToBuffer(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y + 1, "\\/", 0xF0);
+        break;
+    case 'L':
+        g_Console.writeToBuffer(g_sChar.m_cLocation.X - 2, g_sChar.m_cLocation.Y, "<<", 0xF0);
+        break;
+    case 'R':
+        g_Console.writeToBuffer(g_sChar.m_cLocation.X + 2, g_sChar.m_cLocation.Y, ">>", 0xF0);
+        break;
+    }
+}
+
+void getDialogue(unsigned num)
+>>>>>>> Stashed changes
 {
     dialogue = "";
 

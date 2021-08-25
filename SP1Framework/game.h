@@ -28,6 +28,7 @@ struct SMouseEvent
 enum EKEYS
 {
     K_UP, K_DOWN, K_LEFT, K_RIGHT,
+    K_ATK_UP, K_ATK_DOWN, K_ATK_LEFT, K_ATK_RIGHT,
     K_ENTER, K_ESCAPE,
     K_INTERACTIVE, K_INVENTORY,
     K_COUNT
@@ -49,6 +50,7 @@ struct SGameChar
 {
     COORD m_cLocation;
     int hp, dmg, def, weight;
+    char dir; //U, D, L, R, N (Up, Down, Left, Right, None)
 };
 
 void init        (void);        // initialize your variables, allocate memory, etc
@@ -72,11 +74,16 @@ void initMapVector();           // init map vector
 void renderMap();               // renders the map to the buffer first
 void createEnemies();           // creates slime objects
 void deleteEnemies();           // deletes slime objects
-void renderSlimes();            // renders the slime into the buffer
-void renderGolems();            // renders golems into the buffer
+void renderEnemies();            // renders the enemies into the buffer
 void renderCharacter();         // renders the character into the buffer
+<<<<<<< Updated upstream
 void changeDialogue(unsigned);  // change dialogues
 void renderDialogues();  // renders the dialogue into the buffer
+=======
+void renderPlayerAttack(char);
+void getDialogue(unsigned);     // get dialogues
+void renderDialogues();         // renders the dialogue into the buffer
+>>>>>>> Stashed changes
 void enemyMovement();           
 void enemyMeleeAttack();
 void TouchSpikeTrap(double);    // damages player when he steps on spike trap
