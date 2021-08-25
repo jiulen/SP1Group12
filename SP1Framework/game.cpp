@@ -27,7 +27,7 @@ Inventory inventory;
 EGAMESTATES g_eGameState = S_SPLASHSCREEN; // initial state
 
 int damagetaken = 0, kills = 0;
-unsigned level_no = 4, itemsCount = 0, charCount = 0;
+unsigned level_no = 1, itemsCount = 0, charCount = 0;
 bool E_KeyPressed = false, onDialogue = false, updatedDialogueTimer = false, golemDefeated = false, golemIsAttacking = false;
 bool lv3_DialogueShown = false, lv4_StartingDialogueShown = false, lv4_GolemDefeatDialogueShown = false, lv5_DialogueShown = false;
 bool usingSword = false, usingChestplate = false, usingBoot = false;
@@ -615,13 +615,13 @@ void renderEnemies() {
     // draw location of golems
     std::string golemChar = "==";
     if (level_no == 4) {
-        g_Console.writeToBuffer(enemies[0]->get_posX(), enemies[0]->get_posY(), golemChar, 0x70);
+        g_Console.writeToBuffer(enemies[0]->get_posX(), enemies[0]->get_posY(), golemChar, 0x80);
     }
 }
 
 void renderCharacter() {
     // Draw the location of the character
-    std::string playerChar = "..";
+    std::string playerChar = "^^";
     g_Console.writeToBuffer(g_sChar.m_cLocation, playerChar, 0xF0);
 }
 
@@ -643,14 +643,14 @@ void renderPlayerAttack() {
 }
 void rendergolemRadiusAttack() {
     if (level_no == 4) {
-        g_Console.writeToBuffer(enemies[0]->get_posX() + 1, enemies[0]->get_posY(), "!", 0x6F);
-        g_Console.writeToBuffer(enemies[0]->get_posX() - 1, enemies[0]->get_posY(), "!", 0x6F);
-        g_Console.writeToBuffer(enemies[0]->get_posX(), enemies[0]->get_posY() + 1, "!", 0x6F);
-        g_Console.writeToBuffer(enemies[0]->get_posX(), enemies[0]->get_posY() - 1, "!", 0x6F);
-        g_Console.writeToBuffer(enemies[0]->get_posX() + 1, enemies[0]->get_posY() + 1, "!", 0x6F);
-        g_Console.writeToBuffer(enemies[0]->get_posX() - 1, enemies[0]->get_posY() - 1, "!", 0x6F);
-        g_Console.writeToBuffer(enemies[0]->get_posX() + 1, enemies[0]->get_posY() - 1, "!", 0x6F);
-        g_Console.writeToBuffer(enemies[0]->get_posX() - 1, enemies[0]->get_posY() + 1, "!", 0x6F);
+        g_Console.writeToBuffer(enemies[0]->get_posX() + 1, enemies[0]->get_posY(), "!!", 0x6F);
+        g_Console.writeToBuffer(enemies[0]->get_posX() - 1, enemies[0]->get_posY(), "!!", 0x6F);
+        g_Console.writeToBuffer(enemies[0]->get_posX(), enemies[0]->get_posY() + 1, "!!", 0x6F);
+        g_Console.writeToBuffer(enemies[0]->get_posX(), enemies[0]->get_posY() - 1, "!!", 0x6F);
+        g_Console.writeToBuffer(enemies[0]->get_posX() + 1, enemies[0]->get_posY() + 1, "!!", 0x6F);
+        g_Console.writeToBuffer(enemies[0]->get_posX() - 1, enemies[0]->get_posY() - 1, "!!", 0x6F);
+        g_Console.writeToBuffer(enemies[0]->get_posX() + 1, enemies[0]->get_posY() - 1, "!!", 0x6F);
+        g_Console.writeToBuffer(enemies[0]->get_posX() - 1, enemies[0]->get_posY() + 1, "!!", 0x6F);
       
     }
 }
@@ -753,17 +753,16 @@ void enemyMeleeAttack() {
 }
 void golemRadiusAttack() {
     if (enemies[0] != nullptr && level_no == 4) {
-        if ((g_sChar.m_cLocation.X == enemies[0]->get_posX() - 1 && g_sChar.m_cLocation.Y == enemies[0]->get_posY())        // left
-            || (g_sChar.m_cLocation.X == enemies[0]->get_posX() + 1 && g_sChar.m_cLocation.Y == enemies[0]->get_posY())     // right
+        if ((g_sChar.m_cLocation.X == enemies[0]->get_posX() - 2 && g_sChar.m_cLocation.Y == enemies[0]->get_posY())        // left
+            || (g_sChar.m_cLocation.X == enemies[0]->get_posX() + 2 && g_sChar.m_cLocation.Y == enemies[0]->get_posY())     // right
             || (g_sChar.m_cLocation.X == enemies[0]->get_posX() && g_sChar.m_cLocation.Y == enemies[0]->get_posY() - 1)     // up
             || (g_sChar.m_cLocation.X == enemies[0]->get_posX() && g_sChar.m_cLocation.Y == enemies[0]->get_posY() + 1)     //down
-            || (g_sChar.m_cLocation.X == enemies[0]->get_posX() - 1 && g_sChar.m_cLocation.Y == enemies[0]->get_posY() - 1) // top left corner
-            || (g_sChar.m_cLocation.X == enemies[0]->get_posX() + 1 && g_sChar.m_cLocation.Y == enemies[0]->get_posY() + 1) // bottom right corner
-            || (g_sChar.m_cLocation.X == enemies[0]->get_posX() - 1 && g_sChar.m_cLocation.Y == enemies[0]->get_posY() + 1) // bottom left corner
-            || (g_sChar.m_cLocation.X == enemies[0]->get_posX() + 1 && g_sChar.m_cLocation.Y == enemies[0]->get_posY() - 1))// top right corner
+            || (g_sChar.m_cLocation.X == enemies[0]->get_posX() - 2 && g_sChar.m_cLocation.Y == enemies[0]->get_posY() - 1) // top left corner
+            || (g_sChar.m_cLocation.X == enemies[0]->get_posX() + 2 && g_sChar.m_cLocation.Y == enemies[0]->get_posY() + 1) // bottom right corner
+            || (g_sChar.m_cLocation.X == enemies[0]->get_posX() - 2 && g_sChar.m_cLocation.Y == enemies[0]->get_posY() + 1) // bottom left corner
+            || (g_sChar.m_cLocation.X == enemies[0]->get_posX() + 2 && g_sChar.m_cLocation.Y == enemies[0]->get_posY() - 1))// top right corner
         {
-            g_sChar.hp -= (enemies[0]->get_dmg() - g_sChar.def);
-           
+            g_sChar.hp -= 3; 
         }
     }
 }
