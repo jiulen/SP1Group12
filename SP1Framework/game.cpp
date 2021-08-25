@@ -265,7 +265,7 @@ void updateGame(double dt)                          // gameplay logic
             enemyMeleeAttackTimer += dt;
             if (enemyMeleeAttackTimer >= 0.1) { enemyMeleeAttack(); enemyMeleeAttackTimer = 0.0; }
             golemRadiusAttackTimer += dt;
-            if (golemRadiusAttackTimer >= 1) { golemRadiusAttack(); golemIsAttacking = true; golemRadiusAttackTimer = 0.0; }
+            if (golemRadiusAttackTimer >= 1.5) { golemRadiusAttack(); golemIsAttacking = true; golemRadiusAttackTimer = 0.0; }
             timerTrap += dt;
             if (timerTrap >= 0.1) { TouchSpikeTrap(); timerTrap = 0.0; }
         }
