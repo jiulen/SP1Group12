@@ -51,7 +51,7 @@ Entity* enemies[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nu
 // Output   : void
 //--------------------------------------------------------------
 void init(void) {
-    srand((unsigned int) time(NULL));
+    srand((unsigned int)time(NULL));
     // Set precision for floating point output
     g_dGameTime = 0.0, timerTrap = 0.0, enemyMeleeAttackTimer = 0.0, moveTimer = 0.0, dialogueTimer = 0.0, dialogueDelay = 0.0;
     // sets the initial state for the game
@@ -75,12 +75,6 @@ void init(void) {
 //--------------------------------------------------------------
 void shutdown(void)
 {
-    for (int i = 0; i < 10; i++) {
-        if (enemies[i] != nullptr) {
-            delete enemies[i];
-            enemies[i] = nullptr;
-        }
-    }
     // Reset to white text on black background
     colour(FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED);
     g_Console.clearBuffer();
@@ -179,10 +173,6 @@ void gameplayKBHandler(const KEY_EVENT_RECORD& keyboardEvent)
     case 0x46: key = K_INTERACTIVE; break;
     case VK_RETURN: key = K_ENTER; break;
     case VK_ESCAPE: key = K_ESCAPE; break;
-    case VK_UP: key = K_ATK_UP; break;
-    case VK_DOWN: key = K_ATK_DOWN; break;
-    case VK_LEFT: key = K_ATK_LEFT; break;
-    case VK_RIGHT: key = K_ATK_RIGHT; break;
     }
     // a key pressed event would be one with bKeyDown == true
     // a key released event would be one with bKeyDown == false
@@ -235,7 +225,7 @@ void update(double dt)
     switch (g_eGameState)
     {
     case S_SPLASHSCREEN: splashScreenWait(); break; // game logic for the splash screen
-    case S_GAME: updateGame(dt); break; // gameplay logic when we are in the game
+    case S_GAME: g_dGameTime += dt; updateGame(dt); break; // gameplay logic when we are in the game
     case S_END: endScreenWait(); break;
     }
 }
@@ -254,13 +244,11 @@ void splashScreenWait()    // waits for time to pass in splash screen
 
 void updateGame(double dt)       // gameplay logic
 {
-    g_sChar.dir = 'N';  // resets attack direction
     processUserInput(); // checks if you should change states or do something else with the game, e.g. pause, exit
     keyPressed();       // moves the character, collision detection, physics, etc
                         // sound can be played here too.
     if (E_KeyPressed == false)
     {
-        g_dGameTime += dt;
         moveTimer += dt;
         if (moveTimer >= 0.2) { enemyMovement(); moveTimer = 0.0; }
         enemyMeleeAttackTimer += dt;
@@ -277,18 +265,7 @@ void updateGame(double dt)       // gameplay logic
     if (g_sChar.hp <= 0) {
         g_eGameState = S_END;
     }
-<<<<<<< Updated upstream
     if ((onDialogue == true) && (updatedDialogueTimer == false)) { updatedDialogueTimer = true; dialogueTimer = g_dGameTime; }
-=======
-    for (int i = 0; i < 10; i++) {
-        if (enemies[i] != nullptr) {
-            if (enemies[i]->get_hp() <= 0) {
-                delete enemies[i];
-                enemies[i] = nullptr;
-            }
-        }
-    }
->>>>>>> Stashed changes
 }
 
 void endScreenWait()
@@ -328,45 +305,13 @@ void keyPressed()
                 if ((mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "5") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "5") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "5") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "5")) { changeDialogue(2); }
                 if ((mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "6") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "6") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "6") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "6")) { changeDialogue(3); }
             }
-            if (g_skKeyEvent[K_ATK_UP].keyReleased)
-            {
-                for (int i = 0; i < 10; i++) {
-                    if (enemies[i] != nullptr) {
-                        if (enemies[i]->get_posX() == g_sChar.m_cLocation.X && enemies[i]->get_posY() == g_sChar.m_cLocation.Y - 1) {
-                            enemies[i]->set_hp(enemies[i]->get_hp() - (g_sChar.dmg - enemies[i]->get_def()));
-                        }
-                    }
-                }
-                g_sChar.dir = 'U';
-            }
-            if (g_skKeyEvent[K_ATK_DOWN].keyReleased)
-            {
-                for (int i = 0; i < 10; i++) {
-                    if (enemies[i] != nullptr) {
-                        if (enemies[i]->get_posX() == g_sChar.m_cLocation.X && enemies[i]->get_posY() == g_sChar.m_cLocation.Y + 1) {
-                            enemies[i]->set_hp(enemies[i]->get_hp() - (g_sChar.dmg - enemies[i]->get_def()));
-                        }
-                    }
-                }
-                g_sChar.dir = 'D';
-            }
-            if (g_skKeyEvent[K_ATK_LEFT].keyReleased)
-            {
-                //attack
-                g_sChar.dir = 'L';
-            }
-            if (g_skKeyEvent[K_ATK_RIGHT].keyReleased)
-            {
-                //attack
-                g_sChar.dir = 'R';
-            }
         }
         if (g_skKeyEvent[K_INVENTORY].keyReleased) // we don't want player to spam
         {
             if (E_KeyPressed == false) { E_KeyPressed = true; }
             else { E_KeyPressed = false; }
         }
-    }   
+    }
 }
 
 void processUserInput()
@@ -383,7 +328,7 @@ void checkPosition()
     if ((level_no == 5) && (lv5_DialogueShown == false) && (mapVector[g_sChar.m_cLocation.Y][g_sChar.m_cLocation.X / 2] == "7")) { lv5_DialogueShown = true; changeDialogue(11); }
 
     if (mapVector[g_sChar.m_cLocation.Y][g_sChar.m_cLocation.X / 2] == "7") {
-        
+
         if (level_no < 5) { deleteEnemies(); mapVector.clear(); level_no++; initMapVector(); createEnemies(); }
 
         switch (level_no)
@@ -490,15 +435,11 @@ void renderSplashScreen() {             // renders the splash screen aka menu sc
 
 void renderGame() {
     renderMap(); // then renders the map to the buffer first
-    renderEnemies();
+    renderSlimes(); // render slime objects
+    renderGolems();
     renderCharacter();  // renders the character into the buffer (over slimes)
-<<<<<<< Updated upstream
     if (E_KeyPressed == true) { renderInventory(); } // renders inventory
     if (onDialogue == true) { renderDialogues(); } // renders dialogues
-=======
-    renderPlayerAttack(g_sChar.dir);
-    if (E_KeyPressed == true) { renderInventory(); } // render inventory
->>>>>>> Stashed changes
 }
 
 void initMapVector()
@@ -593,9 +534,9 @@ void deleteEnemies() {
     }
 }
 
-void renderEnemies() {
-    // draw location of slimes/golems
-    std::string slimeChar = "--";
+void renderSlimes() { //will put in entity later
+    // draw location of slimes
+    std::string slimeChar = "--";//also face yey
     if (level_no < 4) {
         for (unsigned i = 0; i < 10; i++) {
             if (enemies[i] != nullptr)
@@ -604,9 +545,12 @@ void renderEnemies() {
             }
         }
     }
-    std::string golemChar = "==";
+}
+
+void renderGolems() {
+    std::string golemChar = "pp";           //golem should be 3x3
     if (level_no == 4) {
-        g_Console.writeToBuffer(enemies[0]->get_posX(), enemies[0]->get_posY(), golemChar, 0x70);
+        g_Console.writeToBuffer(enemies[0]->get_posX(), enemies[0]->get_posY(), golemChar, 0x3F);
     }
 }
 
@@ -616,28 +560,7 @@ void renderCharacter() {
     g_Console.writeToBuffer(g_sChar.m_cLocation, playerChar, 0xF0);
 }
 
-<<<<<<< Updated upstream
 void changeDialogue(unsigned num)
-=======
-void renderPlayerAttack(char direction) {
-    switch (direction) {
-    case 'U':
-        g_Console.writeToBuffer(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y - 1, "/\\", 0xF0);
-        break;
-    case 'D':
-        g_Console.writeToBuffer(g_sChar.m_cLocation.X, g_sChar.m_cLocation.Y + 1, "\\/", 0xF0);
-        break;
-    case 'L':
-        g_Console.writeToBuffer(g_sChar.m_cLocation.X - 2, g_sChar.m_cLocation.Y, "<<", 0xF0);
-        break;
-    case 'R':
-        g_Console.writeToBuffer(g_sChar.m_cLocation.X + 2, g_sChar.m_cLocation.Y, ">>", 0xF0);
-        break;
-    }
-}
-
-void getDialogue(unsigned num)
->>>>>>> Stashed changes
 {
     dialogue = "";
 
@@ -693,7 +616,7 @@ void renderDialogues()
 
     // wait for 3 seconds before removing the rendering dialogue
     if ((charCount == 0) && (g_dGameTime >= (dialogueTimer + dialogueDelay + 3)))
-    { 
+    {
         renderingDialogue = ""; dialogueTimer = 0.0; dialogueDelay = 0.0; onDialogue = false; updatedDialogueTimer = false;
     }
 }
@@ -765,24 +688,24 @@ void updateInventoryHealth()
         {
             switch (g_sChar.hp)
             {
-            case 0: ( (c < 29) ? ( ((c == 26 || c == 27) && (r >= 4 && r <= 6)) ? (inventoryVector[r][c] = "1") : (inventoryVector[r][c] = "0") ) : (inventoryVector[r][c] = "1") ); break;
-            case 1: ( (c != 25) ? (inventoryVector[r][c] = "1") : (inventoryVector[r][c] = "0") ); break;
-            case 2: ( (c < 28) ? ( ((r == 4 && c != 27) || (r == 6 && c != 25)) ? (inventoryVector[r][c] = "1") : (inventoryVector[r][c] = "0") ) : (inventoryVector[r][c] = "1") ); break;
-            case 3: ( (c < 28) ? ( (((r == 4 || r == 6) && c != 27 )) ? (inventoryVector[r][c] = "1") : (inventoryVector[r][c] = "0") ) : (inventoryVector[r][c] = "1") ); break;
-            case 4: ( (c < 29) ? ( (((c == 25 && r <= 5) || (c == 27) || ((c == 26 || c == 28) && r == 5))) ? (inventoryVector[r][c] = "0") : (inventoryVector[r][c] = "1") ) : (inventoryVector[r][c] = "1") ); break;
-            case 5: ( (c < 28) ? ( ((r == 4 && c != 25) || (r == 6 && c != 27)) ? (inventoryVector[r][c] = "1") : (inventoryVector[r][c] = "0") ) : (inventoryVector[r][c] = "1") ); break;
-            case 6: ( (c < 28) ? ( ((r == 4 && c != 25) || (r == 6 && c == 26)) ? (inventoryVector[r][c] = "1") : (inventoryVector[r][c] = "0") ) : (inventoryVector[r][c] = "1") ); break;
-            case 7: ( (c < 28) ? ( (r != 3 && c != 27) ? (inventoryVector[r][c] = "1") : (inventoryVector[r][c] = "0") ) : (inventoryVector[r][c] = "1") ); break;
-            case 8: ( (c < 28) ? ( ((r == 4 || r == 6) && c == 26) ? (inventoryVector[r][c] = "1") : (inventoryVector[r][c] = "0") ) : (inventoryVector[r][c] = "1") ); break;
-            case 9: ( (c < 28) ? ( ((r == 4 && c == 26) || (r == 6 && c != 27)) ? (inventoryVector[r][c] = "1") : (inventoryVector[r][c] = "0") ) : (inventoryVector[r][c] = "1") ); break;
-            case 10: ( (c != 25) ? ( ((c == 26) || ((c == 28 || c == 29) && (r >= 4 && r <= 6))) ? (inventoryVector[r][c] = "1") : (inventoryVector[r][c] = "0") ) : (inventoryVector[r][c] = "0") ); break;
+            case 0: ((c < 29) ? (((c == 26 || c == 27) && (r >= 4 && r <= 6)) ? (inventoryVector[r][c] = "1") : (inventoryVector[r][c] = "0")) : (inventoryVector[r][c] = "1")); break;
+            case 1: ((c != 25) ? (inventoryVector[r][c] = "1") : (inventoryVector[r][c] = "0")); break;
+            case 2: ((c < 28) ? (((r == 4 && c != 27) || (r == 6 && c != 25)) ? (inventoryVector[r][c] = "1") : (inventoryVector[r][c] = "0")) : (inventoryVector[r][c] = "1")); break;
+            case 3: ((c < 28) ? ((((r == 4 || r == 6) && c != 27)) ? (inventoryVector[r][c] = "1") : (inventoryVector[r][c] = "0")) : (inventoryVector[r][c] = "1")); break;
+            case 4: ((c < 29) ? ((((c == 25 && r <= 5) || (c == 27) || ((c == 26 || c == 28) && r == 5))) ? (inventoryVector[r][c] = "0") : (inventoryVector[r][c] = "1")) : (inventoryVector[r][c] = "1")); break;
+            case 5: ((c < 28) ? (((r == 4 && c != 25) || (r == 6 && c != 27)) ? (inventoryVector[r][c] = "1") : (inventoryVector[r][c] = "0")) : (inventoryVector[r][c] = "1")); break;
+            case 6: ((c < 28) ? (((r == 4 && c != 25) || (r == 6 && c == 26)) ? (inventoryVector[r][c] = "1") : (inventoryVector[r][c] = "0")) : (inventoryVector[r][c] = "1")); break;
+            case 7: ((c < 28) ? ((r != 3 && c != 27) ? (inventoryVector[r][c] = "1") : (inventoryVector[r][c] = "0")) : (inventoryVector[r][c] = "1")); break;
+            case 8: ((c < 28) ? (((r == 4 || r == 6) && c == 26) ? (inventoryVector[r][c] = "1") : (inventoryVector[r][c] = "0")) : (inventoryVector[r][c] = "1")); break;
+            case 9: ((c < 28) ? (((r == 4 && c == 26) || (r == 6 && c != 27)) ? (inventoryVector[r][c] = "1") : (inventoryVector[r][c] = "0")) : (inventoryVector[r][c] = "1")); break;
+            case 10: ((c != 25) ? (((c == 26) || ((c == 28 || c == 29) && (r >= 4 && r <= 6))) ? (inventoryVector[r][c] = "1") : (inventoryVector[r][c] = "0")) : (inventoryVector[r][c] = "0")); break;
             }
         }
     }
 }
 
 void updateInventoryItems()
-{    
+{
     for (unsigned y = 0; y < 24; y++)
     {
         for (unsigned x = 0; x < 42; x++)
@@ -795,19 +718,19 @@ void updateInventoryItems()
                     {
                         if (inventory.GetInGameItems()[itemsCount] == "Sword")
                         {
-                            ( (j == i) ? ( (j == 2 && i == 2) ? (inventoryVector[y + j][x + i] = "11") : (inventoryVector[y + j][x + i] = "12") ) : (inventoryVector[y + j][x + i] = "1") );
+                            ((j == i) ? ((j == 2 && i == 2) ? (inventoryVector[y + j][x + i] = "11") : (inventoryVector[y + j][x + i] = "12")) : (inventoryVector[y + j][x + i] = "1"));
                         }
                         else if (inventory.GetInGameItems()[itemsCount] == "Chestplate")
                         {
-                            ( (j == 0 && i == 1) ? (inventoryVector[y + j][x + i] = "1") : (inventoryVector[y + j][x + i] = "13") );
+                            ((j == 0 && i == 1) ? (inventoryVector[y + j][x + i] = "1") : (inventoryVector[y + j][x + i] = "13"));
                         }
                         else if (inventory.GetInGameItems()[itemsCount] == "Boot")
                         {
-                            ( (j != 0 && (i == 0 || i == 2)) ? (inventoryVector[y + j][x + i] = "14") : (inventoryVector[y + j][x + i] = "1") );
+                            ((j != 0 && (i == 0 || i == 2)) ? (inventoryVector[y + j][x + i] = "14") : (inventoryVector[y + j][x + i] = "1"));
                         }
                         else if (inventory.GetInGameItems()[itemsCount] == "Potion")
                         {
-                            ( ((j == 0 && i == 1) || (j == 1 || j == 2)) ? (inventoryVector[y + j][x + i] = "15") : (inventoryVector[y + j][x + i] = "1") );
+                            (((j == 0 && i == 1) || (j == 1 || j == 2)) ? (inventoryVector[y + j][x + i] = "15") : (inventoryVector[y + j][x + i] = "1"));
                         }
                     }
                 }
