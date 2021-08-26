@@ -17,7 +17,7 @@
 #include <stdlib.h> //srand() and rand()
 #include <time.h>
 
-double  g_dDeltaTime, g_dGameTime, timerTrap, enemyMeleeAttackTimer, golemRadiusAttackTimer, moveTimer, dialogueTimer, dialogueDelay, enemyHurtPlayerTimer, trapHurtPlayerTimer, golemRadiusAttackrender;
+double  g_dDeltaTime, g_dGameTime, timerTrap, enemyMeleeAttackTimer, golemRadiusAttackTimer, moveTimer, dialogueTimer, dialogueDelay, enemyHurtPlayerTimer, trapHurtPlayerTimer, golemRadiusAttackrenderTimer;
 
 SKeyEvent g_skKeyEvent[K_COUNT];
 SMouseEvent g_mouseEvent;
@@ -57,7 +57,7 @@ Entity* enemies[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nu
 void init(void) {
     srand((unsigned int)time(NULL));
     // Set precision for floating point output
-    g_dGameTime = 0.0, timerTrap = 0.0, enemyMeleeAttackTimer = 0.0, golemRadiusAttackTimer = 0.0, moveTimer = 0.0, dialogueTimer = 0.0, dialogueDelay = 0.0, enemyHurtPlayerTimer = 0.0, golemRadiusAttackrender = 0.0;
+    g_dGameTime = 0.0, timerTrap = 0.0, enemyMeleeAttackTimer = 0.0, golemRadiusAttackTimer = 0.0, moveTimer = 0.0, dialogueTimer = 0.0, dialogueDelay = 0.0, enemyHurtPlayerTimer = 0.0, golemRadiusAttackrenderTimer = 0.0;
     // sets the initial state for the game
     g_eGameState = S_SPLASHSCREEN;
     //change values to change where player spawns
@@ -275,7 +275,7 @@ void updateGame(double dt)                          // gameplay logic
             if (enemyMeleeAttackTimer >= 0.5) { enemyMeleeAttack();  enemyMeleeAttackTimer = 0.0; }
             golemRadiusAttackTimer += dt;
             if (golemRadiusAttackTimer >= 3) { golemRadiusAttack(); golemIsAttacking = true; golemRadiusAttackTimer = 0.0; }
-            if (golemIsAttacking == true) { golemRadiusAttackrender += dt; }
+            if (golemIsAttacking == true) { golemRadiusAttackrenderTimer += dt; }
             timerTrap += dt;
             if (timerTrap >= 0.3) { TouchSpikeTrap(); timerTrap = 0.0; }
         }
@@ -586,7 +586,7 @@ void renderGame() {
     else if (playerTookDamageFromTrap == true) { renderHurtCharacter(); if (trapHurtPlayerTimer >= 0.15) { playerTookDamageFromTrap = false; trapHurtPlayerTimer = 0.0; } }
     else { renderCharacter(); }
     renderPlayerAttack();
-    if (golemIsAttacking == true) { rendergolemRadiusAttack(); if (golemRadiusAttackrender > 2) { golemIsAttacking = false; golemRadiusAttackrender = 0.0; } }
+    if (golemIsAttacking == true) { rendergolemRadiusAttack(); if (golemRadiusAttackrenderTimer > 2) { golemIsAttacking = false; golemRadiusAttackrenderTimer = 0.0; } }
     if (E_KeyPressed == true) { renderInventory(); } // renders inventory
     if (onDialogue == true) { renderDialogues(); } // renders dialogues
     if (E_KeyPressed == true) { renderItemInfos(); }
@@ -1113,7 +1113,7 @@ void renderFramerate() {                //part of gui
     if (level_no == 4) {
         c.X = 40; c.Y = 40;
         ss.str("");
-        if (enemies[0]->get_hp() <= 0) { // displays the boss's health
+        if (enemies[0] == nullptr) { // displays the boss's health
             ss << "Boss HP: ";
         }
         else {
