@@ -1116,20 +1116,30 @@ void renderFramerate() {                //part of gui
         }
         g_Console.writeToBuffer(c, hb.str(), 0xF4); //white background, red text
     }
+    //render objectives here
     c.X = 0; c.Y = 41;
     WORD red = 0xF4;
     WORD green = 0xF2;
-    g_Console.writeToBuffer(c, "Objectives: Find out where you are.", red);         //find prisoner, he'll explain stuff         
-    c.X += 12; c.Y++;
-    g_Console.writeToBuffer(c, "Defeat the slimes.", green);                        //kill all the slimes in level 2
+    WORD ObjectiveColor;
+    g_Console.writeToBuffer(c, "Objectives:", 0xF0);
+    c.X += 12;
+    if (SWORD_AND_CHESTPLATE_GIVEN == true) ObjectiveColor = green;
+    else ObjectiveColor = red;
+    g_Console.writeToBuffer(c, "Find out where you are.", ObjectiveColor); //find prisoner, he'll explain stuff
+    if (kills >= 10) ObjectiveColor = green;
+    else ObjectiveColor = red;
     c.Y++;
-    g_Console.writeToBuffer(c, "Look out for traps.", green);                       //get past level 3
+    g_Console.writeToBuffer(c, "Defeat some enemies.", ObjectiveColor);     //kill 10 enemies
+    if (level_no > 3) ObjectiveColor = green;
+    else ObjectiveColor = red;
     c.Y++;
-    g_Console.writeToBuffer(c, "Get past the golem.", green);                       //kill the golem to unlock gate
+    g_Console.writeToBuffer(c, "Look out for traps.", ObjectiveColor);     //get past level 3
+    if (golemDefeated == true) ObjectiveColor = green;
+    else ObjectiveColor = red;
     c.Y++;
-    g_Console.writeToBuffer(c, "Locate the treasure.", red);                        //take the treasure
+    g_Console.writeToBuffer(c, "Get past the golem.", ObjectiveColor);     //kill the golem to unlock gate
     c.Y++;
-    g_Console.writeToBuffer(c, "Leave the temple ALIVE!", red);                     //find a way to escape
+    g_Console.writeToBuffer(c, "Leave the temple ALIVE!", red);            //find a way to escape
 }
 
 void renderToScreen() {
