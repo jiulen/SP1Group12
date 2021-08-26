@@ -1054,7 +1054,7 @@ void renderItemInfos()
 void renderEndScreen() {
     COORD c;
     c.X = 10; c.Y = 5;
-    g_Console.writeToBuffer(c, "Created by Group 12: Jun Hou, Jiu Len, Darius and winston.", 0xF0);
+    g_Console.writeToBuffer(c, "Created by Group 12: Jun Hou, Jiu Len, Darius and Winston.", 0xF0);
     c.Y += 1;
     if (g_sChar.hp > 0) {
         g_Console.writeToBuffer(c, "YOU WIN!!!", 0xF0);
