@@ -2,6 +2,8 @@
 #include "game.h"
 #include "Golem.h"
 #include "Slime.h"
+#include "Guard.h"
+#include "Hunter.h"
 #include "Entity.h"
 #include "Framework\console.h"
 #include "Inventory.h"
@@ -15,7 +17,7 @@
 #include <stdlib.h> //srand() and rand()
 #include <time.h>
 
-double  g_dDeltaTime, g_dGameTime, timerTrap, enemyMeleeAttackTimer, golemRadiusAttackTimer, moveTimer, dialogueTimer, dialogueDelay, playerHurt;
+double  g_dDeltaTime, g_dGameTime, timerTrap, enemyMeleeAttackTimer, golemRadiusAttackTimer, moveTimer, dialogueTimer, dialogueDelay, playerHurt, g_dElapsedT;
 
 SKeyEvent g_skKeyEvent[K_COUNT];
 SMouseEvent g_mouseEvent;
@@ -29,8 +31,8 @@ EGAMESTATES g_eGameState = S_SPLASHSCREEN; // initial state
 int damagetaken = 0, kills = 0;
 unsigned level_no = 1, itemsCount = 0, charCount = 0;
 bool E_KeyPressed = false, onDialogue = false, updatedDialogueTimer = false, golemDefeated = false, golemIsAttacking = false, playerTookDamage = false;
-bool lv3_DialogueShown = false, lv4_StartingDialogueShown = false, lv4_GolemDefeatDialogueShown = false, lv5_DialogueShown = false;
-bool usingSword = false, usingChestplate = false, usingBoot = false;
+bool lv3_StartingDialogueShown = false, lv3_BootDialogueShown = false, lv4_StartingDialogueShown = false, lv4_GolemDefeatDialogueShown = false, lv5_DialogueShown = false;
+bool usingSword = false, usingChestplate = false, usingBoot = false, itemClicked = false;
 bool SWORD_AND_CHESTPLATE_GIVEN = false, bootGiven = false, chestOpened = false;
 
 std::string dialogue = "", renderingDialogue = "";
@@ -54,7 +56,7 @@ Entity* enemies[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nu
 void init(void) {
     srand((unsigned int)time(NULL));
     // Set precision for floating point output
-    g_dGameTime = 0.0, timerTrap = 0.0, enemyMeleeAttackTimer = 0.0, golemRadiusAttackTimer = 0.0, moveTimer = 0.0, dialogueTimer = 0.0, dialogueDelay = 0.0, playerHurt = 0.0;
+    g_dGameTime = 0.0, timerTrap = 0.0, enemyMeleeAttackTimer = 0.0, golemRadiusAttackTimer = 0.0, moveTimer = 0.0, dialogueTimer = 0.0, dialogueDelay = 0.0, playerHurt = 0.0, g_dElapsedT = 0.0;
     // sets the initial state for the game
     g_eGameState = S_SPLASHSCREEN;
     //change values to change where player spawns
@@ -227,9 +229,14 @@ void update(double dt)
 {
     // get the delta time
     g_dDeltaTime = dt;
+    g_dElapsedT += dt;
     switch (g_eGameState)
     {
-    case S_SPLASHSCREEN: splashScreenWait(); break; // game logic for the splash screen
+    case S_SPLASHSCREEN:
+        if (g_dElapsedT <= 4.0) { initCSVector(1); }
+        else if (g_dElapsedT >= 4.0 && g_dElapsedT <= 8.0) { initCSVector(2); }
+        else if (g_dElapsedT >= 8.0 && g_dElapsedT <= 12.0) { initCSVector(3); }
+        else { splashScreenWait(); }; break; // game logic for the splash screen
     case S_GAME: updateGame(dt); break; // gameplay logic when we are in the game
     case S_END: endScreenWait(); break;
     }
@@ -271,7 +278,7 @@ void updateGame(double dt)                          // gameplay logic
         }
     }
     checkPosition();                                // checks whether player's next position is an exit, a chest, 
-    if (onDialogue == false) { updateStats(); updateInventory(); }
+    if (/*(inventoryVector.size() == 1008) &&*/ (onDialogue == false)) { updateStats(); updateInventory(); }
     if (g_sChar.hp <= 0) {                          // check if player dead
         g_eGameState = S_END;
     }
@@ -289,6 +296,7 @@ void updateGame(double dt)                          // gameplay logic
     }
     if ((onDialogue == true) && (updatedDialogueTimer == false)) { updatedDialogueTimer = true; dialogueTimer = g_dGameTime; }
     if ((level_no == 4) && (enemies[0] != nullptr) && (enemies[0]->get_hp() <= 0)) { golemDefeated = true; }
+    if (onDialogue == false) { mouseClicked(); }
 }
 
 void endScreenWait()
@@ -298,22 +306,22 @@ void endScreenWait()
 
 void keyPressed()
 {
-    // Updating the location of the character based on the key held down
+    // Updating the location of the character based on the key released
     if (E_KeyPressed == false)
     {
-        if ((g_skKeyEvent[K_UP].keyDown) && (g_sChar.m_cLocation.Y > 0) && ((mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "0") || (mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "7") || (mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "8") || (mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "9")))
+        if ((g_skKeyEvent[K_UP].keyReleased) && (g_sChar.m_cLocation.Y > 0) && ((mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "0") || (mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "7") || (mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "8") || (mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "9")))
         {
             g_sChar.m_cLocation.Y--;
         }
-        if ((g_skKeyEvent[K_LEFT].keyDown) && (g_sChar.m_cLocation.X > 1) && ((mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "0") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "7") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "8") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "9")))
+        if ((g_skKeyEvent[K_LEFT].keyReleased) && (g_sChar.m_cLocation.X > 1) && ((mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "0") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "7") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "8") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "9")))
         {
             g_sChar.m_cLocation.X -= 2;
         }
-        if ((g_skKeyEvent[K_DOWN].keyDown) && (g_sChar.m_cLocation.Y < (g_Console.getConsoleSize().Y - 1 - GUI_height)) && ((mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "0") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "7") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "8") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "9")))
+        if ((g_skKeyEvent[K_DOWN].keyReleased) && (g_sChar.m_cLocation.Y < (g_Console.getConsoleSize().Y - 1 - GUI_height)) && ((mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "0") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "7") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "8") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "9")))
         {
             g_sChar.m_cLocation.Y++;
         }
-        if ((g_skKeyEvent[K_RIGHT].keyDown) && (g_sChar.m_cLocation.X < (g_Console.getConsoleSize().X - 2)) && ((mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "0") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "7") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "8") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "9")))
+        if ((g_skKeyEvent[K_RIGHT].keyReleased) && (g_sChar.m_cLocation.X < (g_Console.getConsoleSize().X - 2)) && ((mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "0") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "7") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "8") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "9")))
         {
             g_sChar.m_cLocation.X += 2;
         }
@@ -334,50 +342,50 @@ void keyPressed()
 
 void playerAttack()
 {
-    if (g_skKeyEvent[K_ATK_UP].keyReleased)
-    {
-        for (int i = 0; i < 10; i++) {
-            if (enemies[i] != nullptr) {
-                if (enemies[i]->get_posX() == g_sChar.m_cLocation.X && enemies[i]->get_posY() == g_sChar.m_cLocation.Y - 1) {
-                    enemies[i]->set_hp(enemies[i]->get_hp() - (g_sChar.dmg - enemies[i]->get_def()));
-                }
+if (g_skKeyEvent[K_ATK_UP].keyReleased)
+{
+    for (int i = 0; i < 10; i++) {
+        if (enemies[i] != nullptr) {
+            if (enemies[i]->get_posX() == g_sChar.m_cLocation.X && enemies[i]->get_posY() == g_sChar.m_cLocation.Y - 1) {
+                enemies[i]->set_hp(enemies[i]->get_hp() - (g_sChar.dmg - enemies[i]->get_def()));
             }
         }
-        g_sChar.dir = 'U';
     }
-    if (g_skKeyEvent[K_ATK_DOWN].keyReleased)
-    {
-        for (int i = 0; i < 10; i++) {
-            if (enemies[i] != nullptr) {
-                if (enemies[i]->get_posX() == g_sChar.m_cLocation.X && enemies[i]->get_posY() == g_sChar.m_cLocation.Y + 1) {
-                    enemies[i]->set_hp(enemies[i]->get_hp() - (g_sChar.dmg - enemies[i]->get_def()));
-                }
+    g_sChar.dir = 'U';
+}
+if (g_skKeyEvent[K_ATK_DOWN].keyReleased)
+{
+    for (int i = 0; i < 10; i++) {
+        if (enemies[i] != nullptr) {
+            if (enemies[i]->get_posX() == g_sChar.m_cLocation.X && enemies[i]->get_posY() == g_sChar.m_cLocation.Y + 1) {
+                enemies[i]->set_hp(enemies[i]->get_hp() - (g_sChar.dmg - enemies[i]->get_def()));
             }
         }
-        g_sChar.dir = 'D';
     }
-    if (g_skKeyEvent[K_ATK_LEFT].keyReleased)
-    {
-        for (int i = 0; i < 10; i++) {
-            if (enemies[i] != nullptr) {
-                if (enemies[i]->get_posX() == g_sChar.m_cLocation.X - 2 && enemies[i]->get_posY() == g_sChar.m_cLocation.Y) {
-                    enemies[i]->set_hp(enemies[i]->get_hp() - (g_sChar.dmg - enemies[i]->get_def()));
-                }
+    g_sChar.dir = 'D';
+}
+if (g_skKeyEvent[K_ATK_LEFT].keyReleased)
+{
+    for (int i = 0; i < 10; i++) {
+        if (enemies[i] != nullptr) {
+            if (enemies[i]->get_posX() == g_sChar.m_cLocation.X - 2 && enemies[i]->get_posY() == g_sChar.m_cLocation.Y) {
+                enemies[i]->set_hp(enemies[i]->get_hp() - (g_sChar.dmg - enemies[i]->get_def()));
             }
         }
-        g_sChar.dir = 'L';
     }
-    if (g_skKeyEvent[K_ATK_RIGHT].keyReleased)
-    {
-        for (int i = 0; i < 10; i++) {
-            if (enemies[i] != nullptr) {
-                if (enemies[i]->get_posX() == g_sChar.m_cLocation.X + 2 && enemies[i]->get_posY() == g_sChar.m_cLocation.Y) {
-                    enemies[i]->set_hp(enemies[i]->get_hp() - (g_sChar.dmg - enemies[i]->get_def()));
-                }
+    g_sChar.dir = 'L';
+}
+if (g_skKeyEvent[K_ATK_RIGHT].keyReleased)
+{
+    for (int i = 0; i < 10; i++) {
+        if (enemies[i] != nullptr) {
+            if (enemies[i]->get_posX() == g_sChar.m_cLocation.X + 2 && enemies[i]->get_posY() == g_sChar.m_cLocation.Y) {
+                enemies[i]->set_hp(enemies[i]->get_hp() - (g_sChar.dmg - enemies[i]->get_def()));
             }
         }
-        g_sChar.dir = 'R';
     }
+    g_sChar.dir = 'R';
+}
 }
 
 void processUserInput()
@@ -389,7 +397,8 @@ void processUserInput()
 
 void checkPosition()
 {
-    if ((level_no == 3) && (lv3_DialogueShown == false) && (g_sChar.m_cLocation.Y > 20)) { lv3_DialogueShown = true; changeDialogue(6); if (usingBoot == true) { changeDialogue(7); } }
+    if ((level_no == 3) && (lv3_StartingDialogueShown == false) && (g_sChar.m_cLocation.Y > 20)) { lv3_StartingDialogueShown = true; changeDialogue(6); if (usingBoot == true && onDialogue == false) { changeDialogue(7); } }
+    if ((level_no == 3) && (lv3_BootDialogueShown == false) && (g_sChar.m_cLocation.Y > 20) && (onDialogue == false) && (usingBoot == true)) { lv3_BootDialogueShown = true; changeDialogue(7); }
     if ((level_no == 4) && (lv4_GolemDefeatDialogueShown == false) && (golemDefeated == true)) { lv4_GolemDefeatDialogueShown = true; changeDialogue(9); }
     if ((level_no == 5) && (lv5_DialogueShown == false) && (mapVector[g_sChar.m_cLocation.Y][g_sChar.m_cLocation.X / 2] == "7")) { lv5_DialogueShown = true; changeDialogue(11); }
 
@@ -424,6 +433,26 @@ void updateStats()
     else if (usingBoot == false) { g_sChar.weight = 2; }
 }
 
+void mouseClicked()
+{
+    if ((E_KeyPressed == true) && (g_mouseEvent.eventFlags == 0) && (g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED))
+    {
+        if (((g_mouseEvent.mousePosition.Y - 8) > 1) && (((g_mouseEvent.mousePosition.X / 2) - 9) > 1) && ((g_mouseEvent.mousePosition.Y - 8) < 23) && (((g_mouseEvent.mousePosition.X / 2) - 9) < 41))
+        {
+            if ((inventoryVector[g_mouseEvent.mousePosition.Y - 8][(g_mouseEvent.mousePosition.X / 2) - 9] == "11") || (inventoryVector[g_mouseEvent.mousePosition.Y - 8][(g_mouseEvent.mousePosition.X / 2) - 9] == "12")) { if (usingSword == false) { usingSword = true; } else { usingSword = false; } }
+            else if (inventoryVector[g_mouseEvent.mousePosition.Y - 8][(g_mouseEvent.mousePosition.X / 2) - 9] == "13") { if (usingChestplate == false) { usingChestplate = true; } else { usingChestplate = false; } }
+            else if (inventoryVector[g_mouseEvent.mousePosition.Y - 8][(g_mouseEvent.mousePosition.X / 2) - 9] == "14") { if (usingBoot == false) { usingBoot = true; } else { usingBoot = false; } }
+            else if (inventoryVector[g_mouseEvent.mousePosition.Y - 8][(g_mouseEvent.mousePosition.X / 2) - 9] == "15")
+            {
+                inventory.RemoveItem("Potion");
+                itemsCount = 0;
+                inventoryVector.clear(); initInventoryVector();
+                if (g_sChar.hp < 9) { g_sChar.hp += 2; }
+            }
+        }
+    }
+}
+
 //--------------------------------------------------------------
 // Purpose  : Render function is to update the console screen
 //            At this point, you should know exactly what to draw onto the screen.
@@ -436,7 +465,9 @@ void render() {
     clearScreen();      // clears the current screen and draw from scratch 
     switch (g_eGameState)
     {
-    case S_SPLASHSCREEN: renderSplashScreen(); break;
+    case S_SPLASHSCREEN:
+        if (g_dElapsedT <= 12.0) { renderCS(); }
+        else { renderSplashScreen(); }; break;
     case S_GAME: renderFramerate(); renderGame(); break;
     case S_END: renderEndScreen(); break;
     }
@@ -447,6 +478,52 @@ void render() {
 void clearScreen() {
     // Clears the buffer with this colour attribute
     g_Console.clearBuffer(0xF0);
+}
+
+void initCSVector(int CSno)
+{
+    std::ifstream CSvector; // We dont need to move it to the top as we are not using it from other functions, this frees up memory after this function is ran
+    mapVector.clear();
+    switch (CSno)
+    {
+    case 1: CSvector = std::ifstream("Cutscene1.csv"); break;
+    case 2: CSvector = std::ifstream("Cutscene2.csv"); break;
+    case 3: CSvector = std::ifstream("Cutscene3.csv"); break;
+    }
+    std::string row;
+    while (std::getline(CSvector, row))
+    {
+        std::stringstream rowStream(row);
+        std::string(cell);
+        std::vector<std::string> rowVector;
+        while (std::getline(rowStream, cell, ',')) { rowVector.push_back(cell); }
+        mapVector.push_back(rowVector);
+    }
+    CSvector.close();
+}
+
+void renderCS() {
+    for (unsigned y = 0; y < 40; y++)
+    {
+        for (unsigned x = 0; x < 60; x++)
+        {
+            WORD map_colour = 0x00;
+            switch (stoi(mapVector[y][x]))
+            {
+            case 0: map_colour = 0x00; break;
+            case 1: map_colour = 0x10; break;
+            case 2: map_colour = 0x20; break;
+            case 4: map_colour = 0x40; break;
+            case 5: map_colour = 0x50; break;
+            case 6: map_colour = 0x60; break;
+            case 8: map_colour = 0x80; break;
+            case 10: map_colour = 0xA0; break;
+            case 14: map_colour = 0xE0; break;
+            case 15: map_colour = 0xF0; break;
+            }
+            g_Console.writeToBuffer(x * 2, y, "  ", map_colour);
+        }
+    }
 }
 
 void menuScreen(COORD& c)
@@ -502,18 +579,19 @@ void renderSplashScreen() {             // renders the splash screen aka menu sc
 void renderGame() {
     renderMap(); // then renders the map to the buffer first
     renderEnemies();
-   
     if (playerTookDamage == true) { renderHurtCharacter(); playerTookDamage = false; } // renders the character into the buffer (over slimes and golems)
     else { renderCharacter();}
     renderPlayerAttack();
     if (golemIsAttacking == true) { rendergolemRadiusAttack(); golemIsAttacking = false; }
     if (E_KeyPressed == true) { renderInventory(); } // renders inventory
     if (onDialogue == true) { renderDialogues(); } // renders dialogues
+    if (E_KeyPressed == true) { renderItemInfos(); }
 }
 
 void initMapVector()
 {
     std::ifstream mapCsv; // We dont need to move it to the top as we are not using it from other functions, this frees up memory after this function is ran
+    mapVector.clear();
     switch (level_no)
     {
     case 1: mapCsv = std::ifstream("Map1.csv"); break; //opens map
@@ -571,7 +649,12 @@ void createEnemies() {  // The creation of slime object MUST be inside a FUNCTIO
         break;
     case 2:
         for (unsigned i = 0; i < 10; i++) {
-            enemies[i] = new Slime;
+            if (i < 5) {
+                enemies[i] = new Slime;
+            }
+            else {
+                enemies[i] = new Guard;
+            }
             while (mapVector[enemies[i]->get_posY()][enemies[i]->get_posX() / 2] != "0") {
                 enemies[i]->setPos((2 * (rand() % 60)), rand() % 40);
             }
@@ -579,7 +662,15 @@ void createEnemies() {  // The creation of slime object MUST be inside a FUNCTIO
         break;
     case 3:
         for (unsigned i = 0; i < 10; i++) {
-            enemies[i] = new Slime;
+            if (i < 2) {
+                enemies[i] = new Slime;
+            }
+            else if (i < 6) {
+                enemies[i] = new Guard;
+            }
+            else {
+                enemies[i] = new Hunter;
+            }
             while (mapVector[enemies[i]->get_posY()][enemies[i]->get_posX() / 2] != "0") {
                 enemies[i]->setPos((2 * (rand() % 60)), rand() % 40);
             }
@@ -604,20 +695,11 @@ void deleteEnemies() {
 }
 
 void renderEnemies() {
-    // draw location of slimes
-    std::string slimeChar = "--";
-    if (level_no < 4) {
-        for (unsigned i = 0; i < 10; i++) {
-            if (enemies[i] != nullptr)
-            {
-                g_Console.writeToBuffer(enemies[i]->get_posX(), enemies[i]->get_posY(), slimeChar, 0x20);
-            }
+    for (unsigned i = 0; i < 10; i++) {
+        if (enemies[i] != nullptr)
+        {
+            g_Console.writeToBuffer(enemies[i]->get_posX(), enemies[i]->get_posY(), enemies[i]->get_face(), enemies[i]->get_colour());
         }
-    }
-    // draw location of golems
-    std::string golemChar = "==";
-    if (level_no == 4) {
-        g_Console.writeToBuffer(enemies[0]->get_posX(), enemies[0]->get_posY(), golemChar, 0x80);
     }
 }
 
@@ -724,25 +806,75 @@ void renderDialogues()
 void enemyMovement() {
     for (int z = 0; z < 10; z++) {
         if (enemies[z] != nullptr) {
-            int random = rand() % 4;
-            switch (random) {
-            case 0:
-                if (mapVector[enemies[z]->get_posY() - 1][enemies[z]->get_posX() / 2] == "0") {
-                    enemies[z]->move(random);
-                } break;
-            case 1:
-                if (mapVector[enemies[z]->get_posY() + 1][enemies[z]->get_posX() / 2] == "0") {
-                    enemies[z]->move(random);
-                } break;
-            case 2:
-                if (mapVector[enemies[z]->get_posY()][enemies[z]->get_posX() / 2 - 1] == "0") {
-                    enemies[z]->move(random);
-                } break;
-            case 3:
-                if (mapVector[enemies[z]->get_posY()][enemies[z]->get_posX() / 2 + 1] == "0") {
-                    enemies[z]->move(random);
-                } break;
+            int direction = rand() % 4;
+            if (enemies[z]->get_face() == "++") { // Guard movement
+                if (enemies[z]->get_patrol_dir() == 0) { // U D
+                    switch (direction) {
+                    case 0:
+                    case 1: // up
+                        if (mapVector[enemies[z]->get_posY() - 1][enemies[z]->get_posX() / 2] == "0") {
+                            enemies[z]->move(direction);
+                        }
+                        break;
+                    case 2:
+                    case 3: // down
+                        if (mapVector[enemies[z]->get_posY() + 1][enemies[z]->get_posX() / 2] == "0") {
+                            enemies[z]->move(direction);
+                        }
+                        break;
+                    }
+                }
+                else if (enemies[z]->get_patrol_dir() == 1) { // L R
+                    switch (direction) {
+                    case 0:
+                    case 1: // left
+                        if (mapVector[enemies[z]->get_posY()][enemies[z]->get_posX() / 2 - 1] == "0") {
+                            enemies[z]->move(direction);
+                        }
+                        break;
+                    case 2:
+                    case 3: // right
+                        if (mapVector[enemies[z]->get_posY()][enemies[z]->get_posX() / 2 + 1] == "0") {
+                            enemies[z]->move(direction);
+                        }
+                        break;
+                    }
+                }
 
+            }
+            else {
+                if (enemies[z]->get_face() == "..") { // Hunter direction
+                    if ((enemies[z]->get_posY() - g_sChar.m_cLocation.Y) > 0 && (enemies[z]->get_posY() - g_sChar.m_cLocation.Y) < 5) {
+                        direction = 0;
+                    }
+                    else if ((enemies[z]->get_posY() - g_sChar.m_cLocation.Y) < 0 && (enemies[z]->get_posY() - g_sChar.m_cLocation.Y) > -5) {
+                        direction = 1;
+                    }
+                    else if ((enemies[z]->get_posX() - g_sChar.m_cLocation.X) > 0 && (enemies[z]->get_posX() - g_sChar.m_cLocation.X) < 10) {
+                        direction = 2;
+                    }
+                    else if ((enemies[z]->get_posX() - g_sChar.m_cLocation.X) < 0 && (enemies[z]->get_posX() - g_sChar.m_cLocation.X) > -10) {
+                        direction = 3;
+                    }
+                }
+                switch (direction) {
+                case 0:
+                    if (mapVector[enemies[z]->get_posY() - 1][enemies[z]->get_posX() / 2] == "0") {
+                        enemies[z]->move(direction);
+                    } break;
+                case 1:
+                    if (mapVector[enemies[z]->get_posY() + 1][enemies[z]->get_posX() / 2] == "0") {
+                        enemies[z]->move(direction);
+                    } break;
+                case 2:
+                    if (mapVector[enemies[z]->get_posY()][enemies[z]->get_posX() / 2 - 1] == "0") {
+                        enemies[z]->move(direction);
+                    } break;
+                case 3:
+                    if (mapVector[enemies[z]->get_posY()][enemies[z]->get_posX() / 2 + 1] == "0") {
+                        enemies[z]->move(direction);
+                    } break;
+                }
             }
         }
     }
@@ -889,6 +1021,36 @@ void renderInventory()
             case 15: inventory_colour = 0xD0; break; // potion
             }
             g_Console.writeToBuffer((x + 9) * 2, y + 8, "  ", inventory_colour);
+        }
+    }
+}
+
+void renderItemInfos()
+{
+    if (((g_mouseEvent.mousePosition.Y - 8) > 1) && (((g_mouseEvent.mousePosition.X / 2) - 9) > 1) && ((g_mouseEvent.mousePosition.Y - 8) < 23) && (((g_mouseEvent.mousePosition.X / 2) - 9) < 41))
+    {
+        if ((inventoryVector[g_mouseEvent.mousePosition.Y - 8][(g_mouseEvent.mousePosition.X / 2) - 9] == "11") || (inventoryVector[g_mouseEvent.mousePosition.Y - 8][(g_mouseEvent.mousePosition.X / 2) - 9] == "12"))
+        {
+            g_Console.writeToBuffer(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y, "> Sword <", 0x17);
+            g_Console.writeToBuffer(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y + 1, "Damage: +2", 0x17);
+            g_Console.writeToBuffer(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y + 2, (usingSword == true) ? "Equipped" : "Equip", 0x17);
+        }
+        else if (inventoryVector[g_mouseEvent.mousePosition.Y - 8][(g_mouseEvent.mousePosition.X / 2) - 9] == "13")
+        {
+            g_Console.writeToBuffer(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y, "> Chestplate <", 0x17);
+            g_Console.writeToBuffer(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y + 1, "Defense: +1", 0x17);
+            g_Console.writeToBuffer(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y + 2, (usingChestplate == true) ? "Equipped" : "Equip", 0x17);
+        }
+        else if (inventoryVector[g_mouseEvent.mousePosition.Y - 8][(g_mouseEvent.mousePosition.X / 2) - 9] == "14")
+        {
+            g_Console.writeToBuffer(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y, "> Boot <", 0x17);
+            g_Console.writeToBuffer(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y + 1, "Weight: -1", 0x17);
+            g_Console.writeToBuffer(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y + 2, (usingBoot == true) ? "Equipped" : "Equip", 0x17);
+        }
+        else if (inventoryVector[g_mouseEvent.mousePosition.Y - 8][(g_mouseEvent.mousePosition.X / 2) - 9] == "15")
+        {
+            g_Console.writeToBuffer(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y, "> Potion <", 0x17);
+            g_Console.writeToBuffer(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y + 1, "Health: +2", 0x17);
         }
     }
 }

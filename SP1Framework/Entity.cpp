@@ -52,5 +52,5 @@ WORD Entity::get_colour(void) {
 }
 
 int Entity::get_patrol_dir(void) {
-
+	return 0;
 }

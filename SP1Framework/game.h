@@ -63,11 +63,14 @@ void splashScreenWait();        // waits for time to pass in splash screen
 void updateGame(double);        // gameplay logic
 void endScreenWait();           // wait for 5 seconds after end scene then quitting game
 
+void initCSVector(int);
+void renderCS();
 void keyPressed();              // moves the character, collision detection, physics, etc
 void playerAttack();            // player attacks
 void processUserInput();        // checks if you should change states or do something else with the game, e.g. pause, exit
 void checkPosition();           // checks if player reached the exit
 void updateStats();             // update player's char stats
+void mouseClicked();       // checks if player left clicked
 void clearScreen();             // clears the current screen and draw from scratch 
 void renderSplashScreen();      // renders the splash screen
 void renderGame();              // renders the game stuff
@@ -89,6 +92,7 @@ void TouchSpikeTrap();          // damages player when he steps on spike trap
 void initInventoryVector();     // init inventory vector
 void updateInventory();         // update inventory
 void renderInventory();         // renders the inventory into the buffer
+void renderItemInfos();         // renders the infos for each item in inventory
 void renderFramerate();         // renders debug information, frame rate, elapsed time, etc
 void renderEndScreen();         // renders ending and credit screen
 void renderToScreen();          // dump the contents of the buffer to the screen, one frame worth of game
