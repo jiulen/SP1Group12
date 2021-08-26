@@ -298,7 +298,7 @@ void updateGame(double dt)                          // gameplay logic
         }
     }
     if ((onDialogue == true) && (updatedDialogueTimer == false)) { updatedDialogueTimer = true; dialogueTimer = g_dGameTime; }
-    if ((level_no == 4) && (enemies[0] != nullptr) && (enemies[0]->get_hp() <= 0)) { golemDefeated = true; }
+    if ((level_no == 4) && (enemies[0] == nullptr)) { golemDefeated = true; }
     if (onDialogue == false) { mouseClicked(); }
 }
 
