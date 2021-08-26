@@ -525,6 +525,21 @@ void renderCS() {
             case 15: map_colour = 0xF0; break;
             }
             g_Console.writeToBuffer(x * 2, y, "  ", map_colour);
+            switch (cutscene_no) {
+            case 1:
+                g_Console.writeToBuffer(0, 40, "Villager 1: It's so bright! What's going on?", 0xF1);
+                g_Console.writeToBuffer(0, 41, "Villager 2: It's coming from the temple!", 0xFD);
+                g_Console.writeToBuffer(0, 42, "John: I'm going over to check it out!", 0xF4);
+                g_Console.writeToBuffer(0, 43, "Villager 1: I hope nothing bad will happen...", 0xF1);
+                g_Console.writeToBuffer(0, 44, "Villager 2: Be careful...", 0xFD);
+                break;
+            case 2:
+                g_Console.writeToBuffer(0, 40, "tzzt... GROWL!!! zzzt... < crickets and wild beasts >", 0xF0);
+                break;
+            case 3:
+                g_Console.writeToBuffer(0, 40, "John: Wow, the temple's doors are open. It's never happened before. I wonder what I can find in there!", 0xF4);
+                break;
+            }
         }
     }
 }
