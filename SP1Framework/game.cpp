@@ -753,7 +753,7 @@ void changeDialogue(unsigned num)
         // First room (fake chest)
     case 2: dialogue = "Hmm... There's a looted chest here. Looks like I should keep an eye out for more chests around this area."; break;
         // First room (prisoner)
-    case 3: dialogue = "Hey kid, I don't have much time left, the others have all died too. Here, take this sword and chestplate, they may be old, but they're better than nothing. Promise me you'll survive."; break;
+    case 3: dialogue = "Hey kid, I don't have much time left, the others have all died too. Here, take this sword and chestplate, they may be   old, but they're better than nothing. Promise me you'll survive."; break;
         // Second room (special dead body)
     case 4: dialogue = "These boots look useful... I feel lighter. Thank you Ol'man!"; break;
         // Third room (at the start of the room)
