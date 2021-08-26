@@ -50,3 +50,7 @@ std::string Entity::get_face(void) {
 WORD Entity::get_colour(void) {
 	return colour;
 }
+
+int Entity::get_patrol_dir(void) {
+
+}

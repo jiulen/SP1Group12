@@ -27,6 +27,8 @@ public:
 
 	WORD get_colour(void);
 
+	virtual int get_patrol_dir(void);
+
 protected:
 	Position EntityPos;
 	int hp, dmg, def;
