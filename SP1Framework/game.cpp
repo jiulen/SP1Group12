@@ -1145,8 +1145,8 @@ void renderFramerate() {                //part of gui
     else ObjectiveColor = red;
     c.Y++;
     g_Console.writeToBuffer(c, "Look out for traps.", ObjectiveColor);     //get past level 3
-    if (golemDefeated == true) ObjectiveColor = 0xF0;
-    else ObjectiveColor = red;
+    if (golemDefeated == true) ObjectiveColor = green;
+    else ObjectiveColor = 0xF0;
     c.Y++;
     g_Console.writeToBuffer(c, "Get past the golem.", ObjectiveColor);     //kill the golem to unlock gate
     c.Y++;
