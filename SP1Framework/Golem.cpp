@@ -1,7 +1,7 @@
 #include "Golem.h"
 
 Golem::Golem() {
-	hp = 10;
+	hp = 15;
 	dmg = 3;
 	def = 1;
     face = "==";
