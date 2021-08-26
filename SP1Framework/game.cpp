@@ -1136,7 +1136,7 @@ void renderFramerate() {                //part of gui
     c.Y++;
     if (kills >= 1) ObjectiveColor = green;
     else ObjectiveColor = red;
-    g_Console.writeToBuffer(c, "Defeat at least 1 enemy.", ObjectiveColor);     //kill at least 1 enemy
+    g_Console.writeToBuffer(c, "Defeat your first enemy.", ObjectiveColor);     //kill at least 1 enemy
     c.Y++;
     if (level_no > 3) ObjectiveColor = green;
     else ObjectiveColor = red;
