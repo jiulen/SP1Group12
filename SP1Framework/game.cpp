@@ -17,7 +17,7 @@
 #include <stdlib.h> //srand() and rand()
 #include <time.h>
 
-double  g_dDeltaTime, g_dGameTime, timerTrap, enemyMeleeAttackTimer, golemRadiusAttackTimer, moveTimer, dialogueTimer, dialogueDelay, playerHurt, g_dElapsedT;
+double  g_dDeltaTime, g_dGameTime, timerTrap, enemyMeleeAttackTimer, golemRadiusAttackTimer, moveTimer, dialogueTimer, dialogueDelay, playerHurt;
 
 SKeyEvent g_skKeyEvent[K_COUNT];
 SMouseEvent g_mouseEvent;
@@ -29,7 +29,7 @@ Inventory inventory;
 EGAMESTATES g_eGameState = S_SPLASHSCREEN; // initial state
 
 int damagetaken = 0, kills = 0;
-unsigned level_no = 1, itemsCount = 0, charCount = 0;
+unsigned level_no = 1, itemsCount = 0, charCount = 0, cutscene_no = 1;
 bool E_KeyPressed = false, onDialogue = false, updatedDialogueTimer = false, golemDefeated = false, golemIsAttacking = false, playerTookDamage = false;
 bool lv3_StartingDialogueShown = false, lv3_BootDialogueShown = false, lv4_StartingDialogueShown = false, lv4_GolemDefeatDialogueShown = false, lv5_DialogueShown = false;
 bool usingSword = false, usingChestplate = false, usingBoot = false, itemClicked = false;
@@ -56,7 +56,7 @@ Entity* enemies[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nu
 void init(void) {
     srand((unsigned int)time(NULL));
     // Set precision for floating point output
-    g_dGameTime = 0.0, timerTrap = 0.0, enemyMeleeAttackTimer = 0.0, golemRadiusAttackTimer = 0.0, moveTimer = 0.0, dialogueTimer = 0.0, dialogueDelay = 0.0, playerHurt = 0.0, g_dElapsedT = 0.0;
+    g_dGameTime = 0.0, timerTrap = 0.0, enemyMeleeAttackTimer = 0.0, golemRadiusAttackTimer = 0.0, moveTimer = 0.0, dialogueTimer = 0.0, dialogueDelay = 0.0, playerHurt = 0.0;
     // sets the initial state for the game
     g_eGameState = S_SPLASHSCREEN;
     //change values to change where player spawns
@@ -229,13 +229,12 @@ void update(double dt)
 {
     // get the delta time
     g_dDeltaTime = dt;
-    g_dElapsedT += dt;
     switch (g_eGameState)
     {
     case S_SPLASHSCREEN:
-        if (g_dElapsedT <= 4.0) { initCSVector(1); }
-        else if (g_dElapsedT >= 4.0 && g_dElapsedT <= 8.0) { initCSVector(2); }
-        else if (g_dElapsedT >= 8.0 && g_dElapsedT <= 12.0) { initCSVector(3); }
+        if (cutscene_no == 1) { initCSVector(1); if (g_skKeyEvent[K_ENTER].keyReleased) { cutscene_no++; } }
+        else if (cutscene_no == 2) { initCSVector(2); if (g_skKeyEvent[K_ENTER].keyReleased) { cutscene_no++; } }
+        else if (cutscene_no == 3) { initCSVector(3); if (g_skKeyEvent[K_ENTER].keyReleased) { cutscene_no++; } }
         else { splashScreenWait(); }; break; // game logic for the splash screen
     case S_GAME: updateGame(dt); break; // gameplay logic when we are in the game
     case S_END: endScreenWait(); break;
@@ -466,7 +465,7 @@ void render() {
     switch (g_eGameState)
     {
     case S_SPLASHSCREEN:
-        if (g_dElapsedT <= 12.0) { renderCS(); }
+        if (cutscene_no <= 3) { renderCS(); }
         else { renderSplashScreen(); }; break;
     case S_GAME: renderFramerate(); renderGame(); break;
     case S_END: renderEndScreen(); break;
@@ -569,8 +568,8 @@ void renderSplashScreen() {             // renders the splash screen aka menu sc
     c.X = g_Console.getConsoleSize().X / 2 - 16;
     g_Console.writeToBuffer(c, "Press 'F' to interact with items", 0xF0);
     c.Y++;
-    c.X = g_Console.getConsoleSize().X / 2 - 14;
-    g_Console.writeToBuffer(c, "Press 'Arrow Keys to attack", 0xF0);
+    c.X = g_Console.getConsoleSize().X / 2 - 23;
+    g_Console.writeToBuffer(c, "Press 'Arrow Keys' to attack in that direction", 0xF0);
     c.Y += 3;
     c.X = g_Console.getConsoleSize().X / 2 - 10;
     g_Console.writeToBuffer(c, "Press 'Esc' to quit", 0xF0);
@@ -1076,6 +1075,7 @@ void renderEndScreen() {
     g_Console.writeToBuffer(c, ss.str(), 0xF0);
     ss.str("");
     c.Y += 1;
+    ss << std::fixed << std::setprecision(2);
     ss << "Time: " << g_dGameTime << "secs";
     g_Console.writeToBuffer(c, ss.str(), 0xF0);
     ss.str("");
@@ -1134,7 +1134,7 @@ void renderFramerate() {                //part of gui
     else ObjectiveColor = red;
     c.Y++;
     g_Console.writeToBuffer(c, "Look out for traps.", ObjectiveColor);     //get past level 3
-    if (golemDefeated == true) ObjectiveColor = green;
+    if (golemDefeated == true) ObjectiveColor = 0x00;
     else ObjectiveColor = red;
     c.Y++;
     g_Console.writeToBuffer(c, "Get past the golem.", ObjectiveColor);     //kill the golem to unlock gate
