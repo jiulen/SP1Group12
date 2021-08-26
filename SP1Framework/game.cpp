@@ -13,9 +13,11 @@
 #include <sstream>
 #include <fstream>
 #include <typeinfo>
-#include <stdio.h> //NULL
-#include <stdlib.h> //srand() and rand()
+#include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
+
+#pragma comment(lib, "winmm.lib")
 
 double  g_dDeltaTime, g_dGameTime, timerTrap, enemyMeleeAttackTimer, golemRadiusAttackTimer, moveTimer, dialogueTimer, dialogueDelay, enemyHurtPlayerTimer, trapHurtPlayerTimer, golemRadiusAttackrenderTimer;
 
@@ -35,6 +37,7 @@ bool lv3_StartingDialogueShown = false, lv3_BootDialogueShown = false, lv4_Start
 bool usingSword = false, usingChestplate = false, usingBoot = false, itemClicked = false;
 bool SWORD_AND_CHESTPLATE_GIVEN = false, bootGiven = false, chestOpened = false;
 bool playerTookDamageFromEnemy = false, playerTookDamageFromTrap = false;
+bool cutscene_music = false, main_music = false, end_music = false;
 
 std::string dialogue = "", renderingDialogue = "";
 
@@ -233,12 +236,31 @@ void update(double dt)
     switch (g_eGameState)
     {
     case S_SPLASHSCREEN:
-        if (cutscene_no == 1) { initCSVector(1); if (g_skKeyEvent[K_ENTER].keyReleased) { cutscene_no++; } }
-        else if (cutscene_no == 2) { initCSVector(2); if (g_skKeyEvent[K_ENTER].keyReleased) { cutscene_no++; } }
-        else if (cutscene_no == 3) { initCSVector(3); if (g_skKeyEvent[K_ENTER].keyReleased) { cutscene_no++; } }
-        else { splashScreenWait(); }; break; // game logic for the splash screen
-    case S_GAME: updateGame(dt); break; // gameplay logic when we are in the game
-    case S_END: endScreenWait(); break;
+        if (cutscene_music == false) {
+            PlaySound(L"Cutscenes.wav", NULL, SND_FILENAME | SND_LOOP | SND_ASYNC);
+            cutscene_music = true;
+        }
+        if (cutscene_no <= 3) { initCSVector(cutscene_no); if (g_skKeyEvent[K_ENTER].keyReleased) { cutscene_no++; } }
+        else {
+            splashScreenWait();
+        } break; // game logic for the splash screen
+    case S_GAME:
+        if (main_music == false) {
+            PlaySound(L"Main.wav", NULL, SND_FILENAME | SND_LOOP | SND_ASYNC);
+            main_music = true;
+        }
+        updateGame(dt); break; // gameplay logic when we are in the game
+    case S_END:
+        if (end_music == false) {
+            if (g_sChar.hp <= 0) { //lose
+                PlaySound(L"LoseScene.wav", NULL, SND_FILENAME | SND_LOOP | SND_ASYNC);
+            }
+            else { //win
+                PlaySound(L"VictoryScene.wav", NULL, SND_FILENAME | SND_ASYNC);
+            }
+            end_music = true;
+        }
+        endScreenWait(); break;
     }
 }
 
@@ -520,6 +542,21 @@ void renderCS() {
             case 15: map_colour = 0xF0; break;
             }
             g_Console.writeToBuffer(x * 2, y, "  ", map_colour);
+            switch (cutscene_no) {
+            case 1:
+                g_Console.writeToBuffer(0, 40, "Villager 1: It's so bright! What's going on?", 0xF1);
+                g_Console.writeToBuffer(0, 41, "Villager 2: It's coming from the temple!", 0xFD);
+                g_Console.writeToBuffer(0, 42, "John: I'm going over to check it out!", 0xF4);
+                g_Console.writeToBuffer(0, 43, "Villager 1: I hope nothing bad will happen...", 0xF1);
+                g_Console.writeToBuffer(0, 44, "Villager 2: Be careful...", 0xFD);
+                break;
+            case 2:
+                g_Console.writeToBuffer(0, 40, "tzzt... GROWL!!! zzzt... < crickets and wild beasts >", 0xF0);
+                break;
+            case 3:
+                g_Console.writeToBuffer(0, 40, "John: Wow, the temple's doors are open. It's never happened before. I wonder what I can find in there!", 0xF4);
+                break;
+            }
         }
     }
 }
@@ -1017,7 +1054,7 @@ void renderItemInfos()
 void renderEndScreen() {
     COORD c;
     c.X = 10; c.Y = 5;
-    g_Console.writeToBuffer(c, "Created by Group 12: Jun Hou, Jiu Len, Darius and winston.", 0xF0);
+    g_Console.writeToBuffer(c, "Created by Group 12: Jun Hou, Jiu Len, Darius and Winston.", 0xF0);
     c.Y += 1;
     if (g_sChar.hp > 0) {
         g_Console.writeToBuffer(c, "YOU WIN!!!", 0xF0);
@@ -1099,14 +1136,14 @@ void renderFramerate() {                //part of gui
     c.Y++;
     if (kills >= 1) ObjectiveColor = green;
     else ObjectiveColor = red;
-    g_Console.writeToBuffer(c, "Defeat at least 1 enemy.", ObjectiveColor);     //kill at least 1 enemy
+    g_Console.writeToBuffer(c, "Defeat your first enemy.", ObjectiveColor);     //kill at least 1 enemy
     c.Y++;
     if (level_no > 3) ObjectiveColor = green;
     else ObjectiveColor = red;
     g_Console.writeToBuffer(c, "Look out for traps.", ObjectiveColor);     //get past level 3
     c.Y++;
     if (golemDefeated == true) ObjectiveColor = green;
-    else ObjectiveColor = red;
+    else ObjectiveColor = 0xF5;
     g_Console.writeToBuffer(c, "Get past the golem.", ObjectiveColor);     //kill the golem to unlock gate
     c.Y++;
     g_Console.writeToBuffer(c, "Leave the temple ALIVE!", red);            //find a way to escape
