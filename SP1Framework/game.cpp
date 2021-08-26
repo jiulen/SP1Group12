@@ -1096,26 +1096,30 @@ void renderFramerate() {                //part of gui
     ss << g_dGameTime << "secs";             // displays the elapsed time
     c.X = 0; c.Y = 40;
     g_Console.writeToBuffer(c, ss.str(), 0xF0);
-    std::ostringstream hb;              // displays the player's health
+    ss.str("");
     c.X = 10; c.Y = 40;
-    if (g_sChar.hp <= 0) {
-        hb << "Player HP: ";
+    if (g_sChar.hp <= 0) {             // displays the player's health
+        ss << "Player HP: ";
     }
     else {
-        hb << "Player HP: " << std::string(g_sChar.hp, (char)3); // (char)3 is heart symbol
+        ss << "Player HP: " << std::string(g_sChar.hp, (char)3); // (char)3 is heart symbol
     }
-    g_Console.writeToBuffer(c, hb.str(), 0xF4); //white background, red text
+    g_Console.writeToBuffer(c, ss.str(), 0xF4); //white background, red text
     if (level_no == 4) {
         c.X = 40; c.Y = 40;
-        hb.str("");
-        if (enemies[0]->get_hp() <= 0) {
-            hb << "Boss HP: ";
+        ss.str("");
+        if (enemies[0]->get_hp() <= 0) { // displays the boss's health
+            ss << "Boss HP: ";
         }
         else {
-            hb << "Boss HP: " << std::string(enemies[0]->get_hp(), (char)254); // (char)3 is heart symbol
+            ss << "Boss HP: " << std::string(enemies[0]->get_hp(), (char)254); // (char)254 is small square
         }
-        g_Console.writeToBuffer(c, hb.str(), 0xF4); //white background, red text
+        g_Console.writeToBuffer(c, ss.str(), 0xF4); //white background, red text
     }
+    c.X = 100; c.Y = 40;
+    ss.str("");
+    ss << "Kills: " << kills;
+    g_Console.writeToBuffer(c, ss.str(), 0xF1); //white background, red text
     //render objectives here
     c.X = 0; c.Y = 41;
     WORD red = 0xF4;
