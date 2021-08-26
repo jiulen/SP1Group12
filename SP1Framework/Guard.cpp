@@ -32,3 +32,7 @@ void Guard::move(int dir) {
         }
     }
 }
+
+int Guard::get_patrol_dir(){
+    return patrol_dir;
+}
