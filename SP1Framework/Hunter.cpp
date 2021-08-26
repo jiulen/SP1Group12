@@ -1,17 +1,15 @@
-#include "Slime.h"
-Slime::Slime() {
+#include "Hunter.h"
+Hunter::Hunter() {
 	hp = 1;
 	dmg = 2;
 	def = 0;
-    face = "--";
-    colour = 0x20;
+	face = "..";
+    colour = 0x94;
 }
-
-Slime::~Slime() {
+Hunter::~Hunter() {
 
 }
-
-void Slime::move(int dir) {
+void Hunter::move(int dir) {
     switch (dir) {
     case 0: // up
         EntityPos.setPosition(get_posX(), get_posY() - 1); break;

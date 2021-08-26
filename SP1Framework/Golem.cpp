@@ -2,18 +2,19 @@
 
 Golem::Golem() {
 	hp = 15;
-	dmg = 4;
+	dmg = 3;
 	def = 1;
+    face = "==";
+    colour = 0x80;
 }
-//has 15 health and 1 def, so with sword, deals 4 dmg, 3 hits
 
 Golem::~Golem()
 {
 
 }
 
-void Golem::move(int direction) {
-    switch (direction) {
+void Golem::move(int dir) {
+    switch (dir) {
     case 0: // up
         EntityPos.setPosition(get_posX(), get_posY() - 1); break;
     case 1: // down

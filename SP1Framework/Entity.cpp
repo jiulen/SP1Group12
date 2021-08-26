@@ -1,8 +1,9 @@
 #include "Entity.h"
-#include "windows.h"
+#include <Windows.h>
+#include <stdlib.h>
 
 Entity::Entity() {
-	hp = 0, dmg = 0, def = 0;
+	hp = 0, dmg = 0, def = 0, face = "", colour = 0x0F;
 }
 
 Entity::~Entity() {
@@ -40,4 +41,12 @@ int Entity::get_posY(void) {
 
 void Entity::setPos(int h, int j) {
 	EntityPos.setPosition(h, j);
+}
+
+std::string Entity::get_face(void) {
+	return face;
+}
+
+WORD Entity::get_colour(void) {
+	return colour;
 }

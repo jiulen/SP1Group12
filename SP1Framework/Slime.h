@@ -5,5 +5,4 @@ public:
 	Slime();
 	~Slime();
 	void move(int);
-private:
 };

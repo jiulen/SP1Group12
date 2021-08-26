@@ -1,5 +1,7 @@
 #pragma once
 #include "Position.h"
+#include <string>
+#include <Windows.h>
 
 class Entity {
 public:
@@ -17,13 +19,17 @@ public:
 	int get_def(void);
 	void set_def(int);
 
+	void setPos(int, int);
 	int get_posX(void);
 	int get_posY(void);
 
-	void setPos(int, int);
+	std::string get_face(void);
+
+	WORD get_colour(void);
 
 protected:
 	Position EntityPos;
 	int hp, dmg, def;
-
+	std::string face;
+	WORD colour;
 };

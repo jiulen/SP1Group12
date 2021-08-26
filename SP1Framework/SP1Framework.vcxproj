@@ -83,6 +83,8 @@
     <ClCompile Include="Framework\timer.cpp" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="Golem.cpp" />
+    <ClCompile Include="Guard.cpp" />
+    <ClCompile Include="Hunter.cpp" />
     <ClCompile Include="Inventory.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Position.cpp" />
@@ -94,6 +96,8 @@
     <ClInclude Include="Framework\timer.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="Golem.h" />
+    <ClInclude Include="Guard.h" />
+    <ClInclude Include="Hunter.h" />
     <ClInclude Include="Inventory.h" />
     <ClInclude Include="Position.h" />
     <ClInclude Include="Slime.h" />

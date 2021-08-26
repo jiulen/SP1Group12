@@ -5,5 +5,4 @@ public:
 	Golem();
 	~Golem();
 	void move(int);
-private:
 };
