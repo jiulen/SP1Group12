@@ -1099,13 +1099,24 @@ void renderFramerate() {                //part of gui
     std::ostringstream hb;              // displays the player's health
     c.X = 10; c.Y = 40;
     if (g_sChar.hp <= 0) {
-        hb << "HP: ";
+        hb << "Player HP: ";
     }
     else {
-        hb << "HP: " << std::string(g_sChar.hp, (char)3); // (char)3 is heart symbol
+        hb << "Player HP: " << std::string(g_sChar.hp, (char)3); // (char)3 is heart symbol
     }
     g_Console.writeToBuffer(c, hb.str(), 0xF4); //white background, red text
-    c.X = 0; c.Y = 41;                              //add stuff after. include condition check for change color
+    if (level_no == 4) {
+        c.X = 40; c.Y = 40;
+        hb.str("");
+        if (enemies[0]->get_hp() <= 0) {
+            hb << "Boss HP: ";
+        }
+        else {
+            hb << "Boss HP: " << std::string(enemies[0]->get_hp(), (char)254); // (char)3 is heart symbol
+        }
+        g_Console.writeToBuffer(c, hb.str(), 0xF4); //white background, red text
+    }
+    c.X = 0; c.Y = 41;
     WORD red = 0xF4;
     WORD green = 0xF2;
     g_Console.writeToBuffer(c, "Objectives: Find out where you are.", red);         //find prisoner, he'll explain stuff         
@@ -1119,7 +1130,6 @@ void renderFramerate() {                //part of gui
     g_Console.writeToBuffer(c, "Locate the treasure.", red);                        //take the treasure
     c.Y++;
     g_Console.writeToBuffer(c, "Leave the temple ALIVE!", red);                     //find a way to escape
-    //put objectives with condition check, maybe render_objectives
 }
 
 void renderToScreen() {
