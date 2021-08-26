@@ -30,8 +30,8 @@ EGAMESTATES g_eGameState = S_SPLASHSCREEN; // initial state
 
 int damagetaken = 0, kills = 0;
 unsigned level_no = 1, itemsCount = 0, charCount = 0, cutscene_no = 1;
-bool E_KeyPressed = false, onDialogue = false, updatedDialogueTimer = false, golemDefeated = false, golemIsAttacking = false;
-bool lv3_StartingDialogueShown = false, lv3_BootDialogueShown = false, lv4_StartingDialogueShown = false, lv4_GolemDefeatDialogueShown = false, lv5_DialogueShown = false;
+bool E_KeyPressed = false, onDialogue = false, updatedDialogueTimer = false, golemDefeated = false, golemIsAttacking = false, keyObtained = false;
+bool lv3_StartingDialogueShown = false, lv3_BootDialogueShown = false, lv4_StartingDialogueShown = false, lv4_GolemDefeatDialogueShown = false, lv5_EntryDialogueShown = false, lv5_NoKeyDialogueShown = false;
 bool usingSword = false, usingChestplate = false, usingBoot = false, itemClicked = false;
 bool SWORD_AND_CHESTPLATE_GIVEN = false, bootGiven = false, chestOpened = false;
 bool playerTookDamageFromEnemy = false, playerTookDamageFromTrap = false;
@@ -257,8 +257,6 @@ void splashScreenWait()    // waits for time to pass in splash screen
 void updateGame(double dt)                          // gameplay logic
 {
     processUserInput();                             // checks if you should change states or do something else with the game, e.g. pause, exit
-    if (onDialogue == false) { keyPressed(); }      // moves the character, collision detection, physics, etc
-                                                    // sound can be played here too.
     if (E_KeyPressed == false)
     {
         g_dGameTime += dt;
@@ -281,10 +279,7 @@ void updateGame(double dt)                          // gameplay logic
         }
     }
     checkPosition();                                // checks whether player's next position is an exit, a chest, 
-    if (/*(inventoryVector.size() == 1008) &&*/ (onDialogue == false)) { updateStats(); updateInventory(); }
-    if (g_sChar.hp <= 0) {                          // check if player dead
-        g_eGameState = S_END;
-    }
+    if (g_sChar.hp <= 0) { g_eGameState = S_END; }                       // check if player dead
     if (onDialogue == false)
     {
         for (int i = 0; i < 10; i++) {
@@ -299,7 +294,8 @@ void updateGame(double dt)                          // gameplay logic
     }
     if ((onDialogue == true) && (updatedDialogueTimer == false)) { updatedDialogueTimer = true; dialogueTimer = g_dGameTime; }
     if ((level_no == 4) && (enemies[0] == nullptr)) { golemDefeated = true; }
-    if (onDialogue == false) { mouseClicked(); }
+    // moves the character, collision detection, physics, etc + update player's stats + update player's inventory + check for mouse click
+    if (onDialogue == false) { keyPressed(); updateStats(); updateInventory(); mouseClicked(); }
 }
 
 void endScreenWait()
@@ -331,9 +327,10 @@ void keyPressed()
         if (g_skKeyEvent[K_INTERACTIVE].keyReleased) // we don't want player to spam
         {
             if ((mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "3") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "3") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "3") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "3")) { if (bootGiven == false) { bootGiven = true; changeDialogue(4); inventory.AddInGameItem("Boot"); } }
-            if ((mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "4") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "4") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "4") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "4")) { if (chestOpened == false) { chestOpened = true; changeDialogue(12); inventory.AddInGameItem("Potion"); } }
+            if ((mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "4") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "4") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "4") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "4")) { if (chestOpened == false) { chestOpened = true; changeDialogue(13); inventory.AddInGameItem("Potion"); } }
             if ((mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "5") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "5") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "5") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "5")) { changeDialogue(2); }
             if ((mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "6") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "6") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "6") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "6")) { if (SWORD_AND_CHESTPLATE_GIVEN == false) { SWORD_AND_CHESTPLATE_GIVEN = true; changeDialogue(3); inventory.AddInGameItem("Sword"); inventory.AddInGameItem("Chestplate"); } }
+            if ((mapVector[g_sChar.m_cLocation.Y - 1][g_sChar.m_cLocation.X / 2] == "10") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) - 1] == "10") || (mapVector[g_sChar.m_cLocation.Y + 1][g_sChar.m_cLocation.X / 2] == "10") || (mapVector[g_sChar.m_cLocation.Y][(g_sChar.m_cLocation.X / 2) + 1] == "10")) { if (keyObtained == false) { keyObtained = true; changeDialogue(14); inventory.AddInGameItem("Key"); } }
         }
     }
     if (g_skKeyEvent[K_INVENTORY].keyReleased) // we don't want player to spam
@@ -393,17 +390,17 @@ if (g_skKeyEvent[K_ATK_RIGHT].keyReleased)
 
 void processUserInput()
 {
-    if (g_skKeyEvent[K_ESCAPE].keyReleased) { // quits the game if player hits the escape key
-        g_bQuitGame = true;
-    }
+    if (g_skKeyEvent[K_ESCAPE].keyReleased) { g_bQuitGame = true; } // quits the game if player hits the escape key
 }
 
 void checkPosition()
 {
-    if ((level_no == 3) && (lv3_StartingDialogueShown == false) && (g_sChar.m_cLocation.Y > 20)) { lv3_StartingDialogueShown = true; changeDialogue(6); if (usingBoot == true && onDialogue == false) { changeDialogue(7); } }
+    if ((level_no == 3) && (lv3_StartingDialogueShown == false) && (g_sChar.m_cLocation.Y > 20)) { lv3_StartingDialogueShown = true; changeDialogue(6); }
     if ((level_no == 3) && (lv3_BootDialogueShown == false) && (g_sChar.m_cLocation.Y > 20) && (onDialogue == false) && (usingBoot == true)) { lv3_BootDialogueShown = true; changeDialogue(7); }
     if ((level_no == 4) && (lv4_GolemDefeatDialogueShown == false) && (golemDefeated == true)) { lv4_GolemDefeatDialogueShown = true; changeDialogue(9); }
-    if ((level_no == 5) && (lv5_DialogueShown == false) && (mapVector[g_sChar.m_cLocation.Y][g_sChar.m_cLocation.X / 2] == "7")) { lv5_DialogueShown = true; changeDialogue(11); }
+    if ((level_no == 5) && (lv5_EntryDialogueShown == false) && (mapVector[g_sChar.m_cLocation.Y][g_sChar.m_cLocation.X / 2] == "7")) { lv5_EntryDialogueShown = true; changeDialogue(11); }
+    if ((level_no == 5) && (lv5_EntryDialogueShown == true) && (lv5_NoKeyDialogueShown == false) && (keyObtained == false) && (mapVector[g_sChar.m_cLocation.Y][g_sChar.m_cLocation.X / 2] == "8")) { lv5_NoKeyDialogueShown = true; changeDialogue(12); }
+    if ((level_no == 5) && (lv5_EntryDialogueShown == true) && (lv5_NoKeyDialogueShown == false) && (keyObtained == false) && (mapVector[g_sChar.m_cLocation.Y][g_sChar.m_cLocation.X / 2] == "8")) { lv5_NoKeyDialogueShown = true; changeDialogue(12); }
 
     if (mapVector[g_sChar.m_cLocation.Y][g_sChar.m_cLocation.X / 2] == "7") {
 
@@ -414,14 +411,11 @@ void checkPosition()
         case 2: g_sChar.m_cLocation.X = 8; g_sChar.m_cLocation.Y = 36; chestOpened = false; break;
         case 3: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 2; chestOpened = false; changeDialogue(5); break;
         case 4: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 20; chestOpened = false; if (lv4_StartingDialogueShown == false) { lv4_StartingDialogueShown = true; changeDialogue(8); } break;
-        case 5: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 21; chestOpened = false; if (lv5_DialogueShown == false) { changeDialogue(10); } break;
+        case 5: g_sChar.m_cLocation.X = 2; g_sChar.m_cLocation.Y = 21; chestOpened = false; if (lv5_EntryDialogueShown == false) { changeDialogue(10); } break;
         }
     }
 
-    if ((lv5_DialogueShown == true) && (mapVector[g_sChar.m_cLocation.Y][g_sChar.m_cLocation.X / 2] == "8")) {
-        // Ending scene
-        g_eGameState = S_END;
-    }
+    if ((lv5_EntryDialogueShown == true) && (keyObtained == true) && (mapVector[g_sChar.m_cLocation.Y][g_sChar.m_cLocation.X / 2] == "8")) { g_eGameState = S_END; } // Ending scene
 }
 
 void updateStats()
@@ -450,7 +444,8 @@ void mouseClicked()
                 inventory.RemoveItem("Potion");
                 itemsCount = 0;
                 inventoryVector.clear(); initInventoryVector();
-                if (g_sChar.hp < 9) { g_sChar.hp += 2; }
+                if ((g_sChar.hp + 2) <= 10) { g_sChar.hp += 2; }
+                else if ((g_sChar.hp + 2) > 10) { g_sChar.hp = 10; }
             }
         }
     }
@@ -649,6 +644,7 @@ void renderMap() {
             case 7: map_colour = 0x10; break; //exit  
             case 8: map_colour = 0x00; break; //real exit for lv 5
             case 9: map_colour = 0xCC; break; //spike trap
+            case 10: map_colour = 0xE0; break; //key chest for lv 5
             }
             g_Console.writeToBuffer(x * 2, y, "  ", map_colour);
         }
@@ -661,46 +657,26 @@ void createEnemies() {  // The creation of slime object MUST be inside a FUNCTIO
     case 1:
         for (unsigned i = 0; i < 5; i++) {      //i determines the number of enemies spawning
             enemies[i] = new Slime;
-            while (mapVector[enemies[i]->get_posY()][enemies[i]->get_posX() / 2] != "0") {
-                enemies[i]->setPos((2 * (rand() % 60)), rand() % 40);
-            }
-        }
-        break;
+            while (mapVector[enemies[i]->get_posY()][enemies[i]->get_posX() / 2] != "0") { enemies[i]->setPos((2 * (rand() % 60)), rand() % 40); }
+        } break;
     case 2:
         for (unsigned i = 0; i < 10; i++) {
-            if (i < 5) {
-                enemies[i] = new Slime;
-            }
-            else {
-                enemies[i] = new Guard;
-            }
-            while (mapVector[enemies[i]->get_posY()][enemies[i]->get_posX() / 2] != "0") {
-                enemies[i]->setPos((2 * (rand() % 60)), rand() % 40);
-            }
-        }
-        break;
+            if (i < 5) { enemies[i] = new Slime; }
+            else { enemies[i] = new Guard; }
+
+            while (mapVector[enemies[i]->get_posY()][enemies[i]->get_posX() / 2] != "0") { enemies[i]->setPos((2 * (rand() % 60)), rand() % 40); }
+        } break;
     case 3:
         for (unsigned i = 0; i < 10; i++) {
-            if (i < 2) {
-                enemies[i] = new Slime;
-            }
-            else if (i < 6) {
-                enemies[i] = new Guard;
-            }
-            else {
-                enemies[i] = new Hunter;
-            }
-            while (mapVector[enemies[i]->get_posY()][enemies[i]->get_posX() / 2] != "0") {
-                enemies[i]->setPos((2 * (rand() % 60)), rand() % 40);
-            }
-        }
-        break;
+            if (i < 2) { enemies[i] = new Slime; }
+            else if (i < 6) { enemies[i] = new Guard; }
+            else { enemies[i] = new Hunter; }
+
+            while (mapVector[enemies[i]->get_posY()][enemies[i]->get_posX() / 2] != "0") { enemies[i]->setPos((2 * (rand() % 60)), rand() % 40); }
+        } break;
     case 4:
         enemies[0] = new Golem;
-        while (mapVector[enemies[0]->get_posY()][enemies[0]->get_posX() / 2] != "0") {
-            enemies[0]->setPos(60, 19);
-        }
-        break;
+        while (mapVector[enemies[0]->get_posY()][enemies[0]->get_posX() / 2] != "0") { enemies[0]->setPos(60, 19); } break;
     }
 }
 
@@ -790,8 +766,12 @@ void changeDialogue(unsigned num)
     case 10: dialogue = "Finally... the treasure!!! With this, my village is saved! There won't be any more traps right?"; break;
         // Fifth room (touches fake exit)
     case 11: dialogue = "Wait, how do I leave????"; break;
+        // Fifth room (touches real exit without key)
+    case 12: dialogue = "You need a key."; break;
         // Opening chest (for potion)
-    case 12: dialogue = "A potion? That seems handy."; break;
+    case 13: dialogue = "A potion? That seems handy."; break;
+        // Opening chest (for lv 5 key)
+    case 14: dialogue = "Golden key obtained."; break;
     }
 
     onDialogue = true;
@@ -831,69 +811,32 @@ void enemyMovement() {
                 if (enemies[z]->get_patrol_dir() == 0) { // U D
                     switch (direction) {
                     case 0:
-                    case 1: // up
-                        if (mapVector[enemies[z]->get_posY() - 1][enemies[z]->get_posX() / 2] == "0") {
-                            enemies[z]->move(direction);
-                        }
-                        break;
+                    case 1: if (mapVector[enemies[z]->get_posY() - 1][enemies[z]->get_posX() / 2] == "0") { enemies[z]->move(direction); } break; // up
                     case 2:
-                    case 3: // down
-                        if (mapVector[enemies[z]->get_posY() + 1][enemies[z]->get_posX() / 2] == "0") {
-                            enemies[z]->move(direction);
-                        }
-                        break;
+                    case 3: if (mapVector[enemies[z]->get_posY() + 1][enemies[z]->get_posX() / 2] == "0") { enemies[z]->move(direction); } break; // down
                     }
                 }
                 else if (enemies[z]->get_patrol_dir() == 1) { // L R
                     switch (direction) {
                     case 0:
-                    case 1: // left
-                        if (mapVector[enemies[z]->get_posY()][enemies[z]->get_posX() / 2 - 1] == "0") {
-                            enemies[z]->move(direction);
-                        }
-                        break;
+                    case 1: if (mapVector[enemies[z]->get_posY()][enemies[z]->get_posX() / 2 - 1] == "0") { enemies[z]->move(direction); } break; // left
                     case 2:
-                    case 3: // right
-                        if (mapVector[enemies[z]->get_posY()][enemies[z]->get_posX() / 2 + 1] == "0") {
-                            enemies[z]->move(direction);
-                        }
-                        break;
+                    case 3: if (mapVector[enemies[z]->get_posY()][enemies[z]->get_posX() / 2 + 1] == "0") { enemies[z]->move(direction); } break; // right
                     }
                 }
-
             }
             else {
                 if (enemies[z]->get_face() == "..") { // Hunter direction
-                    if ((enemies[z]->get_posY() - g_sChar.m_cLocation.Y) > 0 && (enemies[z]->get_posY() - g_sChar.m_cLocation.Y) < 5) {
-                        direction = 0;
-                    }
-                    else if ((enemies[z]->get_posY() - g_sChar.m_cLocation.Y) < 0 && (enemies[z]->get_posY() - g_sChar.m_cLocation.Y) > -5) {
-                        direction = 1;
-                    }
-                    else if ((enemies[z]->get_posX() - g_sChar.m_cLocation.X) > 0 && (enemies[z]->get_posX() - g_sChar.m_cLocation.X) < 10) {
-                        direction = 2;
-                    }
-                    else if ((enemies[z]->get_posX() - g_sChar.m_cLocation.X) < 0 && (enemies[z]->get_posX() - g_sChar.m_cLocation.X) > -10) {
-                        direction = 3;
-                    }
+                    if ((enemies[z]->get_posY() - g_sChar.m_cLocation.Y) > 0 && (enemies[z]->get_posY() - g_sChar.m_cLocation.Y) < 5) { direction = 0; }
+                    else if ((enemies[z]->get_posY() - g_sChar.m_cLocation.Y) < 0 && (enemies[z]->get_posY() - g_sChar.m_cLocation.Y) > -5) { direction = 1; }
+                    else if ((enemies[z]->get_posX() - g_sChar.m_cLocation.X) > 0 && (enemies[z]->get_posX() - g_sChar.m_cLocation.X) < 10) { direction = 2; }
+                    else if ((enemies[z]->get_posX() - g_sChar.m_cLocation.X) < 0 && (enemies[z]->get_posX() - g_sChar.m_cLocation.X) > -10) { direction = 3; }
                 }
                 switch (direction) {
-                case 0:
-                    if (mapVector[enemies[z]->get_posY() - 1][enemies[z]->get_posX() / 2] == "0") {
-                        enemies[z]->move(direction);
-                    } break;
-                case 1:
-                    if (mapVector[enemies[z]->get_posY() + 1][enemies[z]->get_posX() / 2] == "0") {
-                        enemies[z]->move(direction);
-                    } break;
-                case 2:
-                    if (mapVector[enemies[z]->get_posY()][enemies[z]->get_posX() / 2 - 1] == "0") {
-                        enemies[z]->move(direction);
-                    } break;
-                case 3:
-                    if (mapVector[enemies[z]->get_posY()][enemies[z]->get_posX() / 2 + 1] == "0") {
-                        enemies[z]->move(direction);
-                    } break;
+                case 0: if (mapVector[enemies[z]->get_posY() - 1][enemies[z]->get_posX() / 2] == "0") { enemies[z]->move(direction); } break;
+                case 1: if (mapVector[enemies[z]->get_posY() + 1][enemies[z]->get_posX() / 2] == "0") { enemies[z]->move(direction); } break;
+                case 2: if (mapVector[enemies[z]->get_posY()][enemies[z]->get_posX() / 2 - 1] == "0") { enemies[z]->move(direction); } break;
+                case 3: if (mapVector[enemies[z]->get_posY()][enemies[z]->get_posX() / 2 + 1] == "0") { enemies[z]->move(direction); } break;
                 }
             }
         }
@@ -1001,6 +944,10 @@ void updateInventoryItems()
                         {
                             (((j == 0 && i == 1) || (j == 1 || j == 2)) ? (inventoryVector[y + j][x + i] = "15") : (inventoryVector[y + j][x + i] = "1"));
                         }
+                        else if (inventory.GetInGameItems()[itemsCount] == "Key")
+                        {
+                            (j == i) ? (inventoryVector[y + j][x + i] = "16") : (inventoryVector[y + j][x + i] = "1");
+                        }
                     }
                 }
                 itemsCount++;
@@ -1040,6 +987,7 @@ void renderInventory()
             case 13: inventory_colour = 0x20; break; // chestplate
             case 14: inventory_colour = 0x30; break; // boot
             case 15: inventory_colour = 0xD0; break; // potion
+            case 16: inventory_colour = 0x60; break; // key for lv 5
             }
             g_Console.writeToBuffer((x + 9) * 2, y + 8, "  ", inventory_colour);
         }
@@ -1072,6 +1020,11 @@ void renderItemInfos()
         {
             g_Console.writeToBuffer(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y, "> Potion <", 0x17);
             g_Console.writeToBuffer(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y + 1, "Health: +2", 0x17);
+        }
+        else if (inventoryVector[g_mouseEvent.mousePosition.Y - 8][(g_mouseEvent.mousePosition.X / 2) - 9] == "16")
+        {
+            g_Console.writeToBuffer(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y, "> Golden Key <", 0x17);
+            g_Console.writeToBuffer(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y + 1, "Price: Inf", 0x17);
         }
     }
 }
@@ -1110,15 +1063,18 @@ void renderEndScreen() {
 void renderFramerate() {                //part of gui
     COORD c;
     std::ostringstream ss;
+
     ss << std::fixed << std::setprecision(2);
     ss << 1.0 / g_dDeltaTime << " fps";         // displays the framerate
     c.X = g_Console.getConsoleSize().X - 9; c.Y = 40;
     g_Console.writeToBuffer(c, ss.str(), 0xF0);
+
     ss.str("");
     ss << g_dGameTime << "secs";             // displays the elapsed time
     c.X = 0; c.Y = 40;
     g_Console.writeToBuffer(c, ss.str(), 0xF0);
     ss.str("");
+
     c.X = 10; c.Y = 40;
     if (g_sChar.hp <= 0) {             // displays the player's health
         ss << "Player HP: ";
@@ -1127,6 +1083,7 @@ void renderFramerate() {                //part of gui
         ss << "Player HP: " << std::string(g_sChar.hp, (char)3); // (char)3 is heart symbol
     }
     g_Console.writeToBuffer(c, ss.str(), 0xF4); //white background, red text
+
     if (level_no == 4) {
         c.X = 40; c.Y = 40;
         ss.str("");
@@ -1138,12 +1095,14 @@ void renderFramerate() {                //part of gui
         }
         g_Console.writeToBuffer(c, ss.str(), 0xF4); //white background, red text
     }
+
     c.X = 100; c.Y = 40;
     ss.str("");
     ss << "Kills: " << kills;
     g_Console.writeToBuffer(c, ss.str(), 0xF1); //white background, red text
+
     //render objectives here
-    c.X = 0; c.Y = 41;
+    c.X = 0; c.Y = 42;
     WORD red = 0xF4;
     WORD green = 0xF2;
     WORD ObjectiveColor;
@@ -1152,17 +1111,17 @@ void renderFramerate() {                //part of gui
     if (SWORD_AND_CHESTPLATE_GIVEN == true) ObjectiveColor = green;
     else ObjectiveColor = red;
     g_Console.writeToBuffer(c, "Find out where you are.", ObjectiveColor); //find prisoner, he'll explain stuff
-    if (kills >= 10) ObjectiveColor = green;
-    else ObjectiveColor = red;
     c.Y++;
-    g_Console.writeToBuffer(c, "Defeat some enemies.", ObjectiveColor);     //kill 10 enemies
+    if (kills >= 1) ObjectiveColor = green;
+    else ObjectiveColor = red;
+    g_Console.writeToBuffer(c, "Defeat at least 1 enemy.", ObjectiveColor);     //kill at least 1 enemy
+    c.Y++;
     if (level_no > 3) ObjectiveColor = green;
     else ObjectiveColor = red;
-    c.Y++;
     g_Console.writeToBuffer(c, "Look out for traps.", ObjectiveColor);     //get past level 3
-    if (golemDefeated == true) ObjectiveColor = green;
-    else ObjectiveColor = 0xF0;
     c.Y++;
+    if (golemDefeated == true) ObjectiveColor = green;
+    else ObjectiveColor = red;
     g_Console.writeToBuffer(c, "Get past the golem.", ObjectiveColor);     //kill the golem to unlock gate
     c.Y++;
     g_Console.writeToBuffer(c, "Leave the temple ALIVE!", red);            //find a way to escape
